@@ -1,0 +1,4 @@
+include ':app', ':library'
+
+//调试插件使用
+includeBuild './module-plugin'
