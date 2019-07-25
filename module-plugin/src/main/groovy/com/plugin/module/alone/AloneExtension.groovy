@@ -1,6 +1,6 @@
 package com.plugin.module.alone
 
-class Extension {
+class AloneExtension {
 
     /**
      * 是否自动注册组件，true则会使用字节码插入的方式自动注册代码
