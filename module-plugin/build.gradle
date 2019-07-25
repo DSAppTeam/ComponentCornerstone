@@ -23,6 +23,7 @@ dependencies {
     compile gradleApi()
     //groovy sdk
     compile localGroovy()
+    compile 'org.jetbrains.kotlin:kotlin-compiler-embeddable:1.3.10'
 }
 
 sourceSets {

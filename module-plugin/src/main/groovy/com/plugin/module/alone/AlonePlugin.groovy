@@ -16,7 +16,7 @@ class AlonePlugin implements Plugin<Project> {
     void apply(Project project) {
 
         //解析ComExtension属性
-        Extension extension = project.extensions.create(Constants.EXTENSION_NAME, Extension)
+        AloneExtension extension = project.extensions.create(Constants.EXTENSION_NAME, AloneExtension)
 
         //获取运行task名称
         String taskNames = project.gradle.startParameter.taskNames.toString()
