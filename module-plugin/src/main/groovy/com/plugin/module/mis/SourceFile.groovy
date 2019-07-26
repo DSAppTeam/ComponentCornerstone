@@ -5,7 +5,7 @@ package com.plugin.module.mis
  */
 class SourceFile {
 
-    String path             //路径
+    String path             //源码路径
     String name             //名称
-    Long lastModified       //最后修改事件
+    Long lastModified       //最后修改时间
 }

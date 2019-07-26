@@ -11,6 +11,8 @@ import org.jetbrains.kotlin.cli.common.ExitCode
 import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
 
 import java.util.concurrent.TimeUnit
+import java.util.jar.JarEntry
+import java.util.jar.JarFile
 import java.util.zip.ZipFile
 
 class JarUtil {
@@ -270,6 +272,46 @@ class JarUtil {
         if (filePath == null) return false
         return compareJar(localPath, filePath)
     }
+
+    private static boolean compareJar(String jar1, String jar2) {
+        try {
+            JarFile jarFile1 = new JarFile(jar1)
+            JarFile jarFile2 = new JarFile(jar2)
+            if (jarFile1.size() != jarFile2.size())
+                return false
+
+            Enumeration entries = jarFile1.entries()
+            while (entries.hasMoreElements()) {
+                JarEntry jarEntry1 = (JarEntry) entries.nextElement()
+                if (!jarEntry1.name.endsWith(".class"))
+                    continue
+
+                JarEntry jarEntry2 = jarFile2.getJarEntry(jarEntry1.getName())
+                if (jarEntry2 == null) {
+                    return false
+                }
+                InputStream stream1 = jarFile1.getInputStream(jarEntry1)
+                byte[] bytes1 = stream1.bytes
+                bytes1 = Arrays.copyOfRange(bytes1, 8, bytes1.length)
+                stream1.close()
+
+                InputStream stream2 = jarFile2.getInputStream(jarEntry2)
+                byte[] bytes2 = stream2.bytes
+                bytes2 = Arrays.copyOfRange(bytes2, 8, bytes2.length)
+                stream2.close()
+
+                if (!Arrays.equals(bytes1, bytes2)) {
+                    return false
+                }
+            }
+            jarFile1.close()
+            jarFile2.close()
+        } catch (IOException e) {
+            return false
+        }
+        return true
+    }
+
 
     /**
      * 获取目标文件中包含 classes.jar 的文件并写入jarFile

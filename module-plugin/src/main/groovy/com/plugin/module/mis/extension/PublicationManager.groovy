@@ -24,7 +24,7 @@ class PublicationManager {
     private static PublicationManager sPublicationManager
 
     private File misDir
-    private Map<String, Publication> publicationManifest
+    private Map<String, Publication> publicationManifest        //maven Id 映射 Publication
 
     Digraph<String> dependencyGraph
     Map<String, Publication> publicationDependencies
@@ -77,7 +77,7 @@ class PublicationManager {
             if (publication.version == "") publication.version = null
             publication.invalid = Boolean.valueOf(publicationElement.getAttribute("invalid"))
 
-            //更新publication
+            //如果有效
             if (!publication.invalid) {
                 NodeList sourceSetNodeList = publicationElement.getElementsByTagName("sourceSet")
                 Element sourceSetElement = (Element) sourceSetNodeList.item(0)
@@ -114,6 +114,7 @@ class PublicationManager {
         Element manifestElement = document.createElement("manifest")
         this.publicationManifest.each {
             Publication publication = it.value
+
             if (!publication.hit || publication.invalid) return
 
             Element publicationElement = document.createElement('publication')
@@ -178,16 +179,19 @@ class PublicationManager {
         }
     }
 
+    /**
+     * 判断是否修改
+     * @param publication
+     * @return
+     */
     boolean hasModified(Publication publication) {
         Publication lastPublication = publicationManifest.get(publication.groupId + '-' + publication.artifactId)
         if (lastPublication == null) {
             return true
         }
-
         if (publication.invalid != lastPublication.invalid) {
             return true
         }
-
         return hasModifiedSourceSet(publication.misSourceSet, lastPublication.misSourceSet)
     }
 
