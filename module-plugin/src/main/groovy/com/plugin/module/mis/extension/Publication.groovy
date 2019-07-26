@@ -12,8 +12,8 @@ class Publication {
     String sourceSetName
     File buildDir                       //{peoject}/build/mis
 
-    String project
-    SourceSet misSourceSet              //资源集
+    String project                      //模块project路径
+    SourceSet misSourceSet              //资源集，如果当前maven不可用，则需要记录源码及最后修改时间信息
 
     String groupId                      //依赖分组id
     String artifactId                   //依赖id
@@ -25,7 +25,7 @@ class Publication {
 
     Closure sourceFilter                //资源过滤block
 
-    boolean invalid                     //是否合法
+    boolean invalid                     //是否非法
     boolean hit                         //是否隐藏
     boolean useLocal                    //是否使用本地jar
 
