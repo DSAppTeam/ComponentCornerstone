@@ -140,9 +140,87 @@ class MisPlugin implements Plugin<Project> {
         }
 
 
+        //获取子project publication
+        List<Publication> publications = publicationManager.getPublicationByProject(project)
+        project.dependencies {
+            publications.each {
+                implementation getPublication(it.groupId, it.artifactId)
+            }
+        }
+
+        //解析子项目 publication 并为子项目添加依赖
+        if (project.gradle.startParameter.taskNames.isEmpty()) {
+            publications.each {
+                addPublicationDependencies(it)
+            }
+        }
 
 
+        //发布到maven
+        project.afterEvaluate {
+            MisUtil.addMisSourceSets(project)
 
+            List<Publication> publicationList = publicationManager.getPublicationByProject(project)
+            List<Publication> publicationPublishList = new ArrayList<>()
+            publicationList.each {
+                if (it.version != null) {
+                    publicationPublishList.add(it)
+                }
+            }
+
+            if (publicationPublishList.size() > 0) {
+                project.plugins.apply('maven-publish')
+                def publishing = project.extensions.getByName('publishing')
+                if (misExtension.configure != null) {
+                    publishing.repositories misExtension.configure
+                }
+
+                publicationPublishList.each {
+                    createPublishTask(it)
+                }
+            }
+        }
+    }
+
+    /**
+     * 获取依赖
+     * @param groupId
+     * @param artifactId
+     * @return
+     */
+    def getPublication(String groupId, String artifactId) {
+        Publication publication = publicationManager.getPublication(groupId, artifactId)
+        if (publication != null) {
+            if (publication.invalid) {
+                return []
+            } else if (publication.useLocal) {
+                return ':mis-' + publication.groupId + '-' + publication.artifactId + ':'
+            } else {
+                return publication.groupId + ':' + publication.artifactId + ':' + publication.version
+            }
+        } else {
+            return []
+        }
+    }
+
+    /**
+     * 添加真实依赖
+     * @param publication
+     */
+    void addPublicationDependencies(Publication publication) {
+        if (publication.dependencies == null) return
+        project.dependencies {
+            if (publication.dependencies.compileOnly != null) {
+                publication.dependencies.compileOnly.each {
+                    compileOnly it
+                }
+            }
+            if (publication.dependencies.implementation != null) {
+                publication.dependencies.implementation.each {
+                    implementation it
+                }
+            }
+        }
     }
 
 
