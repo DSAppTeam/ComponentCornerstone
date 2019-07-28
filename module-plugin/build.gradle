@@ -36,6 +36,8 @@ sourceSets {
 
 
 repositories {
+    jcenter()
+    google()
     mavenCentral()
 }
 
