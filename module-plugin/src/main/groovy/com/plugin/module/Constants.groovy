@@ -15,14 +15,17 @@ class Constants{
 
     //sourceSets
     public static String AFTER_MANIFEST_PATH = "src/main/runalone/AndroidManifest.xml"
-    public static String JAVA_PATH = "src/main/java"
     public static String AFTER_JAVA_PATH = "src/main/runalone/java"
-    public static String RES_PATH = "src/main/res"
     public static String AFTER_RES_PATH = "src/main/runalone/res"
-    public static String ASSETS_PATH = "src/main/assets"
     public static String AFTER_ASSETS_PATH = "src/main/runalone/assets"
-    public static String JNILIBS_PATH = "src/main/jniLibs"
     public static String AFTER_JNILIBS_PATH = "src/main/runalone/jniLibs"
+
+    public static String JAVA_PATH = "src/main/java"
+    public static String RES_PATH = "src/main/res"
+    public static String ASSETS_PATH = "src/main/assets"
+    public static String JNILIBS_PATH = "src/main/jniLibs"
+
+    public static String MIS_JAVA_PATH = "src/main/mis/java"
 
     //plugin
     public static String PLUGIN_APPLICATION = "com.android.application"
