@@ -16,9 +16,13 @@ class AlonePlugin implements Plugin<Project> {
 
     void apply(Project project) {
 
-        //解析ComExtension属性
         AloneExtension extension = project.extensions.create(Constants.EXTENSION_NAME, AloneExtension)
 
+        //解析ComExtension属性
+        def moduleScript = new File(project.projectDir, 'module.gradle')
+        if (moduleScript.exists()) {
+            project.apply from: moduleScript
+        }
 
         //获取运行task名称
         String taskNames = project.gradle.startParameter.taskNames.toString()
@@ -71,12 +75,13 @@ class AlonePlugin implements Plugin<Project> {
                 project.android.sourceSets {
                     main {
                         manifest.srcFile Constants.AFTER_MANIFEST_PATH
-                        java.srcDirs = [Constants.JAVA_PATH, Constants.AFTER_JAVA_PATH]
+                        java.srcDirs = [Constants.JAVA_PATH, Constants.AFTER_JAVA_PATH, Constants.MIS_JAVA_PATH]
                         res.srcDirs = [Constants.RES_PATH, Constants.AFTER_RES_PATH]
                         assets.srcDirs = [Constants.ASSETS_PATH, Constants.AFTER_ASSETS_PATH]
                         jniLibs.srcDirs = [Constants.JNILIBS_PATH, Constants.AFTER_JNILIBS_PATH]
                     }
                 }
+
             }
             if (assembleTask.isAssemble && module.equals(compileModule)) {
                 Utils.compileComponents(project, assembleTask)
