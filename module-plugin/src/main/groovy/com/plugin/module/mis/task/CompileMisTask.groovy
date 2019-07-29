@@ -1,6 +1,7 @@
 package com.plugin.module.mis.task
 
 import com.plugin.module.mis.extension.Publication
+import com.plugin.module.mis.extension.PublicationManager
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
