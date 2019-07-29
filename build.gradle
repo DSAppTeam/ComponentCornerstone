@@ -66,34 +66,31 @@ task clean(type: Delete) {
 
 apply plugin: 'com.android.module'
 
-module {
+runalone {
+    applicationName = 'com.plugin.library.LibraryApplication'
+    isRegisterComponentAuto = true
+    runAlone = true
+}
 
-    runalone {
-        applicationName = 'com.plugin.library.LibraryApplication'
-        isRegisterComponentAuto = true
-        runAlone = true
+mis {
+
+    compileSdkVersion 27
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    mis {
-
-        compileSdkVersion 27
-
-//        compileOptions {
-//            sourceCompatibility JavaVersion.VERSION_1_8
-//            targetCompatibility JavaVersion.VERSION_1_8
-//        }
-//
-//        repositories {
-//            maven {
-//                url "http://******"
-//                credentials {
-//                    username '******'
-//                    password '******'
-//                }
-//            }
-//        }
-
+    repositories {
+        maven {
+            url "http://******"
+            credentials {
+                username '******'
+                password '******'
+            }
+        }
     }
+
 }
 
 
