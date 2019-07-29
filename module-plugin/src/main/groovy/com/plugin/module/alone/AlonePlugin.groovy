@@ -8,6 +8,7 @@ import org.gradle.api.Project
 
 /**
  * 编写 AlonePlugin 插件
+ *  ./gradlew --no-daemon checkGradleDependencies  -Dorg.gradle.debug=true
  */
 class AlonePlugin implements Plugin<Project> {
 
@@ -17,6 +18,7 @@ class AlonePlugin implements Plugin<Project> {
 
         //解析ComExtension属性
         AloneExtension extension = project.extensions.create(Constants.EXTENSION_NAME, AloneExtension)
+
 
         //获取运行task名称
         String taskNames = project.gradle.startParameter.taskNames.toString()
@@ -39,11 +41,11 @@ class AlonePlugin implements Plugin<Project> {
             throw new RuntimeException("you should set isRunAlone in " + module + "'s gradle.properties")
         }
 
-        boolean isRunAlone = extension.runAlone
+//        boolean isRunAlone = extension.runAlone
 
 
-
-//        String mainModuleName = project.rootProject.property(Constants.PROPERTIES_MAIN_MODULE_NAME)
+        boolean isRunAlone = Boolean.parseBoolean((project.properties.get("isRunAlone")))
+        String mainModuleName = project.rootProject.property(Constants.PROPERTIES_MAIN_MODULE_NAME)
 
 
         //当且仅当 isRunAlone 为ture需要判断
@@ -64,17 +66,16 @@ class AlonePlugin implements Plugin<Project> {
             Utils.buildOutput("project.apply plugin: com.android.application")
 
             //对于组件，则需要读取alone目录进行运行
-//            if (!module.equals(mainModuleName)) {
+            if (!module.equals(mainModuleName)) {
 
-//            }
-
-            project.android.sourceSets {
-                main {
-                    manifest.srcFile Constants.AFTER_MANIFEST_PATH
-                    java.srcDirs = [Constants.JAVA_PATH, Constants.AFTER_JAVA_PATH]
-                    res.srcDirs = [Constants.RES_PATH, Constants.AFTER_RES_PATH]
-                    assets.srcDirs = [Constants.ASSETS_PATH, Constants.AFTER_ASSETS_PATH]
-                    jniLibs.srcDirs = [Constants.JNILIBS_PATH, Constants.AFTER_JNILIBS_PATH]
+                project.android.sourceSets {
+                    main {
+                        manifest.srcFile Constants.AFTER_MANIFEST_PATH
+                        java.srcDirs = [Constants.JAVA_PATH, Constants.AFTER_JAVA_PATH]
+                        res.srcDirs = [Constants.RES_PATH, Constants.AFTER_RES_PATH]
+                        assets.srcDirs = [Constants.ASSETS_PATH, Constants.AFTER_ASSETS_PATH]
+                        jniLibs.srcDirs = [Constants.JNILIBS_PATH, Constants.AFTER_JNILIBS_PATH]
+                    }
                 }
             }
             if (assembleTask.isAssemble && module.equals(compileModule)) {

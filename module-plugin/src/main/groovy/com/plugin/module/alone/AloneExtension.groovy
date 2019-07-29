@@ -14,5 +14,5 @@ class AloneExtension {
      */
     String applicationName
 
-    boolean runAlone = false
+    boolean runAlone = true
 }
