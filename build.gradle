@@ -41,10 +41,10 @@ buildscript {
     repositories {
         google()
         jcenter()
-        
+
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.1'
+        classpath 'com.android.tools.build:gradle:3.3.0'
         classpath 'com.effective.plugins:module-plugin'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -55,13 +55,51 @@ allprojects {
     repositories {
         google()
         jcenter()
-        
+
     }
 }
 
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+
+apply plugin: 'com.android.module'
+
+module {
+
+    runalone {
+        applicationName = 'com.plugin.library.LibraryApplication'
+        isRegisterComponentAuto = true
+        runAlone = true
+    }
+
+    mis {
+
+        compileSdkVersion 27
+
+//        compileOptions {
+//            sourceCompatibility JavaVersion.VERSION_1_8
+//            targetCompatibility JavaVersion.VERSION_1_8
+//        }
+//
+//        repositories {
+//            maven {
+//                url "http://******"
+//                credentials {
+//                    username '******'
+//                    password '******'
+//                }
+//            }
+//        }
+
+    }
+}
+
+
+
+
+
 
 
 

@@ -1,4 +1,6 @@
-apply plugin: 'com.android.module'
+//apply plugin: 'com.android.module'
+
+apply plugin: 'com.android.library'
 
 android {
 
