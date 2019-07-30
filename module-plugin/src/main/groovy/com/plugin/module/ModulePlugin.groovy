@@ -34,17 +34,21 @@ class ModulePlugin implements Plugin<Project> {
                 throw new GradleException("The android or android-library plugin must be applied to the project.")
             }
 
+            //解析 misPublication(xxxx) 中的字符串转化为 maven 格式
             project.dependencies.metaClass.misPublication { Object value ->
                 String[] gav = MisUtil.filterGAV(value)
                 return getPublication(gav[0], gav[1])
             }
 
+            //获取当前project 可能依赖scope 使用的 misPublication(xxxx)，转化为 implementation
             List<Publication> publications = publicationManager.getPublicationByProject(project)
             project.dependencies {
                 publications.each {
                     implementation getPublication(it.groupId, it.artifactId)
                 }
             }
+
+            //添加每一个 publication 的依赖
             if (project.gradle.startParameter.taskNames.isEmpty()) {
                 publications.each {
                     addPublicationDependencies(it)
@@ -313,6 +317,37 @@ class ModulePlugin implements Plugin<Project> {
             }
             publication.invalid = false
             publicationManager.addPublication(publication)
+        }
+    }
+
+    def getPublication(String groupId, String artifactId) {
+        Publication publication = publicationManager.getPublication(groupId, artifactId)
+        if (publication != null) {
+            if (publication.invalid) {
+                return []
+            } else if (publication.useLocal) {
+                return ':mis-' + publication.groupId + '-' + publication.artifactId + ':'
+            } else {
+                return publication.groupId + ':' + publication.artifactId + ':' + publication.version
+            }
+        } else {
+            return []
+        }
+    }
+
+    void addPublicationDependencies(Publication publication) {
+        if (publication.dependencies == null) return
+        project.dependencies {
+            if (publication.dependencies.compileOnly != null) {
+                publication.dependencies.compileOnly.each {
+                    compileOnly it
+                }
+            }
+            if (publication.dependencies.implementation != null) {
+                publication.dependencies.implementation.each {
+                    implementation it
+                }
+            }
         }
     }
 
