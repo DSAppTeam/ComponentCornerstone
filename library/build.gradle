@@ -1,7 +1,8 @@
 //apply plugin: 'com.android.module'
 
-apply plugin: 'com.android.library'
+//apply plugin: 'com.android.library'
 
+apply plugin: 'com.android.module'
 android {
 
     compileSdkVersion 29

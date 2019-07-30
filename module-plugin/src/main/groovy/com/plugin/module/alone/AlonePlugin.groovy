@@ -16,8 +16,6 @@ class AlonePlugin implements Plugin<Project> {
 
     void apply(Project project) {
 
-        AloneExtension extension = project.extensions.create(Constants.EXTENSION_NAME, AloneExtension)
-
         //解析ComExtension属性
         def moduleScript = new File(project.projectDir, 'module.gradle')
         if (moduleScript.exists()) {

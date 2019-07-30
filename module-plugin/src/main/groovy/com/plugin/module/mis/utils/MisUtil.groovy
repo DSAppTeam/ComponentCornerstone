@@ -73,7 +73,7 @@ class MisUtil {
     static addMisSourceSets(BaseExtension baseExtension, String name) {
         def obj = baseExtension.sourceSets.getByName(name)
         obj.java.srcDirs.each {
-            obj.aidl.srcDirs(it.absolutePath.replace('java', 'mis'))
+            obj.aidl.srcDirs(it.absolutePath.replace('java', 'misExtension'))
         }
     }
 
@@ -118,7 +118,7 @@ class MisUtil {
         }
 
         if (compileSdkVersion == 0) {
-            throw new RuntimeException("mis compileSdkVersion is not specified.")
+            throw new RuntimeException("misExtension compileSdkVersion is not specified.")
         }
 
         def androidJar = new File(androidHome, "/platforms/android-${compileSdkVersion}/android.jar")

@@ -10,7 +10,7 @@ class Publication {
 
     String name
     String sourceSetName
-    File buildDir                       //{peoject}/build/mis
+    File buildDir                       //{peoject}/build/misExtension
 
     String project                      //模块project路径
     SourceSet misSourceSet              //资源集，如果当前maven不可用，则需要记录源码及最后修改时间信息
