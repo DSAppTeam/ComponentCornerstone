@@ -31,8 +31,8 @@ class MisPlugin implements Plugin<Project> {
         //如果是根项目
         if (project == project.rootProject) {
 
-            //{project}/.gradle/mis
-            misDir = new File(project.projectDir, '.gradle/mis')
+            //{project}/.gradle/misExtension
+            misDir = new File(project.projectDir, '.gradle/misExtension')
             if (!misDir.exists()) {
                 misDir.mkdirs()
             }
@@ -52,12 +52,12 @@ class MisPlugin implements Plugin<Project> {
                 }
             }
 
-            //{project}/.gradle/mis/publicationManifest.xml
+            //{project}/.gradle/misExtension/publicationManifest.xml
             publicationManager = PublicationManager.getInstance()
             publicationManager.loadManifest(project, misDir)
 
             //读取跟节点信息添加监听
-            misExtension = project.extensions.create('mis', MisExtension, new OnMisExtensionListener() {
+            misExtension = project.extensions.create('misExtension', MisExtension, new OnMisExtensionListener() {
                 @Override
                 void onPublicationAdded(Project childProject, Publication publication) {
                     initPublication(childProject, publication)
@@ -76,7 +76,7 @@ class MisPlugin implements Plugin<Project> {
 
                 childProject.plugins.whenObjectAdded {
                     if (it instanceof AppPlugin || it instanceof LibraryPlugin) {
-                        childProject.pluginManager.apply('mis')
+                        childProject.pluginManager.apply('misExtension')
                     }
                 }
             }
@@ -89,14 +89,14 @@ class MisPlugin implements Plugin<Project> {
                 //扩展misPublication
                 Dependencies.metaClass.misPublication { String value ->
                     String[] gav = MisUtil.filterGAV(value)
-                    return 'mis-' + gav[0] + ':' + gav[1] + ':' + gav[2]
+                    return 'misExtension-' + gav[0] + ':' + gav[1] + ':' + gav[2]
                 }
 
                 //检索每个子project目录下的mis.gradle并apply
                 project.allprojects.each {
                     if (it == project) return
                     Project childProject = it
-                    def misScript = new File(childProject.projectDir, 'mis.gradle')
+                    def misScript = new File(childProject.projectDir, 'misExtension.gradle')
                     if (misScript.exists()) {
                         misExtension.childProject = childProject
                         project.apply from: misScript
@@ -194,7 +194,7 @@ class MisPlugin implements Plugin<Project> {
             if (publication.invalid) {
                 return []
             } else if (publication.useLocal) {
-                return ':mis-' + publication.groupId + '-' + publication.artifactId + ':'
+                return ':misExtension-' + publication.groupId + '-' + publication.artifactId + ':'
             } else {
                 return publication.groupId + ':' + publication.artifactId + ':' + publication.version
             }
@@ -229,12 +229,12 @@ class MisPlugin implements Plugin<Project> {
             if (publication.dependencies.compileOnly != null) {
                 List<Object> compileOnly = new ArrayList<>()
                 publication.dependencies.compileOnly.each {
-                    if (it instanceof String && it.startsWith('mis-')) {
-                        String[] gav = MisUtil.filterGAV(it.replace('mis-', ''))
+                    if (it instanceof String && it.startsWith('misExtension-')) {
+                        String[] gav = MisUtil.filterGAV(it.replace('misExtension-', ''))
                         Publication existPublication = publicationManager.getPublicationByKey(gav[0] + '-' + gav[1])
                         if (existPublication != null) {
                             if (existPublication.useLocal) {
-                                compileOnly.add(':mis-' + existPublication.groupId + '-' + existPublication.artifactId + ':')
+                                compileOnly.add(':misExtension-' + existPublication.groupId + '-' + existPublication.artifactId + ':')
                             } else {
                                 compileOnly.add(existPublication.groupId + ':' + existPublication.artifactId + ':' + existPublication.version)
                             }
@@ -248,12 +248,12 @@ class MisPlugin implements Plugin<Project> {
             if (publication.dependencies.implementation != null) {
                 List<Object> implementation = new ArrayList<>()
                 publication.dependencies.implementation.each {
-                    if (it instanceof String && it.startsWith('mis-')) {
-                        String[] gav = MisUtil.filterGAV(it.replace('mis-', ''))
+                    if (it instanceof String && it.startsWith('misExtension-')) {
+                        String[] gav = MisUtil.filterGAV(it.replace('misExtension-', ''))
                         Publication existPublication = publicationManager.getPublicationByKey(gav[0] + '-' + gav[1])
                         if (existPublication != null) {
                             if (existPublication.useLocal) {
-                                implementation.add(':mis-' + existPublication.groupId + '-' + existPublication.artifactId + ':')
+                                implementation.add(':misExtension-' + existPublication.groupId + '-' + existPublication.artifactId + ':')
                             } else {
                                 implementation.add(existPublication.groupId + ':' + existPublication.artifactId + ':' + existPublication.version)
                             }
@@ -278,7 +278,7 @@ class MisPlugin implements Plugin<Project> {
      * @return
      */
     def handleLocalJar(Project project, Publication publication) {
-        File target = new File(misDir, 'mis-' + publication.groupId + '-' + publication.artifactId + '.jar')
+        File target = new File(misDir, 'misExtension-' + publication.groupId + '-' + publication.artifactId + '.jar')
         if (publication.invalid) {
             publicationManager.addPublication(publication)
             if (target.exists()) {
@@ -326,7 +326,7 @@ class MisPlugin implements Plugin<Project> {
      * @return
      */
     def handleMavenJar(Project project, Publication publication) {
-        File target = new File(misDir, 'mis-' + publication.groupId + '-' + publication.artifactId + '.jar')
+        File target = new File(misDir, 'misExtension-' + publication.groupId + '-' + publication.artifactId + '.jar')
         if (publication.invalid) {
             publicationManager.addPublication(publication)
             if (target.exists()) {

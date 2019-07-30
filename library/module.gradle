@@ -1,10 +1,10 @@
-componentBuild {
+runalone {
     applicationName = 'com.plugin.library.LibraryApplication'
     isRegisterComponentAuto = true
     runAlone = true
 }
 
-//mis {
+//misExtension {
 //    publications {
 //        main {
 //            groupId 'com.eastwood.demo'
