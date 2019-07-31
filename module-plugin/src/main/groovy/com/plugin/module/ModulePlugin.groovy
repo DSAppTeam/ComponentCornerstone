@@ -11,6 +11,7 @@ import com.plugin.module.listener.OnMisExtensionListener
 import com.plugin.module.publication.Publication
 import com.plugin.module.publication.PublicationManager
 import com.plugin.module.transform.CodeTransform
+import com.plugin.module.utils.JarUtil
 import com.plugin.module.utils.MisUtil
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -44,7 +45,8 @@ class ModulePlugin implements Plugin<Project> {
 
         String compileModule = Constants.DEFAULT_APP_NAME
 
-        project.getExtensions().create("runalone", AloneExtension)
+        project.extensions.create("runalone", AloneExtension)
+        project.extensions.create("mis", MisExtension)
 
         def misScript = new File(project.projectDir, 'module.gradle')
         if (misScript.exists()) {
@@ -212,6 +214,7 @@ class ModulePlugin implements Plugin<Project> {
         //读取 manifest
         publicationManager = PublicationManager.getInstance()
         publicationManager.loadManifest(project, misDir)
+
         misExtension = project.getExtensions().create("mis", MisExtension, new OnMisExtensionListener() {
             @Override
             void onPublicationAdded(Project childProject, Publication publication) {
@@ -219,10 +222,10 @@ class ModulePlugin implements Plugin<Project> {
                 publicationManager.addDependencyGraph(publication)
             }
         })
+
         alone = project.getExtensions().create("runalone", AloneExtension)
 
 
-        //如果子project不存在module.gradle,则报错
         project.allprojects.each {
             if (it == project) return
             Project childProject = it
@@ -233,15 +236,23 @@ class ModulePlugin implements Plugin<Project> {
             }
         }
 
-        //评估完成之后
         project.afterEvaluate {
 
             androidJarPath = MisUtil.getAndroidJarPath(project, misExtension.compileSdkVersion)
 
-            //扩展misPublication
             Dependencies.metaClass.misPublication { String value ->
                 String[] gav = MisUtil.filterGAV(value)
                 return 'mis-' + gav[0] + ':' + gav[1] + ':' + gav[2]
+            }
+
+            project.allprojects.each {
+                if (it == project) return
+                Project childProject = it
+                def misScript = new File(childProject.projectDir, 'module.gradle')
+                if (misScript.exists()) {
+                    misExtension.childProject = childProject
+                    project.apply from: misScript
+                }
             }
 
             List<String> topSort = publicationManager.dependencyGraph.topSort()
@@ -271,12 +282,12 @@ class ModulePlugin implements Plugin<Project> {
             if (publication.dependencies.compileOnly != null) {
                 List<Object> compileOnly = new ArrayList<>()
                 publication.dependencies.compileOnly.each {
-                    if (it instanceof String && it.startsWith('misExtension-')) {
-                        String[] gav = MisUtil.filterGAV(it.replace('misExtension-', ''))
+                    if (it instanceof String && it.startsWith('mis-')) {
+                        String[] gav = MisUtil.filterGAV(it.replace('mis-', ''))
                         Publication existPublication = publicationManager.getPublicationByKey(gav[0] + '-' + gav[1])
                         if (existPublication != null) {
                             if (existPublication.useLocal) {
-                                compileOnly.add(':misExtension-' + existPublication.groupId + '-' + existPublication.artifactId + ':')
+                                compileOnly.add(':mis-' + existPublication.groupId + '-' + existPublication.artifactId + ':')
                             } else {
                                 compileOnly.add(existPublication.groupId + ':' + existPublication.artifactId + ':' + existPublication.version)
                             }
@@ -290,12 +301,12 @@ class ModulePlugin implements Plugin<Project> {
             if (publication.dependencies.implementation != null) {
                 List<Object> implementation = new ArrayList<>()
                 publication.dependencies.implementation.each {
-                    if (it instanceof String && it.startsWith('misExtension-')) {
-                        String[] gav = MisUtil.filterGAV(it.replace('misExtension-', ''))
+                    if (it instanceof String && it.startsWith('mis-')) {
+                        String[] gav = MisUtil.filterGAV(it.replace('mis-', ''))
                         Publication existPublication = publicationManager.getPublicationByKey(gav[0] + '-' + gav[1])
                         if (existPublication != null) {
                             if (existPublication.useLocal) {
-                                implementation.add(':misExtension-' + existPublication.groupId + '-' + existPublication.artifactId + ':')
+                                implementation.add(':mis-' + existPublication.groupId + '-' + existPublication.artifactId + ':')
                             } else {
                                 implementation.add(existPublication.groupId + ':' + existPublication.artifactId + ':' + existPublication.version)
                             }
@@ -310,7 +321,7 @@ class ModulePlugin implements Plugin<Project> {
     }
 
     def handleLocalJar(Project project, Publication publication) {
-        File target = new File(misDir, 'misExtension-' + publication.groupId + '-' + publication.artifactId + '.jar')
+        File target = new File(misDir, 'mis-' + publication.groupId + '-' + publication.artifactId + '.jar')
 
         if (publication.invalid) {
             publicationManager.addPublication(publication)
@@ -347,7 +358,7 @@ class ModulePlugin implements Plugin<Project> {
     }
 
     def handleMavenJar(Project project, Publication publication) {
-        File target = new File(misDir, 'misExtension-' + publication.groupId + '-' + publication.artifactId + '.jar')
+        File target = new File(misDir, 'mis-' + publication.groupId + '-' + publication.artifactId + '.jar')
         if (publication.invalid) {
             publicationManager.addPublication(publication)
             if (target.exists()) {

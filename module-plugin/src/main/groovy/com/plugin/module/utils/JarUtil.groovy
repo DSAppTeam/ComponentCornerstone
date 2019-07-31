@@ -29,13 +29,13 @@ class JarUtil {
      */
     static File packJavaSourceJar(Project project, Publication publication, String androidJarPath,
                                   CompileOptions compileOptions, boolean vars) {
-        //.../build/misExtension 重置
+        //.../build/mis 重置
         publication.buildDir.deleteDir()
         publication.buildDir.mkdirs()
 
-        //.../build/misExtension/source
-        //.../build/misExtension/classes
-        //.../build/misExtension/output
+        //.../build/mis/source
+        //.../build/mis/classes
+        //.../build/mis/output
         def sourceDir = new File(publication.buildDir, "source")
         def classesDir = new File(publication.buildDir, "classes")
         def outputDir = new File(publication.buildDir, "output")
@@ -43,7 +43,7 @@ class JarUtil {
         classesDir.mkdirs()
         outputDir.mkdirs()
 
-        //复制 misExtension sourceSet 的java或kotlin文件到source目录中，返回source目录下的文件路径
+        //复制 mis sourceSet 的java或kotlin文件到source目录中，返回source目录下的文件路径
         def argFiles = []
         File file = new File(publication.misSourceSet.path)
         String prefix = publication.misSourceSet.path
@@ -53,7 +53,7 @@ class JarUtil {
         }
 
         //迁移发布依赖到project依赖，从{name}路径重点读取该依赖
-        def name = "misExtension[${publication.groupId}-${publication.artifactId}]Classpath"
+        def name = "mis[${publication.groupId}-${publication.artifactId}]Classpath"
         if (publication.dependencies != null) {
             if (publication.dependencies.implementation != null) {
                 publication.dependencies.implementation.each {
@@ -131,8 +131,8 @@ class JarUtil {
             JavaVersion targetCompatibility = compileOptions.targetCompatibility
             def target = targetCompatibility.toString()
             if (!targetCompatibility.isJava8() && !targetCompatibility.isJava6()) {
-                throw new GradleException("Failure to compile misExtension kotlin source to bytecode: unknown JVM target version: $target, supported versions: 1.6, 1.8\nTry:\n " +
-                        "   misExtension {\n" +
+                throw new GradleException("Failure to compile mis kotlin source to bytecode: unknown JVM target version: $target, supported versions: 1.6, 1.8\nTry:\n " +
+                        "   mis {\n" +
                         "       ...\n" +
                         "       compileOptions {\n" +
                         "           sourceCompatibility JavaVersion.VERSION_1_8\n" +
@@ -152,7 +152,7 @@ class JarUtil {
 
             ExitCode exitCode = compiler.exec(System.out, (String[]) args.toArray())
             if (exitCode != ExitCode.OK) {
-                throw new GradleException("Failure to compile misExtension kotlin source to bytecode.")
+                throw new GradleException("Failure to compile mis kotlin source to bytecode.")
             }
 
             new File(classesDir, '/META-INF').deleteDir()
@@ -166,11 +166,11 @@ class JarUtil {
 
             def result = p.waitFor(30, TimeUnit.SECONDS)
             if (!result) {
-                throw new GradleException("Timed out when compile misExtension java source to bytecode with command.\nExecute command:\n" + command)
+                throw new GradleException("Timed out when compile mis java source to bytecode with command.\nExecute command:\n" + command)
             }
 
             if (p.exitValue() != 0) {
-                throw new GradleException("Failure to compile misExtension java source to bytecode: \n" + p.err.text + "\nExecute command:\n" + command)
+                throw new GradleException("Failure to compile mis java source to bytecode: \n" + p.err.text + "\nExecute command:\n" + command)
             }
         }
 
@@ -202,7 +202,7 @@ class JarUtil {
         def p = "jar cvf ../outputs/classes-source.jar .".execute(null, sourceDir)
         def result = p.waitFor()
         if (result != 0) {
-            throw new RuntimeException("failure to make misExtension-sdk java source directory: \n" + p.err.text)
+            throw new RuntimeException("failure to make mis-sdk java source directory: \n" + p.err.text)
         }
         def sourceJar = new File(sourceDir.parentFile, 'outputs/classes-source.jar')
         return sourceJar
@@ -260,7 +260,7 @@ class JarUtil {
     static boolean compareMavenJar(Project project, Publication publication, String localPath) {
         String filePath = null
         String fileName = publication.artifactId + "-" + publication.version + ".jar"
-        def name = "misExtension[${publication.groupId}-${publication.artifactId}]Classpath"
+        def name = "mis[${publication.groupId}-${publication.artifactId}]Classpath"
         Configuration configuration = project.configurations.create(name)
         project.dependencies.add(name, publication.groupId + ":" + publication.artifactId + ":" + publication.version)
         configuration.copy().files.each {
