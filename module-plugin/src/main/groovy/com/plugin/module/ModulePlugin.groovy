@@ -11,6 +11,7 @@ import com.plugin.module.listener.OnMisExtensionListener
 import com.plugin.module.publication.Publication
 import com.plugin.module.publication.PublicationManager
 import com.plugin.module.transform.CodeTransform
+import com.plugin.module.utils.FileUtil
 import com.plugin.module.utils.JarUtil
 import com.plugin.module.utils.MisUtil
 import org.gradle.api.Plugin
