@@ -153,12 +153,12 @@ class PublicationManager {
         if (publication.dependencies != null) {
             if (publication.dependencies.implementation != null) {
                 publication.dependencies.implementation.each {
-                    if (it instanceof String && it.startsWith('misExtension-')) {
-                        String[] gav = MisUtil.filterGAV(it.replace('misExtension-', ''))
+                    if (it instanceof String && it.startsWith('mis-')) {
+                        String[] gav = MisUtil.filterGAV(it.replace('mis-', ''))
                         dependencyGraph.add(key, gav[0] + '-' + gav[1])
                         if (!dependencyGraph.isDag()) {
                             def misPublication = gav[0] + ':' + gav[1] + (gav[2] == null ? (":" + gav[2]) : "")
-                            throw new RuntimeException("Circular dependency between misExtension publication '${publication.groupId}:${publication.artifactId}' and '${misPublication}'.")
+                            throw new RuntimeException("Circular dependency between mis publication '${publication.groupId}:${publication.artifactId}' and '${misPublication}'.")
                         }
                     }
                 }
@@ -166,12 +166,12 @@ class PublicationManager {
 
             if (publication.dependencies.compileOnly != null) {
                 publication.dependencies.compileOnly.each {
-                    if (it instanceof String && it.startsWith('misExtension-')) {
-                        String[] gav = MisUtil.filterGAV(it.replace('misExtension-', ''))
+                    if (it instanceof String && it.startsWith('mis-')) {
+                        String[] gav = MisUtil.filterGAV(it.replace('mis-', ''))
                         dependencyGraph.add(key, gav[0] + '-' + gav[1])
                         if (!dependencyGraph.isDag()) {
                             def misPublication = gav[0] + ':' + gav[1] + (gav[2] == null ? (":" + gav[2]) : "")
-                            throw new RuntimeException("Circular dependency between misExtension publication '${publication.groupId}:${publication.artifactId}' and '${misPublication}'.")
+                            throw new RuntimeException("Circular dependency between mis publication '${publication.groupId}:${publication.artifactId}' and '${misPublication}'.")
                         }
                     }
                 }
