@@ -29,6 +29,49 @@ class MisUtil {
         }
     }
 
+    static addAloneSourceSet(Project project){
+        BaseExtension baseExtension = project.extensions.getByName('android')
+        addAloneSourceSet(baseExtension, 'main')
+        //  如果是app
+        if(baseExtension instanceof AppExtension) {
+            AppExtension appExtension = (AppExtension) baseExtension
+            appExtension.getApplicationVariants().each {
+                addAloneSourceSet(baseExtension, it.buildType.name)
+                it.productFlavors.each {
+                    addAloneSourceSet(baseExtension, it.name)
+                }
+                if(it.productFlavors.size() >= 1) {
+                    if(it.productFlavors.size() > 1) {
+                        addAloneSourceSet(baseExtension, it.flavorName)
+                    }
+                    addAloneSourceSet(baseExtension, it.name)
+                }
+            }
+            //如果是module
+        } else if(baseExtension instanceof LibraryExtension) {
+            LibraryExtension libraryExtension = (LibraryExtension) baseExtension
+            libraryExtension.getLibraryVariants().each {
+                addAloneSourceSet(baseExtension, it.buildType.name)
+                it.productFlavors.each {
+                    addAloneSourceSet(baseExtension, it.name)
+                }
+                if(it.productFlavors.size() >= 1) {
+                    if(it.productFlavors.size() > 1) {
+                        addAloneSourceSet(baseExtension, it.flavorName)
+                    }
+                    addAloneSourceSet(baseExtension, it.name)
+                }
+            }
+        }
+    }
+
+    static addAloneSourceSet(BaseExtension baseExtension, String name){
+        def obj = baseExtension.sourceSets.getByName(name)
+        obj.java.srcDirs.each {
+            obj.aidl.srcDirs(it.absolutePath.replace('java', 'runalone'))
+        }
+    }
+
 
     static addMisSourceSets(Project project) {
         BaseExtension baseExtension = project.extensions.getByName('android')

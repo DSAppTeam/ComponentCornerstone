@@ -4,7 +4,7 @@ runalone {
     runAlone = true
 }
 
-//misExtension {
+//mis {
 //    publications {
 //        main {
 //            groupId 'com.eastwood.demo'
@@ -22,4 +22,26 @@ runalone {
 //            }
 //        }
 //    }
+//}
+
+
+//mis {
+//
+//    compileSdkVersion 27
+//
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_1_8
+//        targetCompatibility JavaVersion.VERSION_1_8
+//    }
+//
+//    repositories {
+//        maven {
+//            url "http://******"
+//            credentials {
+//                username '******'
+//                password '******'
+//            }
+//        }
+//    }
+//
 //}
