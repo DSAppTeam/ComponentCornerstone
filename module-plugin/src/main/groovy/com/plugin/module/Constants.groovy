@@ -25,7 +25,7 @@ class Constants{
     public static String ASSETS_PATH = "src/main/assets"
     public static String JNILIBS_PATH = "src/main/jniLibs"
 
-    public static String MIS_JAVA_PATH = "src/main/misExtension/java"
+    public static String MIS_JAVA_PATH = "src/main/mis"
 
     //plugin
     public static String PLUGIN_APPLICATION = "com.android.application"
