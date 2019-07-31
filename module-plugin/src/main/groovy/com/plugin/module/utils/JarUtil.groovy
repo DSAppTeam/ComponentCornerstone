@@ -35,10 +35,10 @@ class JarUtil {
 
         //.../build/mis/source
         //.../build/mis/classes
-        //.../build/mis/output
+        //.../build/mis/outputs
         def sourceDir = new File(publication.buildDir, "source")
         def classesDir = new File(publication.buildDir, "classes")
-        def outputDir = new File(publication.buildDir, "output")
+        def outputDir = new File(publication.buildDir, "outputs")
         sourceDir.mkdirs()
         classesDir.mkdirs()
         outputDir.mkdirs()
@@ -54,6 +54,7 @@ class JarUtil {
 
         //迁移发布依赖到project依赖，从{name}路径重点读取该依赖
         def name = "mis[${publication.groupId}-${publication.artifactId}]Classpath"
+        Configuration configuration = project.configurations.create(name)
         if (publication.dependencies != null) {
             if (publication.dependencies.implementation != null) {
                 publication.dependencies.implementation.each {
@@ -67,7 +68,6 @@ class JarUtil {
             }
         }
 
-        Configuration configuration = project.configurations.create(name)
         def classPath = [androidJarPath]
         configuration.copy().files.each {
             if (it.name.endsWith('.aar')) {
@@ -176,12 +176,10 @@ class JarUtil {
 
         def p = "jar cvf outputs/classes.jar -C classes . ".execute(null, classesDir.parentFile)
         def result = p.waitFor()
-        p.destroy()
-        p = null
+        p.waitFor()
         if (result != 0) {
-            throw new RuntimeException("failure to package classes.jar: \n" + p.err.text)
+            throw new RuntimeException("failure to package classes.jar: \n" +  p.err.text)
         }
-
         return new File(classesDir.parentFile, 'outputs/classes.jar')
     }
 
