@@ -1,6 +1,7 @@
 package com.plugin.module
 
 import com.plugin.module.extension.AloneExtension
+import com.plugin.module.extension.module.AssembleTask
 import com.plugin.module.extension.module.Dependencies
 import com.plugin.module.extension.MisExtension
 import com.plugin.module.listener.OnMisExtensionListener
@@ -38,11 +39,49 @@ class ModulePlugin implements Plugin<Project> {
      */
     private void handleProject(Project project) {
 
+//        //获取运行task名称
+//        String taskNames = project.gradle.startParameter.taskNames.toString()
+//        Logger.buildOutput("taskNames is " + taskNames)
+//
+//        //获取运行模块名称
+//        String module = project.path.replace(":", "")
+//        Logger.buildOutput("current module is " + module)
+//
+//        //解析AssembleTask
+//        Logger.buildOutput("startParameter.taskNames is " + project.gradle.startParameter.taskNames)
+//        AssembleTask assembleTask = com.plugin.module.utils.Utils.parseTaskInfo(project.gradle.startParameter.taskNames)
+//        if (assembleTask.isAssemble) {
+//            compileModule = com.plugin.module.utils.Utils.parseMainModuleName(project, assembleTask)
+//            Logger.buildOutput("compile module is : " + compileModule)
+//        }
+//
+//        //需要在特定的模块中声明 isRunAlone，用于判断是否单独运行
+//        if (!project.hasProperty(Constants.PROPERTIES_ISRUNALONE)) {
+//            throw new RuntimeException("you should set isRunAlone in " + module + "'s gradle.properties")
+//        }
+//
+//        boolean isRunAlone = Boolean.parseBoolean((project.properties.get("isRunAlone")))
+//        String mainModuleName = project.rootProject.property(Constants.PROPERTIES_MAIN_MODULE_NAME)
+//
+//        //当且仅当 isRunAlone 为ture需要判断
+//        if (isRunAlone && assembleTask.isAssemble) {
+//            //如果运行的模块就是app模块，或者当前运行的模块就是我们配置的mainmodulename，则默认需要单独运行，其他组件强制修改为false
+//            if (module.equals(compileModule)) {
+//                isRunAlone = true
+//            } else {
+//                isRunAlone = false
+//            }
+//        }
+//        project.setProperty("isRunAlone", isRunAlone)
+//        Logger.buildOutput("setProperty isRunAlone(" + isRunAlone + ")")
+
+
         new AlonePlugin().apply(project)
 
-        if (!MisUtil.hasAndroidPlugin(project)) {
-            throw new GradleException("The android or android-library plugin must be applied to the project.")
-        }
+//        if (!MisUtil.hasAndroidPlugin(project)) {
+//            throw new GradleException("The android or android-library plugin must be applied to the project.")
+//        }
+
 
         //解析 misPublication(xxxx) 中的字符串转化为 maven 格式
         project.dependencies.metaClass.misPublication { Object value ->
@@ -66,7 +105,10 @@ class ModulePlugin implements Plugin<Project> {
         }
 
         project.afterEvaluate {
+            //调整sourceSet
             MisUtil.addMisSourceSets(project)
+
+
             List<Publication> publicationList = publicationManager.getPublicationByProject(project)
 
             List<Publication> publicationPublishList = new ArrayList<>()
@@ -131,23 +173,12 @@ class ModulePlugin implements Plugin<Project> {
         project.allprojects.each {
             if (it == project) return
             Project childProject = it
-            if(childProject.pluginManager.hasPlugin('com.android.module')){
-                def misScript = new File(childProject.projectDir, 'module.gradle')
-                if (misScript.exists()) {
-                    misExtension.childProject = childProject
-                    project.apply from: misScript
-                    //添加依赖路径
-                    childProject.repositories {
-                        flatDir {
-                            dirs misDir.absolutePath
-                        }
-                    }
-                } else {
-                    throw new RuntimeException("找不到 " + project.name + "下的module.gradle ！")
+            childProject.repositories {
+                flatDir {
+                    dirs misDir.absolutePath
                 }
             }
         }
-
 
         //评估完成之后
         project.afterEvaluate {

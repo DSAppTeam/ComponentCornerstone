@@ -1,6 +1,8 @@
 package com.plugin.module
 
 import com.android.build.gradle.BaseExtension
+import com.plugin.module.extension.AloneExtension
+import com.plugin.module.extension.MisExtension
 import com.plugin.module.extension.module.AssembleTask
 import com.plugin.module.transform.CodeTransform
 import org.gradle.api.Plugin
@@ -16,10 +18,13 @@ class AlonePlugin implements Plugin<Project> {
 
     void apply(Project project) {
 
-        //解析ComExtension属性
-        def moduleScript = new File(project.projectDir, 'module.gradle')
-        if (moduleScript.exists()) {
-            project.apply from: moduleScript
+        project.getExtensions().create("runalone", AloneExtension)
+
+        def misScript = new File(project.projectDir, 'module.gradle')
+        if (misScript.exists()) {
+            project.apply from: misScript
+        } else {
+            throw new RuntimeException("找不到 " + project.name + "下的module.gradle ！")
         }
 
         //获取运行task名称

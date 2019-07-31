@@ -29,11 +29,7 @@ class MisUtil {
         }
     }
 
-    /**
-     * 添加mis模块 sourceSet
-     * @param project
-     * @return
-     */
+
     static addMisSourceSets(Project project) {
         BaseExtension baseExtension = project.extensions.getByName('android')
         addMisSourceSets(baseExtension, 'main')

@@ -72,7 +72,7 @@ class CodeTransform extends Transform {
             }
             //对类型为“文件夹”的input进行遍历
             input.directoryInputs.each { DirectoryInput directoryInput ->
-                boolean isRegisterComponentAuto = project.extensions.componentBuild.isRegisterComponentAuto
+                boolean isRegisterComponentAuto = project.extensions.runalone.isRegisterComponentAuto
 
                 //如果是自动注入组件，则
                 if (isRegisterComponentAuto) {
@@ -102,13 +102,13 @@ class CodeTransform extends Transform {
 
     /**
      * 获取 gradle配置的
-     * componentBuild{*     applicationName = "xxxx"
+     * runalone{*     applicationName = "xxxx"
      *}* @param inputs
      */
     private void getRealApplicationName(Collection<TransformInput> inputs) {
-        applicationName = project.extensions.componentBuild.applicationName
+        applicationName = project.extensions.runalone.applicationName
         if (applicationName == null || applicationName.isEmpty()) {
-            throw new RuntimeException("you should set applicationName in componentBuild")
+            throw new RuntimeException("you should set applicationName in runalone")
         }
     }
 
