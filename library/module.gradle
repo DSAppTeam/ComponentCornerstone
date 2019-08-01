@@ -1,10 +1,11 @@
-runalone {
-    applicationName = 'com.plugin.library.LibraryApplication'
-    isRegisterComponentAuto = true
-    runAlone = true
-}
+module {
 
-mis {
+    runalone {
+        applicationName  'com.plugin.library.LibraryApplication'
+        isRegisterComponentAuto  true
+        runAlone  true
+    }
+
     publications {
         main {
             groupId 'com.eastwood.demo'

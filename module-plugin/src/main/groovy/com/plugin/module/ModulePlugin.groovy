@@ -1,15 +1,15 @@
 package com.plugin.module
 
 import com.android.build.gradle.BaseExtension
-import com.plugin.module.extension.AloneExtension
+import com.plugin.module.extension.module.AloneConfiguration
 import com.plugin.module.extension.module.AssembleTask
 import com.plugin.module.extension.module.Dependencies
-import com.plugin.module.extension.MisExtension
+import com.plugin.module.extension.ModuleExtension
 import com.plugin.module.extension.module.SourceFile
 import com.plugin.module.extension.module.SourceSet
-import com.plugin.module.listener.OnMisExtensionListener
-import com.plugin.module.publication.Publication
-import com.plugin.module.publication.PublicationManager
+import com.plugin.module.listener.OnModuleExtensionListener
+import com.plugin.module.extension.publication.Publication
+import com.plugin.module.extension.publication.PublicationManager
 import com.plugin.module.transform.CodeTransform
 import com.plugin.module.utils.FileUtil
 import com.plugin.module.utils.JarUtil
@@ -24,13 +24,14 @@ import org.gradle.api.publish.maven.MavenPublication
 class ModulePlugin implements Plugin<Project> {
 
     static File misDir
-    static MisExtension misExtension
-    static AloneExtension alone
+    public static ModuleExtension sModuleExtension
     static String androidJarPath
     static PublicationManager publicationManager
+    Project project;
 
     @Override
     void apply(Project project) {
+        this.project = project;
         if (project == project.rootProject) {
             handleRootProject(project)
         } else {
@@ -46,15 +47,6 @@ class ModulePlugin implements Plugin<Project> {
 
         String compileModule = Constants.DEFAULT_APP_NAME
 
-        project.extensions.create("runalone", AloneExtension)
-        project.extensions.create("mis", MisExtension)
-
-        def misScript = new File(project.projectDir, 'module.gradle')
-        if (misScript.exists()) {
-            project.apply from: misScript
-        } else {
-            throw new RuntimeException("找不到 " + project.name + "下的module.gradle ！")
-        }
 
         //获取运行task名称
         String taskNames = project.gradle.startParameter.taskNames.toString()
@@ -76,8 +68,6 @@ class ModulePlugin implements Plugin<Project> {
         if (!project.hasProperty(Constants.PROPERTIES_ISRUNALONE)) {
             throw new RuntimeException("you should set isRunAlone in " + module + "'s gradle.properties")
         }
-
-//        boolean isRunAlone = extension.runAlone
 
 
         boolean isRunAlone = Boolean.parseBoolean((project.properties.get("isRunAlone")))
@@ -177,8 +167,8 @@ class ModulePlugin implements Plugin<Project> {
             if (publicationPublishList.size() > 0) {
                 project.plugins.apply('maven-publish')
                 def publishing = project.extensions.getByName('publishing')
-                if (misExtension.configure != null) {
-                    publishing.repositories misExtension.configure
+                if (sModuleExtension.configure != null) {
+                    publishing.repositories sModuleExtension.configure
                 }
 
                 publicationPublishList.each {
@@ -216,16 +206,19 @@ class ModulePlugin implements Plugin<Project> {
         publicationManager = PublicationManager.getInstance()
         publicationManager.loadManifest(project, misDir)
 
-        misExtension = project.getExtensions().create("mis", MisExtension, new OnMisExtensionListener() {
+        sModuleExtension = project.getExtensions().create("module", ModuleExtension, new OnModuleExtensionListener() {
+
             @Override
             void onPublicationAdded(Project childProject, Publication publication) {
                 initPublication(childProject, publication)
                 publicationManager.addDependencyGraph(publication)
             }
+
+            @Override
+            void onAloneConfigAdded(Project childProject, AloneConfiguration aloneConfiguration) {
+                aloneConfiguration.toString()
+            }
         })
-
-        alone = project.getExtensions().create("runalone", AloneExtension)
-
 
         project.allprojects.each {
             if (it == project) return
@@ -239,7 +232,7 @@ class ModulePlugin implements Plugin<Project> {
 
         project.afterEvaluate {
 
-            androidJarPath = MisUtil.getAndroidJarPath(project, misExtension.compileSdkVersion)
+            androidJarPath = MisUtil.getAndroidJarPath(project, sModuleExtension.compileSdkVersion)
 
             Dependencies.metaClass.misPublication { String value ->
                 String[] gav = MisUtil.filterGAV(value)
@@ -251,7 +244,7 @@ class ModulePlugin implements Plugin<Project> {
                 Project childProject = it
                 def misScript = new File(childProject.projectDir, 'module.gradle')
                 if (misScript.exists()) {
-                    misExtension.childProject = childProject
+                    sModuleExtension.currentChildProject = childProject
                     project.apply from: misScript
                 }
             }
@@ -342,7 +335,7 @@ class ModulePlugin implements Plugin<Project> {
             }
         }
 
-        File releaseJar = JarUtil.packJavaSourceJar(project, publication, androidJarPath, misExtension.compileOptions, true)
+        File releaseJar = JarUtil.packJavaSourceJar(project, publication, androidJarPath, sModuleExtension.compileOptions, true)
         if (releaseJar == null) {
             publication.invalid = true
             publicationManager.addPublication(publication)
@@ -372,7 +365,7 @@ class ModulePlugin implements Plugin<Project> {
 
         if (target.exists()) {
             if (hasModifiedSource) {
-                def releaseJar = JarUtil.packJavaSourceJar(project, publication, androidJarPath, misExtension.compileOptions, true)
+                def releaseJar = JarUtil.packJavaSourceJar(project, publication, androidJarPath, sModuleExtension.compileOptions, true)
                 if (releaseJar == null) {
                     publication.invalid = true
                     publicationManager.addPublication(publication)
@@ -397,7 +390,7 @@ class ModulePlugin implements Plugin<Project> {
             publicationManager.addPublication(publication)
             return
         } else {
-            def releaseJar = JarUtil.packJavaSourceJar(project, publication, androidJarPath, misExtension.compileOptions, false)
+            def releaseJar = JarUtil.packJavaSourceJar(project, publication, androidJarPath, sModuleExtension.compileOptions, false)
             if (releaseJar == null) {
                 publication.invalid = true
                 publicationManager.addPublication(publication)
@@ -418,7 +411,7 @@ class ModulePlugin implements Plugin<Project> {
                 }
                 publication.useLocal = false
             } else {
-                releaseJar = JarUtil.packJavaSourceJar(project, publication, androidJarPath, misExtension.compileOptions, true)
+                releaseJar = JarUtil.packJavaSourceJar(project, publication, androidJarPath, sModuleExtension.compileOptions, true)
                 FileUtil.copyFile(releaseJar, target)
                 publication.useLocal = true
             }

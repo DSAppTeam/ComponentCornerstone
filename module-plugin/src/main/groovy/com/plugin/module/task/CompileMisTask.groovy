@@ -1,7 +1,7 @@
 package com.plugin.module.task
 
-import com.plugin.module.publication.Publication
-import com.plugin.module.publication.PublicationManager
+import com.plugin.module.extension.publication.Publication
+import com.plugin.module.extension.publication.PublicationManager
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
@@ -15,7 +15,7 @@ class CompileMisTask extends DefaultTask {
     @TaskAction
     void compileSource() {
         def project = getProject()
-        def releaseJar = JarUtil.packJavaSourceJar(project, publication, MisPlugin.androidJarPath, MisPlugin.misExtension.compileOptions, false)
+        def releaseJar = JarUtil.packJavaSourceJar(project, publication, MisPlugin.androidJarPath, MisPlugin.sModuleExtension.compileOptions, false)
         if (releaseJar == null) {
             throw new RuntimeException("nothing to push.")
         }

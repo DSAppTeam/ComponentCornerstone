@@ -1,4 +1,4 @@
-package com.plugin.module.publication
+package com.plugin.module.extension.publication
 
 import com.plugin.module.extension.module.Digraph
 import com.plugin.module.extension.module.SourceFile
