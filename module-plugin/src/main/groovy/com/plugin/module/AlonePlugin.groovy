@@ -1,8 +1,7 @@
 package com.plugin.module
 
 import com.android.build.gradle.BaseExtension
-import com.plugin.module.extension.AloneExtension
-import com.plugin.module.extension.MisExtension
+import com.plugin.module.extension.module.AloneConfiguration
 import com.plugin.module.extension.module.AssembleTask
 import com.plugin.module.transform.CodeTransform
 import org.gradle.api.Plugin
@@ -18,7 +17,7 @@ class AlonePlugin implements Plugin<Project> {
 
     void apply(Project project) {
 
-        project.getExtensions().create("runalone", AloneExtension)
+        project.getExtensions().create("runalone", AloneConfiguration)
 
         def misScript = new File(project.projectDir, 'module.gradle')
         if (misScript.exists()) {

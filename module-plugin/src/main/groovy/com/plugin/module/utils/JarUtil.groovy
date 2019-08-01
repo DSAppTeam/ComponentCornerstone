@@ -1,7 +1,7 @@
 package com.plugin.module.utils
 
 import com.plugin.module.extension.module.CompileOptions
-import com.plugin.module.publication.Publication
+import com.plugin.module.extension.publication.Publication
 import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
