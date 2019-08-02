@@ -1,9 +1,11 @@
 module {
 
     runalone {
-        applicationName  'com.plugin.library.LibraryApplication'
-        isRegisterComponentAuto  true
-        runAlone  true
+        main {
+            applicationName 'com.plugin.library.LibraryApplication'
+            isRegisterComponentAuto  true
+            runAlone true
+        }
     }
 
     publications {
@@ -24,25 +26,3 @@ module {
         }
     }
 }
-
-
-//mis {
-//
-//    compileSdkVersion 27
-//
-//    compileOptions {
-//        sourceCompatibility JavaVersion.VERSION_1_8
-//        targetCompatibility JavaVersion.VERSION_1_8
-//    }
-//
-//    repositories {
-//        maven {
-//            url "http://******"
-//            credentials {
-//                username '******'
-//                password '******'
-//            }
-//        }
-//    }
-//
-//}

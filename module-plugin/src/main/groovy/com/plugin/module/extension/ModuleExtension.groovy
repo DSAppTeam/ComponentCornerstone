@@ -15,26 +15,23 @@ class ModuleExtension {
     int compileSdkVersion                           //编译版本
     CompileOptions compileOptions                   //编译选项
     Action<? super RepositoryHandler> configure     //仓库配置
-
-    Project currentChildProject                      //子项目
+    Project currentChildProject                     //子项目
     OnModuleExtensionListener listener               //发布监听器
     Map<String, Publication> publicationMap         //发布信息
-    AloneConfiguration aloneConfiguration
-    Map<String, AloneConfiguration> aloneRunMap           //配置信息
+
 
     ModuleExtension(OnModuleExtensionListener listener) {
         this.listener = listener
         this.publicationMap = new HashMap<>()
-        this.aloneRunMap = new HashMap<>()
         compileOptions = new CompileOptions()
     }
 
-
     void runalone(Closure closure) {
-        aloneConfiguration = new AloneConfiguration()
-        ConfigureUtil.configure(closure, aloneConfiguration)
-        aloneRunMap.put(currentChildProject.name, aloneConfiguration)
-        listener.onAloneConfigAdded(currentChildProject, aloneConfiguration)
+        NamedDomainObjectContainer<AloneConfiguration> runalones = currentChildProject.container(AloneConfiguration)
+        ConfigureUtil.configure(closure, runalones)
+        runalones.each {
+            listener.onAloneConfigAdded(currentChildProject, it)
+        }
     }
 
     void compileSdkVersion(int version) {
