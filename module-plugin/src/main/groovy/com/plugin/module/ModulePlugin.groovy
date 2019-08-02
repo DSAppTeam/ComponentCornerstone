@@ -1,6 +1,7 @@
 package com.plugin.module
 
 import com.android.build.gradle.BaseExtension
+import com.plugin.module.extension.ModuleRuntime
 import com.plugin.module.extension.module.AloneConfiguration
 import com.plugin.module.extension.module.AssembleTask
 import com.plugin.module.extension.module.Dependencies
@@ -27,7 +28,7 @@ class ModulePlugin implements Plugin<Project> {
     public static ModuleExtension sModuleExtension
     static String androidJarPath
     static PublicationManager publicationManager
-    Project project;
+    Project project
 
     @Override
     void apply(Project project) {
@@ -46,7 +47,6 @@ class ModulePlugin implements Plugin<Project> {
     private void handleProject(Project project) {
 
         String compileModule = Constants.DEFAULT_APP_NAME
-
 
         //获取运行task名称
         String taskNames = project.gradle.startParameter.taskNames.toString()
@@ -85,7 +85,7 @@ class ModulePlugin implements Plugin<Project> {
         }
         project.setProperty("isRunAlone", isRunAlone)
         Logger.buildOutput("setProperty isRunAlone(" + isRunAlone + ")")
-        boolean needAloneSourceSrt = false;
+        boolean needAloneSourceSrt = false
 
         //根据配置添加各种组件依赖，并且自动化生成组件加载代码
         if (isRunAlone) {
@@ -212,11 +212,12 @@ class ModulePlugin implements Plugin<Project> {
             void onPublicationAdded(Project childProject, Publication publication) {
                 initPublication(childProject, publication)
                 publicationManager.addDependencyGraph(publication)
+                ModuleRuntime.publicationMap.put(childProject.name, publication)
             }
 
             @Override
             void onAloneConfigAdded(Project childProject, AloneConfiguration aloneConfiguration) {
-                aloneConfiguration.toString()
+                ModuleRuntime.aloneRunMap.put(childProject.name, aloneConfiguration)
             }
         })
 

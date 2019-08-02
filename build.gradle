@@ -71,12 +71,6 @@ module {
 
     compileSdkVersion 27
 
-    runalone {
-        applicationName  'com.plugin.library.LibraryApplication'
-        isRegisterComponentAuto  true
-        runAlone  true
-    }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
