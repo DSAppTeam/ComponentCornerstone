@@ -1,5 +1,6 @@
 package com.plugin.module.extension.publication
 
+import com.plugin.module.Constants
 import com.plugin.module.extension.module.Digraph
 import com.plugin.module.extension.module.SourceFile
 import com.plugin.module.extension.module.SourceSet
@@ -153,8 +154,8 @@ class PublicationManager {
         if (publication.dependencies != null) {
             if (publication.dependencies.implementation != null) {
                 publication.dependencies.implementation.each {
-                    if (it instanceof String && it.startsWith('mis-')) {
-                        String[] gav = MisUtil.filterGAV(it.replace('mis-', ''))
+                    if (it instanceof String && it.startsWith(Constants.MODULE_SDK_PRE)) {
+                        String[] gav = MisUtil.filterGAV(it.replace(Constants.MODULE_SDK_PRE, ''))
                         dependencyGraph.add(key, gav[0] + '-' + gav[1])
                         if (!dependencyGraph.isDag()) {
                             def misPublication = gav[0] + ':' + gav[1] + (gav[2] == null ? (":" + gav[2]) : "")
@@ -166,8 +167,8 @@ class PublicationManager {
 
             if (publication.dependencies.compileOnly != null) {
                 publication.dependencies.compileOnly.each {
-                    if (it instanceof String && it.startsWith('mis-')) {
-                        String[] gav = MisUtil.filterGAV(it.replace('mis-', ''))
+                    if (it instanceof String && it.startsWith(Constants.MODULE_SDK_PRE)) {
+                        String[] gav = MisUtil.filterGAV(it.replace(Constants.MODULE_SDK_PRE, ''))
                         dependencyGraph.add(key, gav[0] + '-' + gav[1])
                         if (!dependencyGraph.isDag()) {
                             def misPublication = gav[0] + ':' + gav[1] + (gav[2] == null ? (":" + gav[2]) : "")

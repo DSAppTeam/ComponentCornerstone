@@ -1,6 +1,18 @@
 package com.plugin.module.utils
 
+import com.plugin.module.Constants
+
 class FileUtil {
+
+    /**
+     * 是否是有效目标文件
+     * @param file
+     * @return
+     */
+    static boolean isValidPackSource(File file){
+        return file != null &&
+                (file.name.endsWith(Constants.JAVA_FILE_END) || file.name.endsWith(Constants.KOTLIN_FILE_END))
+    }
 
     /**
      * 复制文件

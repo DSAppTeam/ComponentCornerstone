@@ -2,6 +2,12 @@ package com.plugin.module
 
 class Constants{
 
+    public static JAVA_FILE_END = ".java"
+    public static KOTLIN_FILE_END = ".kotlin"
+
+    public static String MODULE_SDK_PRE = 'mis-'
+    public static String BUILD_MODULE_SDK_DIR = 'build/mis'
+
     public static String TAG = "AlonePlugin"
     public static String DEFAULT_APP_NAME = "app"       //默认是app，直接运行assembleRelease的时候，等同于运行app:assembleRelease
 

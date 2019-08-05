@@ -1,5 +1,7 @@
 package com.plugin.module.utils
 
+import com.plugin.module.Constants
+import com.plugin.module.extension.ModuleRuntime
 import com.plugin.module.extension.module.CompileOptions
 import com.plugin.module.extension.publication.Publication
 import org.gradle.api.GradleException
@@ -330,5 +332,111 @@ class JarUtil {
         }
         zip.close()
         return jarFile.absolutePath
+    }
+
+    static void handleMavenJar(Project project, Publication publication) {
+        File target = new File(ModuleRuntime.misDir, Constants.MODULE_SDK_PRE + publication.groupId + '-' + publication.artifactId + '.jar')
+        if (publication.invalid) {
+            ModuleRuntime.publicationManager.addPublication(publication)
+            if (target.exists()) {
+                target.delete()
+            }
+            return
+        }
+
+        boolean hasModifiedSource = ModuleRuntime.publicationManager.hasModified(publication)
+
+        if (target.exists()) {
+            if (hasModifiedSource) {
+                def releaseJar = JarUtil.packJavaSourceJar(project, publication, ModuleRuntime.androidJarPath, ModuleRuntime.sModuleExtension.compileOptions, true)
+                if (releaseJar == null) {
+                    publication.invalid = true
+                    ModuleRuntime.publicationManager.addPublication(publication)
+                    if (target.exists()) {
+                        target.delete()
+                    }
+                    return
+                }
+                FileUtil.copyFile(releaseJar, target)
+            }
+            publication.invalid = false
+            publication.useLocal = true
+            ModuleRuntime.publicationManager.addPublication(publication)
+        } else if (!hasModifiedSource) {
+            Publication lastPublication = ModuleRuntime.publicationManager.getPublication(publication.groupId, publication.artifactId)
+            if (lastPublication.version != publication.version) {
+                publication.versionNew = publication.version
+                publication.version = lastPublication.version
+            }
+            publication.invalid = false
+            publication.useLocal = false
+            ModuleRuntime.publicationManager.addPublication(publication)
+            return
+        } else {
+            def releaseJar = JarUtil.packJavaSourceJar(project, publication, ModuleRuntime.androidJarPath, ModuleRuntime.sModuleExtension.compileOptions, false)
+            if (releaseJar == null) {
+                publication.invalid = true
+                ModuleRuntime.publicationManager.addPublication(publication)
+                if (target.exists()) {
+                    target.delete()
+                }
+                return
+            }
+
+            Publication lastPublication = ModuleRuntime.publicationManager.getPublication(publication.groupId, publication.artifactId)
+            if (lastPublication == null) {
+                lastPublication = publication
+            }
+            boolean equals = JarUtil.compareMavenJar(project, lastPublication, releaseJar.absolutePath)
+            if (equals) {
+                if (target.exists()) {
+                    target.delete()
+                }
+                publication.useLocal = false
+            } else {
+                releaseJar = JarUtil.packJavaSourceJar(project, publication, ModuleRuntime.androidJarPath, ModuleRuntime.sModuleExtension.compileOptions, true)
+                FileUtil.copyFile(releaseJar, target)
+                publication.useLocal = true
+            }
+            publication.invalid = false
+            ModuleRuntime.publicationManager.addPublication(publication)
+        }
+    }
+
+    static void handleLocalJar(Project project, Publication publication) {
+        File target = new File(ModuleRuntime.misDir, Constants.MODULE_SDK_PRE + publication.groupId + '-' + publication.artifactId + '.jar')
+
+        if (publication.invalid) {
+            ModuleRuntime.publicationManager.addPublication(publication)
+            if (target.exists()) {
+                target.delete()
+            }
+            return
+        }
+
+        if (target.exists()) {
+            boolean hasModifiedSource = ModuleRuntime.publicationManager.hasModified(publication)
+            if (!hasModifiedSource) {
+                publication.invalid = false
+                publication.useLocal = true
+                ModuleRuntime.publicationManager.addPublication(publication)
+                return
+            }
+        }
+
+        File releaseJar = JarUtil.packJavaSourceJar(project, publication, ModuleRuntime.androidJarPath, ModuleRuntime.sModuleExtension.compileOptions, true)
+        if (releaseJar == null) {
+            publication.invalid = true
+            ModuleRuntime.publicationManager.addPublication(publication)
+            if (target.exists()) {
+                target.delete()
+            }
+            return
+        }
+
+        FileUtil.copyFile(releaseJar, target)
+        publication.invalid = false
+        publication.useLocal = true
+        ModuleRuntime.publicationManager.addPublication(publication)
     }
 }

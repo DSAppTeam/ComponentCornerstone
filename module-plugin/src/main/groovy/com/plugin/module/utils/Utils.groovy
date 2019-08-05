@@ -17,7 +17,6 @@ import java.util.regex.Pattern
 
 class Utils {
 
-
     /**
      * 根据当前的task，获取要运行的组件，规则如下：
      * assembleRelease ---app
