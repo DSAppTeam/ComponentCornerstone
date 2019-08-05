@@ -6,34 +6,25 @@ import com.plugin.module.extension.module.AloneConfiguration
 import com.plugin.module.extension.module.AssembleTask
 import com.plugin.module.extension.module.Dependencies
 import com.plugin.module.extension.ModuleExtension
-import com.plugin.module.extension.module.SourceFile
-import com.plugin.module.extension.module.SourceSet
 import com.plugin.module.listener.OnModuleExtensionListener
 import com.plugin.module.extension.publication.Publication
 import com.plugin.module.extension.publication.PublicationManager
 import com.plugin.module.transform.CodeTransform
-import com.plugin.module.utils.FileUtil
 import com.plugin.module.utils.JarUtil
 import com.plugin.module.utils.MisUtil
+import com.plugin.module.utils.PublicationUtil
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.publish.maven.MavenPublication
 
 /**
  *   ./gradlew --no-daemon ModulePlugin  -Dorg.gradle.debug=true
  */
 class ModulePlugin implements Plugin<Project> {
 
-    static File misDir
-    public static ModuleExtension sModuleExtension
-    static String androidJarPath
-    static PublicationManager publicationManager
-    Project project
-
     @Override
     void apply(Project project) {
-        this.project = project;
-        if (project == project.rootProject) {
+        boolean isRoot = project == project.rootProject
+        if (isRoot) {
             handleRootProject(project)
         } else {
             handleProject(project)
@@ -127,21 +118,21 @@ class ModulePlugin implements Plugin<Project> {
         //解析 misPublication(xxxx) 中的字符串转化为 maven 格式
         project.dependencies.metaClass.misPublication { Object value ->
             String[] gav = MisUtil.filterGAV(value)
-            return getPublication(gav[0], gav[1])
+            return PublicationUtil.getPublication(gav[0], gav[1])
         }
 
         //获取当前project 可能依赖scope 使用的 misPublication(xxxx)，转化为 implementation
-        List<Publication> publications = publicationManager.getPublicationByProject(project)
+        List<Publication> publications = ModuleRuntime.publicationManager.getPublicationByProject(project)
         project.dependencies {
             publications.each {
-                implementation getPublication(it.groupId, it.artifactId)
+                implementation PublicationUtil.getPublication(it.groupId, it.artifactId)
             }
         }
 
         //添加每一个 publication 的依赖
         if (project.gradle.startParameter.taskNames.isEmpty()) {
             publications.each {
-                addPublicationDependencies(it)
+                PublicationUtil.addPublicationDependencies(project, it)
             }
         }
 
@@ -150,12 +141,8 @@ class ModulePlugin implements Plugin<Project> {
             //调整sourceSet
             MisUtil.addMisSourceSets(project)
 
-//            if(needAloneSourceSrt){
-//                MisUtil.addAloneSourceSet(project)
-//            }
 
-
-            List<Publication> publicationList = publicationManager.getPublicationByProject(project)
+            List<Publication> publicationList = ModuleRuntime.publicationManager.getPublicationByProject(project)
 
             List<Publication> publicationPublishList = new ArrayList<>()
             publicationList.each {
@@ -167,51 +154,51 @@ class ModulePlugin implements Plugin<Project> {
             if (publicationPublishList.size() > 0) {
                 project.plugins.apply('maven-publish')
                 def publishing = project.extensions.getByName('publishing')
-                if (sModuleExtension.configure != null) {
-                    publishing.repositories sModuleExtension.configure
+                if (ModuleRuntime.sModuleExtension.configure != null) {
+                    publishing.repositories ModuleRuntime.sModuleExtension.configure
                 }
 
                 publicationPublishList.each {
-                    createPublishTask(it)
+                    PublicationUtil.createPublishTask(project, it)
                 }
             }
         }
     }
 
     /**
-     * 处理root peoject
+     * 1. 初始化 mis-sdk/manifest 文件
+     * 2. 读取 module.gradle 配置完成子project信息 module-plugin 所需要信息手机
      * @param project
      */
     private void handleRootProject(Project project) {
-        //重置 .gradle/mis 文件
-        misDir = new File(project.projectDir, '.gradle/mis')
-        if (!misDir.exists()) {
-            misDir.mkdirs()
+
+        ModuleRuntime.misDir = new File(project.projectDir, '.gradle/mis')
+        if (!ModuleRuntime.misDir.exists()) {
+            ModuleRuntime.misDir.mkdirs()
         }
         project.gradle.getStartParameter().taskNames.each {
             if (it == 'clean') {
-                if (!misDir.deleteDir()) {
-                    throw new RuntimeException("unable to delete dir " + misDir.absolutePath)
+                if (!ModuleRuntime.misDir.deleteDir()) {
+                    throw new RuntimeException("unable to delete dir " + ModuleRuntime.misDir.absolutePath)
                 }
-                misDir.mkdirs()
+                ModuleRuntime.misDir.mkdirs()
             }
         }
         project.repositories {
             flatDir {
-                dirs misDir.absolutePath
+                dirs ModuleRuntime.misDir.absolutePath
             }
         }
 
         //读取 manifest
-        publicationManager = PublicationManager.getInstance()
-        publicationManager.loadManifest(project, misDir)
-
-        sModuleExtension = project.getExtensions().create("module", ModuleExtension, new OnModuleExtensionListener() {
+        ModuleRuntime.publicationManager = PublicationManager.getInstance()
+        ModuleRuntime.publicationManager.loadManifest(project, ModuleRuntime.misDir)
+        ModuleRuntime.sModuleExtension = project.getExtensions().create("module", ModuleExtension, new OnModuleExtensionListener() {
 
             @Override
             void onPublicationAdded(Project childProject, Publication publication) {
-                initPublication(childProject, publication)
-                publicationManager.addDependencyGraph(publication)
+                PublicationUtil.initPublication(childProject, publication)
+                ModuleRuntime.publicationManager.addDependencyGraph(publication)
                 ModuleRuntime.publicationMap.put(childProject.name, publication)
             }
 
@@ -226,18 +213,18 @@ class ModulePlugin implements Plugin<Project> {
             Project childProject = it
             childProject.repositories {
                 flatDir {
-                    dirs misDir.absolutePath
+                    dirs ModuleRuntime.misDir.absolutePath
                 }
             }
         }
 
         project.afterEvaluate {
 
-            androidJarPath = MisUtil.getAndroidJarPath(project, sModuleExtension.compileSdkVersion)
+            ModuleRuntime.androidJarPath = MisUtil.getAndroidJarPath(project, ModuleRuntime.sModuleExtension.compileSdkVersion)
 
             Dependencies.metaClass.misPublication { String value ->
                 String[] gav = MisUtil.filterGAV(value)
-                return 'mis-' + gav[0] + ':' + gav[1] + ':' + gav[2]
+                return Constants.MODULE_SDK_PRE + gav[0] + ':' + gav[1] + ':' + gav[2]
             }
 
             project.allprojects.each {
@@ -245,300 +232,29 @@ class ModulePlugin implements Plugin<Project> {
                 Project childProject = it
                 def misScript = new File(childProject.projectDir, 'module.gradle')
                 if (misScript.exists()) {
-                    sModuleExtension.currentChildProject = childProject
+                    ModuleRuntime.sModuleExtension.currentChildProject = childProject
                     project.apply from: misScript
                 }
             }
 
-            List<String> topSort = publicationManager.dependencyGraph.topSort()
+            List<String> topSort = ModuleRuntime.publicationManager.dependencyGraph.topSort()
             Collections.reverse(topSort)
             topSort.each {
-                Publication publication = publicationManager.publicationDependencies.get(it)
+                Publication publication = ModuleRuntime.publicationManager.publicationDependencies.get(it)
                 if (publication == null) {
                     return
                 }
 
                 Project childProject = project.findProject(publication.project)
-                filterPublicationDependencies(publication)
+                PublicationUtil.filterPublicationDependencies(publication)
                 if (publication.version != null) {
-                    handleMavenJar(childProject, publication)
+                    JarUtil.handleMavenJar(childProject, publication)
                 } else {
-                    handleLocalJar(childProject, publication)
+                    JarUtil.handleLocalJar(childProject, publication)
                 }
-                publicationManager.hitPublication(publication)
+                ModuleRuntime.publicationManager.hitPublication(publication)
             }
 
         }
     }
-
-
-    def filterPublicationDependencies(Publication publication) {
-        if (publication.dependencies != null) {
-            if (publication.dependencies.compileOnly != null) {
-                List<Object> compileOnly = new ArrayList<>()
-                publication.dependencies.compileOnly.each {
-                    if (it instanceof String && it.startsWith('mis-')) {
-                        String[] gav = MisUtil.filterGAV(it.replace('mis-', ''))
-                        Publication existPublication = publicationManager.getPublicationByKey(gav[0] + '-' + gav[1])
-                        if (existPublication != null) {
-                            if (existPublication.useLocal) {
-                                compileOnly.add(':mis-' + existPublication.groupId + '-' + existPublication.artifactId + ':')
-                            } else {
-                                compileOnly.add(existPublication.groupId + ':' + existPublication.artifactId + ':' + existPublication.version)
-                            }
-                        }
-                    } else {
-                        compileOnly.add(it)
-                    }
-                }
-                publication.dependencies.compileOnly = compileOnly
-            }
-            if (publication.dependencies.implementation != null) {
-                List<Object> implementation = new ArrayList<>()
-                publication.dependencies.implementation.each {
-                    if (it instanceof String && it.startsWith('mis-')) {
-                        String[] gav = MisUtil.filterGAV(it.replace('mis-', ''))
-                        Publication existPublication = publicationManager.getPublicationByKey(gav[0] + '-' + gav[1])
-                        if (existPublication != null) {
-                            if (existPublication.useLocal) {
-                                implementation.add(':mis-' + existPublication.groupId + '-' + existPublication.artifactId + ':')
-                            } else {
-                                implementation.add(existPublication.groupId + ':' + existPublication.artifactId + ':' + existPublication.version)
-                            }
-                        }
-                    } else {
-                        implementation.add(it)
-                    }
-                }
-                publication.dependencies.implementation = implementation
-            }
-        }
-    }
-
-    def handleLocalJar(Project project, Publication publication) {
-        File target = new File(misDir, 'mis-' + publication.groupId + '-' + publication.artifactId + '.jar')
-
-        if (publication.invalid) {
-            publicationManager.addPublication(publication)
-            if (target.exists()) {
-                target.delete()
-            }
-            return
-        }
-
-        if (target.exists()) {
-            boolean hasModifiedSource = publicationManager.hasModified(publication)
-            if (!hasModifiedSource) {
-                publication.invalid = false
-                publication.useLocal = true
-                publicationManager.addPublication(publication)
-                return
-            }
-        }
-
-        File releaseJar = JarUtil.packJavaSourceJar(project, publication, androidJarPath, sModuleExtension.compileOptions, true)
-        if (releaseJar == null) {
-            publication.invalid = true
-            publicationManager.addPublication(publication)
-            if (target.exists()) {
-                target.delete()
-            }
-            return
-        }
-
-        FileUtil.copyFile(releaseJar, target)
-        publication.invalid = false
-        publication.useLocal = true
-        publicationManager.addPublication(publication)
-    }
-
-    def handleMavenJar(Project project, Publication publication) {
-        File target = new File(misDir, 'mis-' + publication.groupId + '-' + publication.artifactId + '.jar')
-        if (publication.invalid) {
-            publicationManager.addPublication(publication)
-            if (target.exists()) {
-                target.delete()
-            }
-            return
-        }
-
-        boolean hasModifiedSource = publicationManager.hasModified(publication)
-
-        if (target.exists()) {
-            if (hasModifiedSource) {
-                def releaseJar = JarUtil.packJavaSourceJar(project, publication, androidJarPath, sModuleExtension.compileOptions, true)
-                if (releaseJar == null) {
-                    publication.invalid = true
-                    publicationManager.addPublication(publication)
-                    if (target.exists()) {
-                        target.delete()
-                    }
-                    return
-                }
-                FileUtil.copyFile(releaseJar, target)
-            }
-            publication.invalid = false
-            publication.useLocal = true
-            publicationManager.addPublication(publication)
-        } else if (!hasModifiedSource) {
-            Publication lastPublication = publicationManager.getPublication(publication.groupId, publication.artifactId)
-            if (lastPublication.version != publication.version) {
-                publication.versionNew = publication.version
-                publication.version = lastPublication.version
-            }
-            publication.invalid = false
-            publication.useLocal = false
-            publicationManager.addPublication(publication)
-            return
-        } else {
-            def releaseJar = JarUtil.packJavaSourceJar(project, publication, androidJarPath, sModuleExtension.compileOptions, false)
-            if (releaseJar == null) {
-                publication.invalid = true
-                publicationManager.addPublication(publication)
-                if (target.exists()) {
-                    target.delete()
-                }
-                return
-            }
-
-            Publication lastPublication = publicationManager.getPublication(publication.groupId, publication.artifactId)
-            if (lastPublication == null) {
-                lastPublication = publication
-            }
-            boolean equals = JarUtil.compareMavenJar(project, lastPublication, releaseJar.absolutePath)
-            if (equals) {
-                if (target.exists()) {
-                    target.delete()
-                }
-                publication.useLocal = false
-            } else {
-                releaseJar = JarUtil.packJavaSourceJar(project, publication, androidJarPath, sModuleExtension.compileOptions, true)
-                FileUtil.copyFile(releaseJar, target)
-                publication.useLocal = true
-            }
-            publication.invalid = false
-            publicationManager.addPublication(publication)
-        }
-    }
-
-    def getPublication(String groupId, String artifactId) {
-        Publication publication = publicationManager.getPublication(groupId, artifactId)
-        if (publication != null) {
-            if (publication.invalid) {
-                return []
-            } else if (publication.useLocal) {
-                return ':mis-' + publication.groupId + '-' + publication.artifactId + ':'
-            } else {
-                return publication.groupId + ':' + publication.artifactId + ':' + publication.version
-            }
-        } else {
-            return []
-        }
-    }
-
-    void addPublicationDependencies(Publication publication) {
-        if (publication.dependencies == null) return
-        project.dependencies {
-            if (publication.dependencies.compileOnly != null) {
-                publication.dependencies.compileOnly.each {
-                    compileOnly it
-                }
-            }
-            if (publication.dependencies.implementation != null) {
-                publication.dependencies.implementation.each {
-                    implementation it
-                }
-            }
-        }
-    }
-
-
-    void createPublishTask(Publication publication) {
-        def taskName = 'compileMis[' + publication.artifactId + ']Source'
-        def compileTask = project.getTasks().findByName(taskName)
-        if (compileTask == null) {
-            compileTask = project.getTasks().create(taskName, CompileMisTask.class)
-            compileTask.publication = publication
-            compileTask.dependsOn 'clean'
-        }
-
-        def publicationName = 'Mis[' + publication.artifactId + ']'
-        String publishTaskNamePrefix = "publish${publicationName}PublicationTo"
-        project.tasks.whenTaskAdded {
-            if (it.name.startsWith(publishTaskNamePrefix)) {
-                it.dependsOn compileTask
-                it.doLast {
-                    new File(misDir, 'mis-' + publication.groupId + '-' + publication.artifactId + '.jar').delete()
-                }
-            }
-        }
-        createPublishingPublication(publication, publicationName)
-    }
-
-    void createPublishingPublication(Publication publication, String publicationName) {
-        def publishing = project.extensions.getByName('publishing')
-        MavenPublication mavenPublication = publishing.publications.maybeCreate(publicationName, MavenPublication)
-        mavenPublication.groupId = publication.groupId
-        mavenPublication.artifactId = publication.artifactId
-        mavenPublication.version = publication.versionNew != null ? publication.versionNew : publication.version
-        mavenPublication.pom.packaging = 'jar'
-
-        def outputsDir = new File(publication.buildDir, "outputs")
-        mavenPublication.artifact source: new File(outputsDir, "classes.jar")
-        mavenPublication.artifact source: new File(outputsDir, "classes-source.jar"), classifier: 'sources'
-
-        if (publication.dependencies != null) {
-            mavenPublication.pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-                if (publication.dependencies.implementation != null) {
-                    publication.dependencies.implementation.each {
-                        def gav = it.split(":")
-                        if (gav[1].startsWith('mis-')) {
-                            Publication dependencyPublication = publicationManager.getPublicationByKey(gav[1].replace('mis-', ''))
-                            if (dependencyPublication.useLocal) {
-                                throw new RuntimeException("mis publication [$dependencyPublication.groupId:$dependencyPublication.artifactId] has not publish yet.")
-                            }
-                        }
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', gav[0])
-                        dependencyNode.appendNode('artifactId', gav[1])
-                        dependencyNode.appendNode('version', gav[2])
-                        dependencyNode.appendNode('scope', 'implementation')
-                    }
-                }
-            }
-        }
-
-    }
-
-    void initPublication(Project project, Publication publication) {
-        String displayName = project.getDisplayName()
-        publication.project = displayName.substring(displayName.indexOf("'") + 1, displayName.lastIndexOf("'"))
-        def buildMis = new File(project.projectDir, 'build/mis')
-
-        publication.sourceSetName = publication.name
-        publication.buildDir = new File(buildMis, publication.name)
-
-        SourceSet misSourceSet = new SourceSet()
-        def misDir
-        if (publication.sourceSetName.contains('/')) {
-            misDir = new File(project.projectDir, publication.sourceSetName + '/mis/')
-        } else {
-            misDir = new File(project.projectDir, 'src/' + publication.sourceSetName + '/mis/')
-        }
-        misSourceSet.path = misDir.absolutePath
-        misSourceSet.lastModifiedSourceFile = new HashMap<>()
-        project.fileTree(misDir).each {
-            if (it.name.endsWith('.java') || it.name.endsWith('.kt')) {
-                SourceFile sourceFile = new SourceFile()
-                sourceFile.path = it.path
-                sourceFile.lastModified = it.lastModified()
-                misSourceSet.lastModifiedSourceFile.put(sourceFile.path, sourceFile)
-            }
-        }
-
-        publication.misSourceSet = misSourceSet
-        publication.invalid = misSourceSet.lastModifiedSourceFile.isEmpty()
-    }
-
 }
