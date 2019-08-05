@@ -17,61 +17,8 @@ import java.util.regex.Pattern
 
 class Utils {
 
-    /**
-     * 根据当前的task，获取要运行的组件，规则如下：
-     * assembleRelease ---app
-     * app:assembleRelease :app:assembleRelease ---app
-     * sharecomponent:assembleRelease :sharecomponent:assembleRelease ---sharecomponent
-     *
-     * @param assembleTask
-     * @param project
-     * @param assembleTask
-     * @return
-     */
-    static String parseMainModuleName(@Nonnull Project project, @Nonnull AssembleTask assembleTask) {
-        String compileModule = "app";
-        //需要在根目录 gradle.properties 中设置 mainmodulename
-        if (!project.getRootProject().hasProperty(Constants.PROPERTIES_MAIN_MODULE_NAME)) {
-            throw new RuntimeException("you should set compilemodule in rootproject's gradle.properties");
-        }
-        if (assembleTask.modules.size() > 0 && assembleTask.modules.get(0) != null
-                && assembleTask.modules.get(0).trim().length() > 0
-                && !assembleTask.modules.get(0).equals("all")) {
-            compileModule = assembleTask.modules.get(0)
-        } else {
-            compileModule = (String) project.getRootProject().findProperty(Constants.PROPERTIES_MAIN_MODULE_NAME);
-        }
-        if (compileModule == null || compileModule.trim().length() <= 0) {
-            compileModule = "app";
-        }
-        return compileModule;
-    }
 
-    static AssembleTask parseTaskInfo(@Nonnull List<String> taskNames) {
-        AssembleTask assembleTask = new AssembleTask()
-        if (!taskNames.isEmpty()) {
-            for (String task : taskNames) {
-                Logger.buildOutput("task(" + task + ")");
-                if (task.toUpperCase().contains("ASSEMBLE")
-                        || task.contains("aR")
-                        || task.contains("asR")
-                        || task.contains("asD")
-                        || task.toUpperCase().contains("TINKER")
-                        || task.toUpperCase().contains("INSTALL")
-                        || task.toUpperCase().contains("RESGUARD")) {
-                    if (task.toUpperCase().contains("DEBUG")) {
-                        assembleTask.isDebug = true;
-                    }
-                    Logger.buildOutput("task is debug (" + assembleTask.isDebug + ")");
-                    assembleTask.isAssemble = true;
-                    String[] strs = task.split(":");
-                    assembleTask.modules.add(strs.length > 1 ? strs[strs.length - 2] : "all");
-                    break;
-                }
-            }
-        }
-        return assembleTask;
-    }
+
 
     /**
      * 自动添加依赖，只在运行assemble任务的才会添加依赖，因此在开发期间组件之间是完全感知不到的，这是做到完全隔离的关键
