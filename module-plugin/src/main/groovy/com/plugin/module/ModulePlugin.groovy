@@ -12,6 +12,7 @@ import com.plugin.module.extension.publication.PublicationManager
 import com.plugin.module.transform.CodeTransform
 import com.plugin.module.utils.JarUtil
 import com.plugin.module.utils.MisUtil
+import com.plugin.module.utils.ProjectUtil
 import com.plugin.module.utils.PublicationUtil
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -37,46 +38,34 @@ class ModulePlugin implements Plugin<Project> {
      */
     private void handleProject(Project project) {
 
-        String compileModule = Constants.DEFAULT_APP_NAME
+        String compileModule = Constants.DEFAULT_MAIN_MODULE_NAME
 
-        //获取运行task名称
-        String taskNames = project.gradle.startParameter.taskNames.toString()
-        Logger.buildOutput("taskNames is " + taskNames)
+        String taskNames = ProjectUtil.getTaskName(project)
+        String module = ProjectUtil.getModuleName(project)
 
-        //获取运行模块名称
-        String module = project.path.replace(":", "")
-        Logger.buildOutput("current module is " + module)
 
-        //解析AssembleTask
-        Logger.buildOutput("startParameter.taskNames is " + project.gradle.startParameter.taskNames)
-        AssembleTask assembleTask = com.plugin.module.utils.Utils.parseTaskInfo(project.gradle.startParameter.taskNames)
+        AssembleTask assembleTask = ProjectUtil.parseTaskInfo(ProjectUtil.getTasks(project))
+
         if (assembleTask.isAssemble) {
-            compileModule = com.plugin.module.utils.Utils.parseMainModuleName(project, assembleTask)
-            Logger.buildOutput("compile module is : " + compileModule)
+            compileModule = ProjectUtil.parseMainModuleName(project, assembleTask)
+            Logger.buildOutput("compileModule", compileModule)
         }
 
-        //需要在特定的模块中声明 isRunAlone，用于判断是否单独运行
-        if (!project.hasProperty(Constants.PROPERTIES_ISRUNALONE)) {
-            throw new RuntimeException("you should set isRunAlone in " + module + "'s gradle.properties")
-        }
+        Logger.buildOutput("taskNames", taskNames)
+        Logger.buildOutput("module", module)
+        Logger.buildOutput("isAssemble", assembleTask.isAssemble)
 
 
-        boolean isRunAlone = Boolean.parseBoolean((project.properties.get("isRunAlone")))
-        String mainModuleName = project.rootProject.property(Constants.PROPERTIES_MAIN_MODULE_NAME)
+        boolean isRunAlone = ProjectUtil.isRunalone(project)
+        Logger.buildOutput("runalone", isRunAlone)
 
-
-        //当且仅当 isRunAlone 为ture需要判断
         if (isRunAlone && assembleTask.isAssemble) {
-            //如果运行的模块就是app模块，或者当前运行的模块就是我们配置的mainmodulename，则默认需要单独运行，其他组件强制修改为false
             if (module.equals(compileModule)) {
                 isRunAlone = true
             } else {
                 isRunAlone = false
             }
         }
-        project.setProperty("isRunAlone", isRunAlone)
-        Logger.buildOutput("setProperty isRunAlone(" + isRunAlone + ")")
-        boolean needAloneSourceSrt = false
 
         //根据配置添加各种组件依赖，并且自动化生成组件加载代码
         if (isRunAlone) {
@@ -84,9 +73,7 @@ class ModulePlugin implements Plugin<Project> {
             Logger.buildOutput("project.apply plugin: com.android.application")
 
             //对于组件，则需要读取alone目录进行运行
-            if (!module.equals(mainModuleName)) {
-                needAloneSourceSrt = true;
-
+            if (!module.equals(ProjectUtil.mainModuleName)) {
                 project.android.sourceSets {
                     main {
                         manifest.srcFile Constants.AFTER_MANIFEST_PATH
@@ -96,13 +83,12 @@ class ModulePlugin implements Plugin<Project> {
                         jniLibs.srcDirs = [Constants.JNILIBS_PATH, Constants.AFTER_JNILIBS_PATH]
                     }
                 }
-
             }
             if (assembleTask.isAssemble && module.equals(compileModule)) {
-                com.plugin.module.utils.Utils.compileComponents(project, assembleTask)
+//                com.plugin.module.utils.Utils.compileComponents(project, assembleTask)
                 //参考https://github.com/luojilab/DDComponentForAndroid/issues/122
-                project.extensions.findByType(BaseExtension.class).registerTransform(new CodeTransform(project));
-//                project.android.registerTransform(new CodeTransform(project))
+                //                project.android.registerTransform(new CodeTransform(project))
+                project.extensions.findByType(BaseExtension.class).registerTransform(new CodeTransform(project))
             }
         } else {
             project.apply plugin: Constants.PLUGIN_LIBRARY
@@ -110,26 +96,17 @@ class ModulePlugin implements Plugin<Project> {
         }
 
 
-//        if (!MisUtil.hasAndroidPlugin(project)) {
-//            throw new GradleException("The android or android-library plugin must be applied to the project.")
-//        }
-
-
-        //解析 misPublication(xxxx) 中的字符串转化为 maven 格式
         project.dependencies.metaClass.misPublication { Object value ->
             String[] gav = MisUtil.filterGAV(value)
             return PublicationUtil.getPublication(gav[0], gav[1])
         }
 
-        //获取当前project 可能依赖scope 使用的 misPublication(xxxx)，转化为 implementation
         List<Publication> publications = ModuleRuntime.publicationManager.getPublicationByProject(project)
         project.dependencies {
             publications.each {
                 implementation PublicationUtil.getPublication(it.groupId, it.artifactId)
             }
         }
-
-        //添加每一个 publication 的依赖
         if (project.gradle.startParameter.taskNames.isEmpty()) {
             publications.each {
                 PublicationUtil.addPublicationDependencies(project, it)
@@ -138,12 +115,8 @@ class ModulePlugin implements Plugin<Project> {
 
 
         project.afterEvaluate {
-            //调整sourceSet
             MisUtil.addMisSourceSets(project)
-
-
             List<Publication> publicationList = ModuleRuntime.publicationManager.getPublicationByProject(project)
-
             List<Publication> publicationPublishList = new ArrayList<>()
             publicationList.each {
                 if (it.version != null) {
@@ -175,25 +148,29 @@ class ModulePlugin implements Plugin<Project> {
         ModuleRuntime.misDir = new File(project.projectDir, '.gradle/mis')
         if (!ModuleRuntime.misDir.exists()) {
             ModuleRuntime.misDir.mkdirs()
+            Logger.buildOutput("create File[" + ModuleRuntime.misDir.name + "]")
         }
-        project.gradle.getStartParameter().taskNames.each {
+
+        ProjectUtil.getTasks(project).each {
             if (it == 'clean') {
                 if (!ModuleRuntime.misDir.deleteDir()) {
                     throw new RuntimeException("unable to delete dir " + ModuleRuntime.misDir.absolutePath)
                 }
                 ModuleRuntime.misDir.mkdirs()
-            }
-        }
-        project.repositories {
-            flatDir {
-                dirs ModuleRuntime.misDir.absolutePath
+                Logger.buildOutput("reset File[" + ModuleRuntime.misDir.name + "]")
             }
         }
 
-        //读取 manifest
+        project.repositories {
+            flatDir {
+                dirs ModuleRuntime.misDir.absolutePath
+                Logger.buildOutput(project.name + "-flatDir Dir[" + ModuleRuntime.misDir.absolutePath + "]")
+            }
+        }
+
         ModuleRuntime.publicationManager = PublicationManager.getInstance()
         ModuleRuntime.publicationManager.loadManifest(project, ModuleRuntime.misDir)
-        ModuleRuntime.sModuleExtension = project.getExtensions().create("module", ModuleExtension, new OnModuleExtensionListener() {
+        ModuleRuntime.sModuleExtension = project.getExtensions().create(Constants.EXTENSION_NAME, ModuleExtension, new OnModuleExtensionListener() {
 
             @Override
             void onPublicationAdded(Project childProject, Publication publication) {
@@ -214,6 +191,7 @@ class ModulePlugin implements Plugin<Project> {
             childProject.repositories {
                 flatDir {
                     dirs ModuleRuntime.misDir.absolutePath
+                    Logger.buildOutput(childProject.name + "-flatDir Dir[" + ModuleRuntime.misDir.absolutePath + "]")
                 }
             }
         }
@@ -221,6 +199,7 @@ class ModulePlugin implements Plugin<Project> {
         project.afterEvaluate {
 
             ModuleRuntime.androidJarPath = MisUtil.getAndroidJarPath(project, ModuleRuntime.sModuleExtension.compileSdkVersion)
+            Logger.buildOutput("androidJarPath", ModuleRuntime.androidJarPath)
 
             Dependencies.metaClass.misPublication { String value ->
                 String[] gav = MisUtil.filterGAV(value)
@@ -230,10 +209,11 @@ class ModulePlugin implements Plugin<Project> {
             project.allprojects.each {
                 if (it == project) return
                 Project childProject = it
-                def misScript = new File(childProject.projectDir, 'module.gradle')
-                if (misScript.exists()) {
+                def moduleScript = new File(childProject.projectDir, 'module.gradle')
+                if (moduleScript.exists()) {
                     ModuleRuntime.sModuleExtension.currentChildProject = childProject
-                    project.apply from: misScript
+                    Logger.buildOutput("apply childProject(" + childProject.name + ")'s module.gradle")
+                    project.apply from: moduleScript
                 }
             }
 
@@ -254,7 +234,6 @@ class ModulePlugin implements Plugin<Project> {
                 }
                 ModuleRuntime.publicationManager.hitPublication(publication)
             }
-
         }
     }
 }

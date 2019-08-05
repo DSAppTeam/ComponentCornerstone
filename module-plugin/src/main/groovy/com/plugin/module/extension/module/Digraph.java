@@ -156,7 +156,7 @@ public class Digraph<V> {
 //    /**
 //     * Main program (for testing).
 //     */
-//    public static void main (String[] args) {
+//    public static void mainModuleName (String[] args) {
 //        // Create a Graph with Integer nodes
 //        Digraph<Integer> graph = new Digraph<Integer>();
 //        graph.add(0, 1); graph.add(0, 2); graph.add(0, 3);

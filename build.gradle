@@ -66,10 +66,11 @@ task clean(type: Delete) {
 
 apply plugin: 'com.android.module'
 
-
 module {
 
     compileSdkVersion 27
+
+    mainModuleName 'app'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

@@ -12,6 +12,7 @@ import org.gradle.util.ConfigureUtil
 
 class ModuleExtension {
 
+    String mainModuleName
     int compileSdkVersion                           //编译版本
     CompileOptions compileOptions                   //编译选项
     Action<? super RepositoryHandler> configure     //仓库配置
@@ -36,6 +37,10 @@ class ModuleExtension {
 
     void compileSdkVersion(int version) {
         compileSdkVersion = version
+    }
+
+    void mainModuleName(String mainModuleName) {
+        mainModuleName = mainModuleName
     }
 
     void publications(Closure closure) {
