@@ -1,9 +1,9 @@
 module {
 
     runalone {
-        main {
+        ":library" {
             applicationName 'com.plugin.library.LibraryApplication'
-            isRegisterComponentAuto  true
+            isRegisterComponentAuto true
             runAlone true
         }
     }

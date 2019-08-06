@@ -17,7 +17,7 @@ class ModuleExtension {
     CompileOptions compileOptions                   //编译选项
     Action<? super RepositoryHandler> configure     //仓库配置
     Project currentChildProject                     //子项目
-    OnModuleExtensionListener listener               //发布监听器
+    OnModuleExtensionListener listener              //发布监听器
     Map<String, Publication> publicationMap         //发布信息
 
 
@@ -39,8 +39,8 @@ class ModuleExtension {
         compileSdkVersion = version
     }
 
-    void mainModuleName(String mainModuleName) {
-        mainModuleName = mainModuleName
+    void mainModuleName(String name) {
+        mainModuleName = name
     }
 
     void publications(Closure closure) {

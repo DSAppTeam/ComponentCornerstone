@@ -83,13 +83,15 @@ class ModulePlugin implements Plugin<Project> {
                         jniLibs.srcDirs = [Constants.JNILIBS_PATH, Constants.AFTER_JNILIBS_PATH]
                     }
                 }
-            }
-            if (assembleTask.isAssemble && module.equals(compileModule)) {
+
+                if (assembleTask.isAssemble && module.equals(compileModule)) {
 //                com.plugin.module.utils.Utils.compileComponents(project, assembleTask)
-                //参考https://github.com/luojilab/DDComponentForAndroid/issues/122
-                //                project.android.registerTransform(new CodeTransform(project))
-                project.extensions.findByType(BaseExtension.class).registerTransform(new CodeTransform(project))
+                    //参考https://github.com/luojilab/DDComponentForAndroid/issues/122
+                    //                project.android.registerTransform(new CodeTransform(project))
+                    project.extensions.findByType(BaseExtension.class).registerTransform(new CodeTransform(project))
+                }
             }
+
         } else {
             project.apply plugin: Constants.PLUGIN_LIBRARY
             Logger.buildOutput("project.apply plugin: com.android.library")

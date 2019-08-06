@@ -10,7 +10,7 @@ import javax.annotation.Nonnull
 
 class ProjectUtil {
 
-    static boolean getMainModuleName() {
+    static String getMainModuleName() {
         String name = ModuleRuntime.sModuleExtension.mainModuleName
         if (name == null || name.isEmpty()) {
             return Constants.DEFAULT_MAIN_MODULE_NAME
@@ -19,10 +19,13 @@ class ProjectUtil {
     }
 
     static boolean isRunalone(Project project) {
+        if ((getModuleName(project)) == getMainModuleName()) {
+            return true
+        }
         return ModuleRuntime.aloneRunMap.get(project.name).runAlone
     }
 
-    static List<String> getTasks(Project project){
+    static List<String> getTasks(Project project) {
         return project.gradle.getStartParameter().taskNames
     }
 
