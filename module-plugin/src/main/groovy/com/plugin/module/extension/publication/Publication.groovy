@@ -16,7 +16,7 @@ class Publication {
     String groupId                      //依赖分组id
     String artifactId                   //依赖id
     String version                      //依赖版本
-    String localProject                      //依赖版本
+    String localProject                 //依赖版本
 
     String versionNew
 
@@ -29,7 +29,7 @@ class Publication {
     boolean useLocal                    //是否使用本地jar
 
     Publication(final String name) {
-        this.name = name
+        this.name = "main"
     }
 
     void groupId(String groupId) {
