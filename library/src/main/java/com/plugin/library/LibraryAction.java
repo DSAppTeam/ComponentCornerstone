@@ -1,6 +1,6 @@
 package com.plugin.library;
 
-public class Action implements IAction {
+public class LibraryAction implements IAction {
 
     @Override
     public String getName() {
@@ -8,6 +8,6 @@ public class Action implements IAction {
     }
 }
 
-//public class Action {
+//public class LibraryAction {
 //
 //}

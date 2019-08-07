@@ -16,6 +16,7 @@ class Publication {
     String groupId                      //依赖分组id
     String artifactId                   //依赖id
     String version                      //依赖版本
+    String localProject                      //依赖版本
 
     String versionNew
 
@@ -33,6 +34,10 @@ class Publication {
 
     void groupId(String groupId) {
         this.groupId = groupId
+    }
+
+    void localProject(String name) {
+        this.localProject = name
     }
 
     void artifactId(String artifactId) {

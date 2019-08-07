@@ -2,9 +2,11 @@ package com.plugin.module;
 
 import android.os.Bundle;
 
+import com.effective.android.module.ModuleMamager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.plugin.library.IAction;
+import com.plugin.library.LibraryAction;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -22,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        ModuleMamager.register(IAction.class, new LibraryAction());
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -31,7 +33,13 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-        ((TextView) findViewById(R.id.text)).setText("");
+//        IAction action = new IAction() {
+//            @Override
+//            public String getName() {
+//                return null;
+//            }
+//        }
+        ((TextView) findViewById(R.id.text)).setText(ModuleMamager.getService(IAction.class).getName());
     }
 
     @Override
