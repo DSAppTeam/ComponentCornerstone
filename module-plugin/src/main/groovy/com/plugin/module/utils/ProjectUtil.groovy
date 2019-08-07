@@ -22,6 +22,9 @@ class ProjectUtil {
         if ((getModuleName(project)) == getMainModuleName()) {
             return true
         }
+        if (ModuleRuntime.aloneRunMap.get(project.name) == null) {
+            return false
+        }
         return ModuleRuntime.aloneRunMap.get(project.name).runAlone
     }
 
@@ -88,5 +91,9 @@ class ProjectUtil {
         return compileModule
     }
 
+    static boolean containValidPluginDefine(String string) {
+        return string.contains("apply") &&
+                string.contains("plugin") && (string.contains("com.android.library") || string.contains("com.android.application"))
+    }
 
 }

@@ -1,6 +1,8 @@
 package com.plugin.module
 
+import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.LibraryPlugin
 import com.plugin.module.extension.ModuleRuntime
 import com.plugin.module.extension.module.AloneConfiguration
 import com.plugin.module.extension.module.AssembleTask
@@ -10,6 +12,7 @@ import com.plugin.module.listener.OnModuleExtensionListener
 import com.plugin.module.extension.publication.Publication
 import com.plugin.module.extension.publication.PublicationManager
 import com.plugin.module.transform.CodeTransform
+import com.plugin.module.utils.FileUtil
 import com.plugin.module.utils.JarUtil
 import com.plugin.module.utils.MisUtil
 import com.plugin.module.utils.ProjectUtil
@@ -126,6 +129,8 @@ class ModulePlugin implements Plugin<Project> {
 
 
         project.afterEvaluate {
+            FileUtil.afterEvaluateHandlerBuildScript(project)
+
             MisUtil.addMisSourceSets(project)
             List<Publication> publicationList = ModuleRuntime.publicationManager.getPublicationByProject(project)
             List<Publication> publicationPublishList = new ArrayList<>()
@@ -205,6 +210,17 @@ class ModulePlugin implements Plugin<Project> {
                     Logger.buildOutput(childProject.name + "-flatDir Dir[" + ModuleRuntime.misDir.absolutePath + "]")
                 }
             }
+
+            def buildScript = new File(childProject.projectDir, 'build.gradle')
+            if (buildScript.exists()) {
+                FileUtil.beforeEvaluateHandlerBuildScript(childProject, buildScript)
+            }
+
+            childProject.plugins.whenObjectAdded {
+                if (it instanceof AppPlugin || it instanceof LibraryPlugin) {
+                    childProject.pluginManager.apply('com.android.module')
+                }
+            }
         }
 
         project.afterEvaluate {
@@ -223,7 +239,6 @@ class ModulePlugin implements Plugin<Project> {
                 def moduleScript = new File(childProject.projectDir, 'module.gradle')
                 if (moduleScript.exists()) {
                     ModuleRuntime.sModuleExtension.currentChildProject = childProject
-                    Logger.buildOutput("apply childProject(" + childProject.name + ")'s module.gradle")
                     project.apply from: moduleScript
                 }
             }
@@ -245,6 +260,12 @@ class ModulePlugin implements Plugin<Project> {
                 }
                 ModuleRuntime.publicationManager.hitPublication(publication)
             }
+            ModuleRuntime.publicationManager.saveManifest()
+
+//            project.allprojects.each {
+//                if (it == project) return
+//                it.pluginManager.apply('com.android.module')
+//            }
         }
     }
 }

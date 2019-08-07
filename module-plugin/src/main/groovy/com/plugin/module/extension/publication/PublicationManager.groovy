@@ -49,12 +49,12 @@ class PublicationManager {
         dependencyGraph = new Digraph<String>()
         publicationDependencies = new HashMap<>()
 
-        rootProject.gradle.buildFinished {
-            if (it.failure != null) {
-                return
-            }
-            saveManifest()
-        }
+//        rootProject.gradle.buildFinished {
+//            if (it.failure != null) {
+//                return
+//            }
+//
+//        }
 
         File publicationManifest = new File(misDir, 'publicationManifest.xml')
         if (!publicationManifest.exists()) {
