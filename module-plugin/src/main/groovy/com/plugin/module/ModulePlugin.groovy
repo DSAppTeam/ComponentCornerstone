@@ -100,15 +100,24 @@ class ModulePlugin implements Plugin<Project> {
 
         project.dependencies.metaClass.misPublication { Object value ->
             String[] gav = MisUtil.filterGAV(value)
+            if (isRunAlone && assembleTask.isAssemble) {
+                project.dependencies {
+                    implementation PublicationUtil.getPublication(gav[0], gav[1])
+                }
+                return project.project(':library')
+            }
             return PublicationUtil.getPublication(gav[0], gav[1])
         }
 
+
         List<Publication> publications = ModuleRuntime.publicationManager.getPublicationByProject(project)
+
         project.dependencies {
             publications.each {
-                implementation PublicationUtil.getPublication(it.groupId, it.artifactId)
+                api PublicationUtil.getPublication(it.groupId, it.artifactId)
             }
         }
+
         if (project.gradle.startParameter.taskNames.isEmpty()) {
             publications.each {
                 PublicationUtil.addPublicationDependencies(project, it)

@@ -10,7 +10,8 @@ module {
 
     publications {
         main {
-            groupId 'com.eastwood.demo'
+            localProject 'library'
+            groupId 'com.effective.android'
             artifactId 'library-sdk'
 //            version '1.0.0' // 初次配置时不设置，发布至maven时设置
 

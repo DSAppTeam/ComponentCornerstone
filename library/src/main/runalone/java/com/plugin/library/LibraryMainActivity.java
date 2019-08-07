@@ -12,6 +12,6 @@ public class LibraryMainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_layout);
-        Toast.makeText(this, new Action().getName(), Toast.LENGTH_LONG).show();
+        Toast.makeText(this, new LibraryAction().getName(), Toast.LENGTH_LONG).show();
     }
 }
