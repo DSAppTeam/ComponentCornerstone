@@ -1,5 +1,4 @@
 module {
-
     runalone {
         applicationName 'com.plugin.library.LibraryApplication'
         isRegisterComponentAuto true
@@ -22,5 +21,4 @@ module {
 //                compileOnly misPublication('com.eastwood.demo:module-mainModuleName-sdk')
         }
     }
-
 }

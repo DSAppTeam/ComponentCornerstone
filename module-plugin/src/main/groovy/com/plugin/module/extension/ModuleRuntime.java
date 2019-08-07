@@ -16,4 +16,7 @@ public class ModuleRuntime {
     public static PublicationManager publicationManager;
     public static ModuleExtension sModuleExtension;
     public static File misDir;
+
+    public static Map<String, String> beforeEvaluateText = new HashMap();
+    public static Map<String, File> buildScripts = new HashMap();
 }
