@@ -18,10 +18,6 @@ class AloneConfiguration {
 
     boolean runAlone
 
-    AloneConfiguration(final String name) {
-        this.name = name
-    }
-
     void isRegisterComponentAuto(boolean auto) {
         this.isRegisterComponentAuto = auto
     }

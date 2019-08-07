@@ -33,12 +33,6 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-//        IAction action = new IAction() {
-//            @Override
-//            public String getName() {
-//                return null;
-//            }
-//        }
         ((TextView) findViewById(R.id.text)).setText(ModuleMamager.getService(IAction.class).getName());
     }
 
