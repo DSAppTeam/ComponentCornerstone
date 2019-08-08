@@ -2,7 +2,7 @@ package com.plugin.module
 
 class Constants {
 
-    public static DEFAULT_MAIN_MODULE_NAME = "app"
+    public static String DEFAULT_MAIN_MODULE_NAME = "app"
     public static EXTENSION_NAME = "module"
 
     public static JAVA_FILE_END = ".java"

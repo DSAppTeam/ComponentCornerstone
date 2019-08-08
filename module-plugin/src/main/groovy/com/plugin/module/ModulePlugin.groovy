@@ -5,14 +5,13 @@ import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryPlugin
 import com.plugin.module.extension.ModuleRuntime
 import com.plugin.module.extension.module.AloneConfiguration
-import com.plugin.module.extension.module.AssembleTask
 import com.plugin.module.extension.module.Dependencies
 import com.plugin.module.extension.ModuleExtension
+import com.plugin.module.extension.module.ProjectInfo
 import com.plugin.module.listener.OnModuleExtensionListener
 import com.plugin.module.extension.publication.Publication
 import com.plugin.module.extension.publication.PublicationManager
 import com.plugin.module.transform.CodeTransform
-import com.plugin.module.utils.FileUtil
 import com.plugin.module.utils.JarUtil
 import com.plugin.module.utils.MisUtil
 import com.plugin.module.utils.ProjectUtil
@@ -41,69 +40,11 @@ class ModulePlugin implements Plugin<Project> {
      */
     private void handleProject(Project project) {
 
-        String compileModule = Constants.DEFAULT_MAIN_MODULE_NAME
-
-        String taskNames = ProjectUtil.getTaskName(project)
-        String module = ProjectUtil.getModuleName(project)
-
-
-        AssembleTask assembleTask = ProjectUtil.parseTaskInfo(ProjectUtil.getTasks(project))
-
-        if (assembleTask.isAssemble) {
-            compileModule = ProjectUtil.parseMainModuleName(project, assembleTask)
-            Logger.buildOutput("compileModule", compileModule)
-        }
-
-        Logger.buildOutput("taskNames", taskNames)
-        Logger.buildOutput("module", module)
-        Logger.buildOutput("isAssemble", assembleTask.isAssemble)
-
-
-        boolean isRunAlone = ProjectUtil.isRunalone(project)
-        Logger.buildOutput("runalone", isRunAlone)
-
-        if (isRunAlone && assembleTask.isAssemble) {
-            if (module.equals(compileModule)) {
-                isRunAlone = true
-            } else {
-                isRunAlone = false
-            }
-        }
-
-        //根据配置添加各种组件依赖，并且自动化生成组件加载代码
-        if (isRunAlone) {
-            project.apply plugin: Constants.PLUGIN_APPLICATION
-            Logger.buildOutput("project.apply plugin: com.android.application")
-
-            //对于组件，则需要读取alone目录进行运行
-            if (!module.equals(ProjectUtil.mainModuleName)) {
-                project.android.sourceSets {
-                    main {
-                        manifest.srcFile Constants.AFTER_MANIFEST_PATH
-                        java.srcDirs = [Constants.JAVA_PATH, Constants.AFTER_JAVA_PATH]
-                        res.srcDirs = [Constants.RES_PATH, Constants.AFTER_RES_PATH]
-                        assets.srcDirs = [Constants.ASSETS_PATH, Constants.AFTER_ASSETS_PATH]
-                        jniLibs.srcDirs = [Constants.JNILIBS_PATH, Constants.AFTER_JNILIBS_PATH]
-                    }
-                }
-
-                if (assembleTask.isAssemble && module.equals(compileModule)) {
-//                com.plugin.module.utils.Utils.compileComponents(project, assembleTask)
-                    //参考https://github.com/luojilab/DDComponentForAndroid/issues/122
-                    //                project.android.registerTransform(new CodeTransform(project))
-                    project.extensions.findByType(BaseExtension.class).registerTransform(new CodeTransform(project))
-                }
-            }
-
-        } else {
-            project.apply plugin: Constants.PLUGIN_LIBRARY
-            Logger.buildOutput("project.apply plugin: com.android.library")
-        }
-
+        ProjectInfo projectInfo = ModuleRuntime.projectInfos.get(project.name)
 
         project.dependencies.metaClass.misPublication { Object value ->
             String[] gav = MisUtil.filterGAV(value)
-            if (isRunAlone && assembleTask.isAssemble) {
+            if (projectInfo.isRunAlone && projectInfo.isAssembleTask()) {
                 project.dependencies {
                     implementation PublicationUtil.getPublication(gav[0], gav[1])
                 }
@@ -111,7 +52,6 @@ class ModulePlugin implements Plugin<Project> {
             }
             return PublicationUtil.getPublication(gav[0], gav[1])
         }
-
 
         List<Publication> publications = ModuleRuntime.publicationManager.getPublicationByProject(project)
 
@@ -127,9 +67,7 @@ class ModulePlugin implements Plugin<Project> {
             }
         }
 
-
         project.afterEvaluate {
-            FileUtil.afterEvaluateHandlerBuildScript(project)
 
             MisUtil.addMisSourceSets(project)
             List<Publication> publicationList = ModuleRuntime.publicationManager.getPublicationByProject(project)
@@ -201,28 +139,6 @@ class ModulePlugin implements Plugin<Project> {
             }
         })
 
-        project.allprojects.each {
-            if (it == project) return
-            Project childProject = it
-            childProject.repositories {
-                flatDir {
-                    dirs ModuleRuntime.misDir.absolutePath
-                    Logger.buildOutput(childProject.name + "-flatDir Dir[" + ModuleRuntime.misDir.absolutePath + "]")
-                }
-            }
-
-            def buildScript = new File(childProject.projectDir, 'build.gradle')
-            if (buildScript.exists()) {
-                FileUtil.beforeEvaluateHandlerBuildScript(childProject, buildScript)
-            }
-
-            childProject.plugins.whenObjectAdded {
-                if (it instanceof AppPlugin || it instanceof LibraryPlugin) {
-                    childProject.pluginManager.apply('com.android.module')
-                }
-            }
-        }
-
         project.afterEvaluate {
 
             ModuleRuntime.androidJarPath = MisUtil.getAndroidJarPath(project, ModuleRuntime.sModuleExtension.compileSdkVersion)
@@ -260,12 +176,58 @@ class ModulePlugin implements Plugin<Project> {
                 }
                 ModuleRuntime.publicationManager.hitPublication(publication)
             }
-            ModuleRuntime.publicationManager.saveManifest()
 
-//            project.allprojects.each {
-//                if (it == project) return
-//                it.pluginManager.apply('com.android.module')
-//            }
+            project.allprojects.each {
+                if (it == project) return
+                Project childProject = it
+
+                ProjectInfo projectInfo = new ProjectInfo(childProject)
+                if (projectInfo.isVailModulePluginTarget) {
+                    childProject.repositories {
+                        flatDir {
+                            dirs ModuleRuntime.misDir.absolutePath
+                            Logger.buildOutput(childProject.name + "-flatDir Dir[" + ModuleRuntime.misDir.absolutePath + "]")
+                        }
+                    }
+                    ModuleRuntime.projectInfos.put(childProject.name, projectInfo)
+
+                    Logger.buildOutput("compileModuleName", projectInfo.compileModuleName)
+                    Logger.buildOutput("taskNames", projectInfo.taskNames)
+                    Logger.buildOutput("moduleName", projectInfo.currentModuleName)
+                    Logger.buildOutput("isAssemble", projectInfo.isAssembleTask())
+                    Logger.buildOutput("isRunAlone", projectInfo.isRunAlone)
+
+                    childProject.plugins.whenObjectAdded {
+                        if (it instanceof AppPlugin || it instanceof LibraryPlugin) {
+                            childProject.pluginManager.apply('com.android.module')
+                            Logger.buildOutput("project.apply plugin: com.android.module")
+                        }
+                    }
+
+                    if (projectInfo.isRunAlone) {
+                        childProject.apply plugin: Constants.PLUGIN_APPLICATION
+                        Logger.buildOutput("project.apply plugin: com.android.application")
+
+                        if (!projectInfo.isMainModule()) {
+                            childProject.android.sourceSets {
+                                main {
+                                    manifest.srcFile Constants.AFTER_MANIFEST_PATH
+                                    java.srcDirs = [Constants.JAVA_PATH, Constants.AFTER_JAVA_PATH]
+                                    res.srcDirs = [Constants.RES_PATH, Constants.AFTER_RES_PATH]
+                                    assets.srcDirs = [Constants.ASSETS_PATH, Constants.AFTER_ASSETS_PATH]
+                                    jniLibs.srcDirs = [Constants.JNILIBS_PATH, Constants.AFTER_JNILIBS_PATH]
+                                }
+                            }
+                            if (projectInfo.isCompileModuleAndAssemble()) {
+                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new CodeTransform(childProject))
+                            }
+                        }
+                    } else {
+                        childProject.apply plugin: Constants.PLUGIN_LIBRARY
+                        Logger.buildOutput("project.apply plugin: com.android.library")
+                    }
+                }
+            }
         }
     }
 }

@@ -5,7 +5,6 @@
  */
 println 'build.gradle的配置阶段'
 
-apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 29
