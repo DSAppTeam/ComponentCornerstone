@@ -1,6 +1,7 @@
 package com.plugin.module.extension.publication
 
 import com.plugin.module.Constants
+import com.plugin.module.extension.ModuleRuntime
 import com.plugin.module.extension.module.Digraph
 import com.plugin.module.extension.module.SourceFile
 import com.plugin.module.extension.module.SourceSet
@@ -49,12 +50,13 @@ class PublicationManager {
         dependencyGraph = new Digraph<String>()
         publicationDependencies = new HashMap<>()
 
-//        rootProject.gradle.buildFinished {
-//            if (it.failure != null) {
-//                return
-//            }
-//
-//        }
+        rootProject.gradle.buildFinished {
+            ModuleRuntime.resetProjectInfoScript()
+            if (it.failure != null) {
+                return
+            }
+            saveManifest()
+        }
 
         File publicationManifest = new File(misDir, 'publicationManifest.xml')
         if (!publicationManifest.exists()) {
