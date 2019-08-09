@@ -1,0 +1,24 @@
+component {
+    runalone {
+        applicationName 'com.plugin.library.LibraryApplication'
+        isRegisterComponentAuto true
+        runAlone true
+    }
+
+    service {
+        localProject ':library'
+        groupId 'com.effective.android'
+        artifactId 'library-sdk'
+//            version '1.0.0' // 初次配置时不设置，发布至maven时设置
+
+        dependencies {
+            // 只支持 compileOnly 和 implementation
+
+//                compileOnly 'com.google.code.gson:gson:2.8.1'
+            // or
+            implementation 'com.google.code.gson:gson:2.8.1'
+
+//                compileOnly component('com.eastwood.demo:module-mainModuleName-sdk')
+        }
+    }
+}

@@ -1,10 +1,3 @@
-/**
- * 一定要注意，配置阶段不仅执行build.gradle中的语句，还包括了Task中的配置语句。从上面执行结果中可以看到，在执行了dependencies的闭包后，直接执行的是任务test中的配置段代码（Task中除了Action外的代码段都在配置阶段执行）。
- * 另外一点，无论执行Gradle的任何命令，初始化阶段和配置阶段的代码都会被执行。
- * 同样是上面那段Gradle脚本，我们执行帮助任务gradle help，任然会打印出上面的执行结果。我们在排查构建速度问题的时候可以留意，是否部分代码可以写成任务Task，从而减少配置阶段消耗的时间
- */
-println 'build.gradle的配置阶段'
-
 
 android {
     compileSdkVersion 29
@@ -33,24 +26,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    println 'dependencies中执行的代码'
 
-    implementation misPublication('com.effective.android:library-sdk')
+    implementation component('com.effective.android:library-sdk')
     implementation project(':module_lib')
 }
-
-// 创建一个Task
-task test1() {
-    println 'Task中的配置代码'
-    // 定义一个闭包
-    def a = {
-        println 'Task中的配置代码2'
-    }
-    // 执行闭包
-    a()
-    doFirst {
-        println '这段代码配置阶段不执行'
-    }
-}
-
-println '我是顺序执行的'
