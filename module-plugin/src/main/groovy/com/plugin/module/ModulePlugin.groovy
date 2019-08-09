@@ -3,14 +3,13 @@ package com.plugin.module
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryPlugin
-import com.plugin.module.extension.ModuleRuntime
-import com.plugin.module.extension.module.AloneConfiguration
-import com.plugin.module.extension.module.Dependencies
+import com.plugin.module.extension.option.RunAloneOption
+import com.plugin.module.extension.option.DependenciesOption
 import com.plugin.module.extension.ModuleExtension
 import com.plugin.module.extension.module.ProjectInfo
 import com.plugin.module.listener.OnModuleExtensionListener
-import com.plugin.module.extension.publication.Publication
-import com.plugin.module.extension.publication.PublicationManager
+import com.plugin.module.extension.option.PublicationOption
+import com.plugin.module.extension.PublicationManager
 import com.plugin.module.transform.CodeTransform
 import com.plugin.module.utils.JarUtil
 import com.plugin.module.utils.MisUtil
@@ -21,6 +20,7 @@ import org.gradle.api.Project
 
 /**
  *   ./gradlew --no-daemon ModulePlugin  -Dorg.gradle.debug=true
+ *   ./gradlew --no-daemon [clean, :app:generateDebugSources, :library:generateDebugSources, :module_lib:generateDebugSources]  -Dorg.gradle.debug=true
  */
 class ModulePlugin implements Plugin<Project> {
 
@@ -53,7 +53,7 @@ class ModulePlugin implements Plugin<Project> {
             return PublicationUtil.getPublication(gav[0], gav[1])
         }
 
-        List<Publication> publications = ModuleRuntime.publicationManager.getPublicationByProject(project)
+        List<PublicationOption> publications = ModuleRuntime.publicationManager.getPublicationByProject(project)
 
         project.dependencies {
             publications.each {
@@ -70,8 +70,8 @@ class ModulePlugin implements Plugin<Project> {
         project.afterEvaluate {
 
             MisUtil.addMisSourceSets(project)
-            List<Publication> publicationList = ModuleRuntime.publicationManager.getPublicationByProject(project)
-            List<Publication> publicationPublishList = new ArrayList<>()
+            List<PublicationOption> publicationList = ModuleRuntime.publicationManager.getPublicationByProject(project)
+            List<PublicationOption> publicationPublishList = new ArrayList<>()
             publicationList.each {
                 if (it.version != null) {
                     publicationPublishList.add(it)
@@ -127,14 +127,14 @@ class ModulePlugin implements Plugin<Project> {
         ModuleRuntime.sModuleExtension = project.getExtensions().create(Constants.EXTENSION_NAME, ModuleExtension, new OnModuleExtensionListener() {
 
             @Override
-            void onPublicationAdded(Project childProject, Publication publication) {
+            void onPublicationAdded(Project childProject, PublicationOption publication) {
                 PublicationUtil.initPublication(childProject, publication)
                 ModuleRuntime.publicationManager.addDependencyGraph(publication)
                 ModuleRuntime.publicationMap.put(childProject.name, publication)
             }
 
             @Override
-            void onAloneConfigAdded(Project childProject, AloneConfiguration aloneConfiguration) {
+            void onAloneConfigAdded(Project childProject, RunAloneOption aloneConfiguration) {
                 ModuleRuntime.aloneRunMap.put(childProject.name, aloneConfiguration)
             }
         })
@@ -144,7 +144,7 @@ class ModulePlugin implements Plugin<Project> {
             ModuleRuntime.androidJarPath = MisUtil.getAndroidJarPath(project, ModuleRuntime.sModuleExtension.compileSdkVersion)
             Logger.buildOutput("androidJarPath", ModuleRuntime.androidJarPath)
 
-            Dependencies.metaClass.misPublication { String value ->
+            DependenciesOption.metaClass.misPublication { String value ->
                 String[] gav = MisUtil.filterGAV(value)
                 return Constants.MODULE_SDK_PRE + gav[0] + ':' + gav[1] + ':' + gav[2]
             }
@@ -162,7 +162,7 @@ class ModulePlugin implements Plugin<Project> {
             List<String> topSort = ModuleRuntime.publicationManager.dependencyGraph.topSort()
             Collections.reverse(topSort)
             topSort.each {
-                Publication publication = ModuleRuntime.publicationManager.publicationDependencies.get(it)
+                PublicationOption publication = ModuleRuntime.publicationManager.publicationDependencies.get(it)
                 if (publication == null) {
                     return
                 }

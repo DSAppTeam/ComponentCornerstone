@@ -1,10 +1,11 @@
-package com.plugin.module.extension.publication
+package com.plugin.module.extension
 
 import com.plugin.module.Constants
-import com.plugin.module.extension.ModuleRuntime
+import com.plugin.module.ModuleRuntime
 import com.plugin.module.extension.module.Digraph
 import com.plugin.module.extension.module.SourceFile
 import com.plugin.module.extension.module.SourceSet
+import com.plugin.module.extension.option.PublicationOption
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.w3c.dom.Document
@@ -26,10 +27,10 @@ class PublicationManager {
     private static PublicationManager sPublicationManager
 
     private File misDir
-    private Map<String, Publication> publicationManifest        //maven Id 映射 Publication
+    private Map<String, PublicationOption> publicationManifest        //maven Id 映射 PublicationOption
 
     Digraph<String> dependencyGraph
-    Map<String, Publication> publicationDependencies
+    Map<String, PublicationOption> publicationDependencies
 
     static getInstance() {
         if (sPublicationManager == null) {
@@ -72,7 +73,7 @@ class PublicationManager {
 
             Element publicationElement = (Element) publicationNodeList.item(i)
 
-            Publication publication = new Publication()
+            PublicationOption publication = new PublicationOption()
             publication.project = publicationElement.getAttribute("project")
             publication.groupId = publicationElement.getAttribute("groupId")
             publication.artifactId = publicationElement.getAttribute("artifactId")
@@ -116,7 +117,7 @@ class PublicationManager {
         Document document = builderFactory.newDocumentBuilder().newDocument()
         Element manifestElement = document.createElement("manifest")
         this.publicationManifest.each {
-            Publication publication = it.value
+            PublicationOption publication = it.value
 
             if (!publication.hit || publication.invalid) return
 
@@ -149,7 +150,7 @@ class PublicationManager {
         transformer.transform(new DOMSource(manifestElement), new StreamResult(publicationManifest))
     }
 
-    void addDependencyGraph(Publication publication) {
+    void addDependencyGraph(PublicationOption publication) {
         def key = publication.groupId + '-' + publication.artifactId
         publicationDependencies.put(key, publication)
         dependencyGraph.add(key)
@@ -187,8 +188,8 @@ class PublicationManager {
      * @param publication
      * @return
      */
-    boolean hasModified(Publication publication) {
-        Publication lastPublication = publicationManifest.get(publication.groupId + '-' + publication.artifactId)
+    boolean hasModified(PublicationOption publication) {
+        PublicationOption lastPublication = publicationManifest.get(publication.groupId + '-' + publication.artifactId)
         if (lastPublication == null) {
             return true
         }
@@ -219,23 +220,23 @@ class PublicationManager {
         return false
     }
 
-    void addPublication(Publication publication) {
+    void addPublication(PublicationOption publication) {
         publicationManifest.put(publication.groupId + '-' + publication.artifactId, publication)
     }
 
-    Publication getPublication(String groupId, String artifactId) {
+    PublicationOption getPublication(String groupId, String artifactId) {
         return publicationManifest.get(groupId + '-' + artifactId)
     }
 
-    Publication getPublicationByKey(String key) {
+    PublicationOption getPublicationByKey(String key) {
         return publicationManifest.get(key)
     }
 
-    List<Publication> getPublicationByProject(Project project) {
+    List<PublicationOption> getPublicationByProject(Project project) {
         String displayName = project.getDisplayName()
         String projectName = displayName.substring(displayName.indexOf("'") + 1, displayName.lastIndexOf("'"))
 
-        List<Publication> publications = new ArrayList<>()
+        List<PublicationOption> publications = new ArrayList<>()
         publicationManifest.each {
             if (projectName == it.value.project) {
                 publications.add(it.value)
@@ -244,8 +245,8 @@ class PublicationManager {
         return publications
     }
 
-    void hitPublication(Publication publication) {
-        Publication existsPublication = publicationManifest.get(publication.groupId + '-' + publication.artifactId)
+    void hitPublication(PublicationOption publication) {
+        PublicationOption existsPublication = publicationManifest.get(publication.groupId + '-' + publication.artifactId)
         if (existsPublication == null) return
 
         if (existsPublication.hit) {
@@ -255,7 +256,7 @@ class PublicationManager {
         }
     }
 
-    private void validPublication(Publication publication, Publication existsPublication) {
+    private void validPublication(PublicationOption publication, PublicationOption existsPublication) {
         if (publication.project != existsPublication.project) {
             throw new GradleException("Already exists publication " + existsPublication.groupId + ":" + existsPublication.artifactId + " in project '${existsPublication.project}'.")
         }

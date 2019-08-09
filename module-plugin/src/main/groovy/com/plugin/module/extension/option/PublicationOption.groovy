@@ -1,12 +1,11 @@
-package com.plugin.module.extension.publication
+package com.plugin.module.extension.option
 
 import com.plugin.module.extension.module.SourceSet
-import com.plugin.module.extension.module.Dependencies
 import org.gradle.util.ConfigureUtil
 
-class Publication {
+class PublicationOption {
 
-    String name
+    String name = "main"
     String sourceSetName
     File buildDir                       //{peoject}/build/mis
 
@@ -20,7 +19,7 @@ class Publication {
 
     String versionNew
 
-    Dependencies dependencies           //所持有的依赖信息
+    DependenciesOption dependencies           //所持有的依赖信息
 
     Closure sourceFilter                //资源过滤block
 
@@ -28,9 +27,10 @@ class Publication {
     boolean hit                         //是否隐藏
     boolean useLocal                    //是否使用本地jar
 
-    Publication(final String name) {
-        this.name = "main"
+
+    PublicationOption() {
     }
+
 
     void groupId(String groupId) {
         this.groupId = groupId
@@ -49,7 +49,7 @@ class Publication {
     }
 
     void dependencies(Closure closure) {
-        dependencies = new Dependencies()
+        dependencies = new DependenciesOption()
         ConfigureUtil.configure(closure, dependencies)
     }
 

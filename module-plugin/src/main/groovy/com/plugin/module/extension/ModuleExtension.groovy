@@ -1,9 +1,9 @@
 package com.plugin.module.extension
 
-import com.plugin.module.extension.module.AloneConfiguration
-import com.plugin.module.extension.module.CompileOptions
+import com.plugin.module.extension.option.CompileOption
+import com.plugin.module.extension.option.PublicationOption
+import com.plugin.module.extension.option.RunAloneOption
 import com.plugin.module.listener.OnModuleExtensionListener
-import com.plugin.module.extension.publication.Publication
 import org.gradle.api.Action
 
 import org.gradle.api.Project
@@ -14,50 +14,70 @@ class ModuleExtension {
 
     String mainModuleName
     int compileSdkVersion                           //编译版本
-    CompileOptions compileOptions                   //编译选项
+    CompileOption compileOptions                    //编译选项
     Action<? super RepositoryHandler> configure     //仓库配置
-    Project currentChildProject                     //子项目
     OnModuleExtensionListener listener              //发布监听器
-    Map<String, Publication> publicationMap         //发布信息
 
-    public AloneConfiguration aloneConfiguration
-    public Publication serviceConfiguration
+    public RunAloneOption runAloneOption
+    public PublicationOption publicationOption
 
-
-    void runalone(Action<AloneConfiguration> action) {
-        action.execute(this.aloneConfiguration)
-        listener.onAloneConfigAdded(currentChildProject, aloneConfiguration)
-    }
-
-    void service(Action<Publication> action) {
-        action.execute(this.serviceConfiguration)
-        listener.onPublicationAdded(currentChildProject, serviceConfiguration)
-    }
-
+    Project currentChildProject                      //子项目
 
     ModuleExtension(OnModuleExtensionListener listener) {
         this.listener = listener
-        this.publicationMap = new HashMap<>()
-        compileOptions = new CompileOptions()
-        aloneConfiguration = new AloneConfiguration()
-        serviceConfiguration = new Publication("library")
+        compileOptions = new CompileOption()
+        runAloneOption = new RunAloneOption()
+        publicationOption = new PublicationOption()
     }
 
 
+    /**
+     * 编译sdk
+     * @param version
+     */
     void compileSdkVersion(int version) {
         compileSdkVersion = version
     }
 
+    /**
+     * 工程主项目名称
+     * @param name
+     */
     void mainModuleName(String name) {
         mainModuleName = name
     }
 
-
+    /**
+     * 配置选项
+     * @param closure
+     */
     void compileOptions(Closure closure) {
         ConfigureUtil.configure(closure, compileOptions)
     }
 
+    /**
+     * 仓库配置
+     * @param configure
+     */
     void repositories(Action<? super RepositoryHandler> configure) {
         this.configure = configure
+    }
+
+    /**
+     * 独立运行配置
+     * @param action
+     */
+    void runalone(Action<RunAloneOption> action) {
+        action.execute(this.runAloneOption)
+        listener.onAloneConfigAdded(currentChildProject, runAloneOption)
+    }
+
+    /**
+     * sdk配置
+     * @param action
+     */
+    void service(Action<PublicationOption> action) {
+        action.execute(this.publicationOption)
+        listener.onPublicationAdded(currentChildProject, publicationOption)
     }
 }

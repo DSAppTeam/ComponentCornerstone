@@ -1,9 +1,10 @@
-package com.plugin.module.extension.module
+package com.plugin.module.extension.option
 
 /**
  * 依赖记录
+ * created by yummylau 2019/08/09
  */
-class Dependencies {
+class DependenciesOption {
 
     List<Object> implementation
     List<Object> compileOnly

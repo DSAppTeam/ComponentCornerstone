@@ -2,6 +2,7 @@ package com.plugin.module.extension.module
 
 /**
  * 资源组
+ * created by yummylau 2019/08/09
  */
 class SourceSet {
     String path                                             // 路径

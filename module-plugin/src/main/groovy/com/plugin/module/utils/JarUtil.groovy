@@ -1,9 +1,9 @@
 package com.plugin.module.utils
 
 import com.plugin.module.Constants
-import com.plugin.module.extension.ModuleRuntime
-import com.plugin.module.extension.module.CompileOptions
-import com.plugin.module.extension.publication.Publication
+import com.plugin.module.ModuleRuntime
+import com.plugin.module.extension.option.CompileOption
+import com.plugin.module.extension.option.PublicationOption
 import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
@@ -29,8 +29,8 @@ class JarUtil {
      * @param vars
      * @return
      */
-    static File packJavaSourceJar(Project project, Publication publication, String androidJarPath,
-                                  CompileOptions compileOptions, boolean vars) {
+    static File packJavaSourceJar(Project project, PublicationOption publication, String androidJarPath,
+                                  CompileOption compileOptions, boolean vars) {
         //.../build/mis 重置
         publication.buildDir.deleteDir()
         publication.buildDir.mkdirs()
@@ -96,7 +96,7 @@ class JarUtil {
     private static File generateJavaSourceJar(File classesDir,
                                               List<String> argFiles,
                                               List<String> classPath,
-                                              CompileOptions compileOptions,
+                                              CompileOption compileOptions,
                                               boolean vars) {
 
         //window classpath 路径分割符号与 mac/linux需要做区分
@@ -190,7 +190,7 @@ class JarUtil {
      * @param publication
      * @return
      */
-    static File packJavaDocSourceJar(Publication publication) {
+    static File packJavaDocSourceJar(PublicationOption publication) {
         def javaSource = new File(publication.buildDir, "javaSource")
         javaSource.deleteDir()
         javaSource.mkdirs()
@@ -257,7 +257,7 @@ class JarUtil {
         }
     }
 
-    static boolean compareMavenJar(Project project, Publication publication, String localPath) {
+    static boolean compareMavenJar(Project project, PublicationOption publication, String localPath) {
         String filePath = null
         String fileName = publication.artifactId + "-" + publication.version + ".jar"
         def name = "mis[${publication.groupId}-${publication.artifactId}]Classpath"
@@ -334,7 +334,7 @@ class JarUtil {
         return jarFile.absolutePath
     }
 
-    static void handleMavenJar(Project project, Publication publication) {
+    static void handleMavenJar(Project project, PublicationOption publication) {
         File target = new File(ModuleRuntime.misDir, Constants.MODULE_SDK_PRE + publication.groupId + '-' + publication.artifactId + '.jar')
         if (publication.invalid) {
             ModuleRuntime.publicationManager.addPublication(publication)
@@ -363,7 +363,7 @@ class JarUtil {
             publication.useLocal = true
             ModuleRuntime.publicationManager.addPublication(publication)
         } else if (!hasModifiedSource) {
-            Publication lastPublication = ModuleRuntime.publicationManager.getPublication(publication.groupId, publication.artifactId)
+            PublicationOption lastPublication = ModuleRuntime.publicationManager.getPublication(publication.groupId, publication.artifactId)
             if (lastPublication.version != publication.version) {
                 publication.versionNew = publication.version
                 publication.version = lastPublication.version
@@ -383,7 +383,7 @@ class JarUtil {
                 return
             }
 
-            Publication lastPublication = ModuleRuntime.publicationManager.getPublication(publication.groupId, publication.artifactId)
+            PublicationOption lastPublication = ModuleRuntime.publicationManager.getPublication(publication.groupId, publication.artifactId)
             if (lastPublication == null) {
                 lastPublication = publication
             }
@@ -403,7 +403,7 @@ class JarUtil {
         }
     }
 
-    static void handleLocalJar(Project project, Publication publication) {
+    static void handleLocalJar(Project project, PublicationOption publication) {
         File target = new File(ModuleRuntime.misDir, Constants.MODULE_SDK_PRE + publication.groupId + '-' + publication.artifactId + '.jar')
 
         if (publication.invalid) {

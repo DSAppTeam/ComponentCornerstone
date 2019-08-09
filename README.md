@@ -7,6 +7,7 @@ android modular plugin.
 
 
 * 支持独立调试 (done)
+
 * 支持代码隔离 (done)
 * 动态替换依赖（done）
 * 动态绑定和卸载 （开发中...）
