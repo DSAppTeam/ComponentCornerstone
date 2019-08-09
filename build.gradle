@@ -1,42 +1,4 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-
-/**
- * 初始化阶段
- */
-gradle.addBuildListener(new BuildListener() {
-
-    @Override
-    void buildStarted(Gradle gradle) {
-        println 'gradle 开始构建'
-    }
-
-    @Override
-    void settingsEvaluated(Settings settings) {
-        println 'settings评估完成（settins.gradle中代码执行完毕）'
-    }
-
-    @Override
-    void projectsLoaded(Gradle gradle) {
-        println '项目结构加载完成（初始化阶段结束）'
-        println '初始化结束，可访问根项目：' + var1.gradle.rootProject
-    }
-
-    @Override
-    void projectsEvaluated(Gradle gradle) {
-        println '所有子project项目评估完成（配置阶段结束）'
-    }
-
-    @Override
-    void buildFinished(BuildResult buildResult) {
-        //在 projectsEvaluated 运行完 之后进入执行阶段
-        println 'Gradle.taskGraph.beforeTask '
-        println '执行 task action '
-        println 'Gradle.taskGraph.afterTask '
-        println '构建结束 '
-    }
-})
-
-
 buildscript {
     repositories {
         google()
@@ -45,7 +7,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.3.0'
-        classpath 'com.effective.plugins:module-plugin'
+        classpath 'com.effective.plugins:component-plugin'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -64,9 +26,9 @@ task clean(type: Delete) {
 }
 
 
-apply plugin: 'com.android.module'
+apply plugin: 'com.android.component'
 
-module {
+component {
 
     compileSdkVersion 27
 
