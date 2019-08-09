@@ -1,4 +1,4 @@
-include ':app', ':library', ':module_lib'
+include ':app', ':library', ':core'
 
 //调试插件使用
 includeBuild './component-plugin'

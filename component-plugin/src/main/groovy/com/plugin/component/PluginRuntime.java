@@ -11,6 +11,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 运行时数据
+ * created by yummylau 2019/08/09
+ */
 public class PluginRuntime {
 
     public static Map<String, PublicationOption> sPublicationMap = new HashMap<>();               //发布信息

@@ -10,6 +10,10 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.util.ConfigureUtil
 
+/**
+ * 插件配置
+ * created by yummylau 2019/08/09
+ */
 class ComponentExtension {
 
     String mainModuleName

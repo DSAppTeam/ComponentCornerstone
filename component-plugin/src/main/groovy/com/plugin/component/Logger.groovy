@@ -1,5 +1,9 @@
 package com.plugin.component
 
+/**
+ *  logger 管理
+ *  created by yummylau 2019/08/09
+ */
 class Logger {
 
     static void buildOutput(String log) {

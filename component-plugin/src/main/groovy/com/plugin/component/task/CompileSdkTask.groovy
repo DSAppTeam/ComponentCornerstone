@@ -6,6 +6,10 @@ import com.plugin.component.extension.option.PublicationOption
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
+/**
+ * 编译 sdk task
+ * created by yummylau 2019/08/09
+ */
 class CompileSdkTask extends DefaultTask {
 
     PublicationOption publication

@@ -1,5 +1,8 @@
 package com.plugin.library;
 
+/**
+ * 添加
+ */
 public class LibraryAction implements IAction {
 
     @Override
@@ -7,7 +10,3 @@ public class LibraryAction implements IAction {
         return "library_action";
     }
 }
-
-//public class LibraryAction {
-//
-//}

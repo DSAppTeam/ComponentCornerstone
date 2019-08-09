@@ -1,4 +1,4 @@
-package com.effective.android.module;
+package com.plugin.core;
 
 import android.util.ArrayMap;
 
@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 
 import java.lang.ref.WeakReference;
 
-public class ModuleMamager {
+public class SdkManager {
 
     private static ArrayMap<Class, Object> sServiceArrayMap;
     private static ArrayMap<Class, WeakReference<Object>> sWeekServiceArrayMap;

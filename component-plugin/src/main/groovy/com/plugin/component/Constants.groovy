@@ -1,5 +1,9 @@
 package com.plugin.component
 
+/**
+ *  常量定义
+ *  created by yummylau 2019/08/09
+ */
 class Constants {
 
     //业务无关
@@ -22,11 +26,16 @@ class Constants {
     public static String CLEAN = 'clean'
 
     //file
-    public static String DEFAULT_MAIN_MODULE_NAME = "app"                                   //默认工程主项目名称
-    public static String SDK_DIR = '.gradle/component/sdk'                                  //sdk存放目录
-    public static String IMPL_DIR = 'build/component/impl'                                  //impl存放目录
-    public static String BUILD_SDK_DIR = 'build/component/sdk'                              //生成的sdk文件的build目录
-    public static String BUILD_IMPL_DIR = 'build/component/impl'                            //生成的impl的build目录
+    public static String DEFAULT_MAIN_MODULE_NAME = "app"
+    //默认工程主项目名称
+    public static String SDK_DIR = '.gradle/component/sdk'
+    //sdk存放目录
+    public static String IMPL_DIR = 'build/component/impl'
+    //impl存放目录
+    public static String BUILD_SDK_DIR = 'build/component/sdk'
+    //生成的sdk文件的build目录
+    public static String BUILD_IMPL_DIR = 'build/component/impl'
+    //生成的impl的build目录
     public static String BUILD_SOURCE_DIR = 'source'
     public static String BUILD_CLASSES_DIR = 'classes'
     public static String BUILD_OUTPUT_DIR = 'outputs'

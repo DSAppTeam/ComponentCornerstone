@@ -21,7 +21,8 @@ import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
 /**
- * 单例依赖发布器
+ * 发布sdk管理
+ * created by yummylau 2019/08/09
  */
 class PublicationManager {
 
