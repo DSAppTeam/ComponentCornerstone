@@ -3,6 +3,10 @@ package com.plugin.component.extension.option
 import com.plugin.component.extension.module.SourceSet
 import org.gradle.util.ConfigureUtil
 
+/**
+ * sdk信息
+ * created by yummylau 2019/08/09
+ */
 class PublicationOption {
 
     String name = "main"

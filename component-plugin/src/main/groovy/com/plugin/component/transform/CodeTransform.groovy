@@ -10,6 +10,10 @@ import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 
+/**
+ * https://juejin.im/post/5cbffc7af265da03a97aed41
+ * created by yummylau 2019/08/09
+ */
 class CodeTransform extends Transform {
 
     private Project project
@@ -24,14 +28,20 @@ class CodeTransform extends Transform {
     @Override
     void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
 
-        //获取真实的application
-        getRealApplicationName(transformInvocation.getInputs())
+        def inputs = transformInvocation.getInputs()
+
+        //读取项目配置的 application，后续考虑使用注解？？？
+        RunAloneOption aloneConfiguration = PluginRuntime.sRunAloneMap.get(project.name)
+        applicationName = aloneConfiguration.applicationName
+        if (applicationName == null || applicationName.isEmpty()) {
+            throw new RuntimeException("you should set applicationName in runAlone")
+        }
 
         classPool = new ClassPool()
         project.android.bootClasspath.each {
             classPool.appendClassPath((String) it.absolutePath)
         }
-        def box = Utils.toCtClasses(transformInvocation.getInputs(), classPool)
+        def box = Utils.toCtClasses(inputs, classPool)
 
         //要收集的application，一般情况下只有一个
         List<CtClass> applications = new ArrayList<>()
@@ -56,10 +66,9 @@ class CodeTransform extends Transform {
         }
 
         transformInvocation.inputs.each { TransformInput input ->
-            //对类型为jar文件的input进行遍历
+
             input.jarInputs.each { JarInput jarInput ->
-                //jar文件一般是第三方依赖库jar文件
-                // 重命名输出文件（同目录copyFile会冲突）
+
                 def jarName = jarInput.name
                 def md5Name = DigestUtils.md5Hex(jarInput.file.getAbsolutePath())
                 if (jarName.endsWith(".jar")) {
@@ -72,11 +81,10 @@ class CodeTransform extends Transform {
                 FileUtils.copyFile(jarInput.file, dest)
 
             }
+
             //对类型为“文件夹”的input进行遍历
             input.directoryInputs.each { DirectoryInput directoryInput ->
-                RunAloneOption aloneConfiguration = PluginRuntime.sRunAloneMap[project.name]
                 boolean isRegisterComponentAuto = aloneConfiguration.isRegisterComponentAuto
-
                 //如果是自动注入组件，则
                 if (isRegisterComponentAuto) {
                     String fileName = directoryInput.file.absolutePath
@@ -103,18 +111,6 @@ class CodeTransform extends Transform {
         }
     }
 
-    /**
-     * 获取 gradle配置的
-     * runalone{*     applicationName = "xxxx"
-     *}* @param inputs
-     */
-    private void getRealApplicationName(Collection<TransformInput> inputs) {
-        RunAloneOption aloneConfiguration = PluginRuntime.sRunAloneMap.get(project.name)
-        applicationName = aloneConfiguration.applicationName
-        if (applicationName == null || applicationName.isEmpty()) {
-            throw new RuntimeException("you should set applicationName in runalone")
-        }
-    }
 
     /**
      * 注入application code
@@ -125,15 +121,19 @@ class CodeTransform extends Transform {
     private void injectApplicationCode(CtClass ctClassApplication, List<CtClass> componentLikes, String patch) {
         System.out.println("injectApplicationCode begin")
         ctClassApplication.defrost()
+        //注入componentLike的onCreate的代码
+        StringBuilder autoLoadComCode = new StringBuilder()
+        for (CtClass ctClass : componentLikes) {
+            autoLoadComCode.append("new " + ctClass.getName() + "()" + ".onCreate();")
+        }
         try {
             CtMethod attachBaseContextMethod = ctClassApplication.getDeclaredMethod("onCreate", null)
-            attachBaseContextMethod.insertAfter(getAutoLoadComCode(componentLikes))
+            attachBaseContextMethod.insertAfter(autoLoadComCode.toString())
         } catch (CannotCompileException | NotFoundException e) {
             StringBuilder methodBody = new StringBuilder()
             methodBody.append("protected void onCreate() {")
             methodBody.append("super.onCreate();")
-            methodBody.
-                    append(getAutoLoadComCode(componentLikes))
+            methodBody.append(autoLoadComCode.toString())
             methodBody.append("}")
             ctClassApplication.addMethod(CtMethod.make(methodBody.toString(), ctClassApplication))
         } catch (Exception e) {
@@ -143,19 +143,6 @@ class CodeTransform extends Transform {
         ctClassApplication.detach()
 
         System.out.println("injectApplicationCode success ")
-    }
-
-    /**
-     * 调用所有componentLike的onCreate的代码
-     * @param componentLikes
-     * @return
-     */
-    private String getAutoLoadComCode(List<CtClass> componentLikes) {
-        StringBuilder autoLoadComCode = new StringBuilder()
-        for (CtClass ctClass : componentLikes) {
-            autoLoadComCode.append("new " + ctClass.getName() + "()" + ".onCreate();")
-        }
-        return autoLoadComCode.toString()
     }
 
 
@@ -194,6 +181,10 @@ class CodeTransform extends Transform {
         return TransformManager.CONTENT_CLASS
     }
 
+    /**
+     * application 注册一般需要指定 SCOPE_FULL_PROJECT
+     * @return
+     */
     @Override
     Set<? super QualifiedContent.Scope> getScopes() {
         return TransformManager.SCOPE_FULL_PROJECT

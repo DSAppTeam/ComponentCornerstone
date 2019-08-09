@@ -2,7 +2,6 @@ package com.plugin.component.utils
 
 import com.android.SdkConstants
 import com.android.build.api.transform.TransformInput
-import com.android.utils.FileUtils
 import javassist.ClassPool
 import javassist.CtClass
 
@@ -12,7 +11,6 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 class Utils {
-
 
 
 //
