@@ -1,7 +1,8 @@
 package com.plugin.module.task
 
-import com.plugin.module.extension.publication.Publication
-import com.plugin.module.extension.publication.PublicationManager
+
+import com.plugin.module.extension.PublicationManager
+import com.plugin.module.extension.option.PublicationOption
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
@@ -10,7 +11,7 @@ import org.gradle.api.tasks.TaskAction
  */
 class CompileMisTask extends DefaultTask {
 
-    Publication publication
+    PublicationOption publication
 
     @TaskAction
     void compileSource() {

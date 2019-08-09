@@ -2,9 +2,8 @@ package com.plugin.module.transform
 
 import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
-import com.plugin.module.ModulePlugin
-import com.plugin.module.extension.ModuleRuntime
-import com.plugin.module.extension.module.AloneConfiguration
+import com.plugin.module.ModuleRuntime
+import com.plugin.module.extension.option.RunAloneOption
 import com.plugin.module.utils.Utils
 import javassist.*
 import org.apache.commons.codec.digest.DigestUtils
@@ -75,7 +74,7 @@ class CodeTransform extends Transform {
             }
             //对类型为“文件夹”的input进行遍历
             input.directoryInputs.each { DirectoryInput directoryInput ->
-                AloneConfiguration aloneConfiguration = ModuleRuntime.aloneRunMap[project.name]
+                RunAloneOption aloneConfiguration = ModuleRuntime.aloneRunMap[project.name]
                 boolean isRegisterComponentAuto = aloneConfiguration.isRegisterComponentAuto
 
                 //如果是自动注入组件，则
@@ -110,7 +109,7 @@ class CodeTransform extends Transform {
      *}* @param inputs
      */
     private void getRealApplicationName(Collection<TransformInput> inputs) {
-        AloneConfiguration aloneConfiguration = ModuleRuntime.aloneRunMap.get(project.name)
+        RunAloneOption aloneConfiguration = ModuleRuntime.aloneRunMap.get(project.name)
         applicationName = aloneConfiguration.applicationName
         if (applicationName == null || applicationName.isEmpty()) {
             throw new RuntimeException("you should set applicationName in runalone")

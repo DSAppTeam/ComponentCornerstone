@@ -2,6 +2,7 @@ package com.plugin.module.extension.module
 
 /**
  * 资源文件信息
+ * created by yummylau 2019/08/09
  */
 class SourceFile {
 

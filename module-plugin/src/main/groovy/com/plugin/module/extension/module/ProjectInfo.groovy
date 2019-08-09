@@ -1,12 +1,14 @@
 package com.plugin.module.extension.module
 
 import com.plugin.module.Constants
-import com.plugin.module.extension.ModuleRuntime
+import com.plugin.module.ModuleRuntime
 import com.plugin.module.utils.ProjectUtil
 import org.gradle.api.Project
 
 /**
+ * 插件运行时收集的项目信息
  * 在根root评估前判断子project插件是否存在AppPlugin或者LibraryPlugin
+ * created by yummylau 2019/08/09
  */
 class ProjectInfo {
 

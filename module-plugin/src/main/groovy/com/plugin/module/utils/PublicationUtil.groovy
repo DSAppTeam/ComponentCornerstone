@@ -1,10 +1,10 @@
 package com.plugin.module.utils
 
 import com.plugin.module.Constants
-import com.plugin.module.extension.ModuleRuntime
+import com.plugin.module.ModuleRuntime
 import com.plugin.module.extension.module.SourceFile
 import com.plugin.module.extension.module.SourceSet
-import com.plugin.module.extension.publication.Publication
+import com.plugin.module.extension.option.PublicationOption
 import com.plugin.module.task.CompileMisTask
 import org.gradle.api.Project
 import org.gradle.api.publish.maven.MavenPublication
@@ -12,7 +12,7 @@ import org.gradle.api.publish.maven.MavenPublication
 class PublicationUtil {
 
     static getPublication(String groupId, String artifactId) {
-        Publication publication = ModuleRuntime.publicationManager.getPublication(groupId, artifactId)
+        PublicationOption publication = ModuleRuntime.publicationManager.getPublication(groupId, artifactId)
         if (publication != null) {
             if (publication.invalid) {
                 return []
@@ -27,7 +27,7 @@ class PublicationUtil {
     }
 
 
-    static void addPublicationDependencies(Project project, Publication publication) {
+    static void addPublicationDependencies(Project project, PublicationOption publication) {
         if (publication.dependencies == null) return
         project.dependencies {
             if (publication.dependencies.compileOnly != null) {
@@ -48,7 +48,7 @@ class PublicationUtil {
      * @param project
      * @param publication
      */
-    static void initPublication(Project project, Publication publication) {
+    static void initPublication(Project project, PublicationOption publication) {
         String displayName = project.getDisplayName()
         publication.project = displayName.substring(displayName.indexOf("'") + 1, displayName.lastIndexOf("'"))
         def buildMis = new File(project.projectDir, Constants.BUILD_MODULE_SDK_DIR)
@@ -78,7 +78,7 @@ class PublicationUtil {
         publication.invalid = misSourceSet.lastModifiedSourceFile.isEmpty()
     }
 
-    static void createPublishingPublication(Project project, Publication publication, String publicationName) {
+    static void createPublishingPublication(Project project, PublicationOption publication, String publicationName) {
         def publishing = project.extensions.getByName('publishing')
         MavenPublication mavenPublication = publishing.publications.maybeCreate(publicationName, MavenPublication)
         mavenPublication.groupId = publication.groupId
@@ -97,7 +97,7 @@ class PublicationUtil {
                     publication.dependencies.implementation.each {
                         def gav = it.split(":")
                         if (gav[1].startsWith(Constants.MODULE_SDK_PRE)) {
-                            Publication dependencyPublication = publicationManager.getPublicationByKey(gav[1].replace(Constants.MODULE_SDK_PRE, ''))
+                            PublicationOption dependencyPublication = publicationManager.getPublicationByKey(gav[1].replace(Constants.MODULE_SDK_PRE, ''))
                             if (dependencyPublication.useLocal) {
                                 throw new RuntimeException("mis publication [$dependencyPublication.groupId:$dependencyPublication.artifactId] has not publish yet.")
                             }
@@ -113,7 +113,7 @@ class PublicationUtil {
         }
     }
 
-    static void createPublishTask(Project project, Publication publication) {
+    static void createPublishTask(Project project, PublicationOption publication) {
         def taskName = 'compileMis[' + publication.artifactId + ']Source'
         def compileTask = project.getTasks().findByName(taskName)
         if (compileTask == null) {
@@ -135,14 +135,14 @@ class PublicationUtil {
         PublicationUtil.createPublishingPublication(project, publication, publicationName)
     }
 
-    static void filterPublicationDependencies(Publication publication) {
+    static void filterPublicationDependencies(PublicationOption publication) {
         if (publication.dependencies != null) {
             if (publication.dependencies.compileOnly != null) {
                 List<Object> compileOnly = new ArrayList<>()
                 publication.dependencies.compileOnly.each {
                     if (it instanceof String && it.startsWith(Constants.MODULE_SDK_PRE)) {
                         String[] gav = MisUtil.filterGAV(it.replace(Constants.MODULE_SDK_PRE, ''))
-                        Publication existPublication = publicationManager.getPublicationByKey(gav[0] + '-' + gav[1])
+                        PublicationOption existPublication = publicationManager.getPublicationByKey(gav[0] + '-' + gav[1])
                         if (existPublication != null) {
                             if (existPublication.useLocal) {
                                 compileOnly.add(':' + Constants.MODULE_SDK_PRE + existPublication.groupId + '-' + existPublication.artifactId + ':')
@@ -161,7 +161,7 @@ class PublicationUtil {
                 publication.dependencies.implementation.each {
                     if (it instanceof String && it.startsWith(Constants.MODULE_SDK_PRE)) {
                         String[] gav = MisUtil.filterGAV(it.replace(Constants.MODULE_SDK_PRE, ''))
-                        Publication existPublication = publicationManager.getPublicationByKey(gav[0] + '-' + gav[1])
+                        PublicationOption existPublication = publicationManager.getPublicationByKey(gav[0] + '-' + gav[1])
                         if (existPublication != null) {
                             if (existPublication.useLocal) {
                                 implementation.add(':' + Constants.MODULE_SDK_PRE + existPublication.groupId + '-' + existPublication.artifactId + ':')

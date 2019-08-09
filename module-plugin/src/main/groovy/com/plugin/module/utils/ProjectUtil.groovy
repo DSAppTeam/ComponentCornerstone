@@ -3,11 +3,8 @@ package com.plugin.module.utils
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryPlugin
 import com.plugin.module.Constants
-import com.plugin.module.Logger
-import com.plugin.module.extension.ModuleRuntime
+import com.plugin.module.ModuleRuntime
 import org.gradle.api.Project
-
-import javax.annotation.Nonnull
 
 class ProjectUtil {
 
