@@ -2,11 +2,8 @@ package com.plugin.library;
 
 import android.app.Application;
 
-import com.plugin.core.IComponent;
-import com.plugin.core.SdkManager;
-import com.plugin.core.anno.AutoInject;
 
-@AutoInject
+@AutoInjectComponent
 public class LibraryComponent implements IComponent {
 
     @Override

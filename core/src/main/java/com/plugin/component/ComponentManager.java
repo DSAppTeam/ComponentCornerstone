@@ -1,4 +1,4 @@
-package com.plugin.core;
+package com.plugin.component;
 
 import android.app.Application;
 import android.util.Log;

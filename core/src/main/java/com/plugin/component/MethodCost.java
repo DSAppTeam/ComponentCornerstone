@@ -1,13 +1,14 @@
-package com.plugin.core.anno;
+package com.plugin.component;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.TYPE)
+/**
+ * 方法耗时
+ */
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.CLASS)
-public @interface AutoInject {
-
-    String name() default "DEFAULT";
+public @interface MethodCost {
 }
