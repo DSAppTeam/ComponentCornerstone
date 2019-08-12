@@ -8,7 +8,8 @@ import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.option.PublicationOption
 import com.plugin.component.extension.option.RunAloneOption
 import com.plugin.component.listener.OnModuleExtensionListener
-import com.plugin.component.transform.CodeTransform
+
+import com.plugin.component.transform.ComponentTransform
 import com.plugin.component.utils.JarUtil
 import com.plugin.component.extension.PublicationManager
 import com.plugin.component.extension.ComponentExtension
@@ -206,9 +207,10 @@ class ComponentPlugin implements Plugin<Project> {
                                 }
                             }
                             if (projectInfo.isCompileModuleAndAssemble()) {
-                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new CodeTransform(childProject))
+//                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new CodeTransform(childProject))
                             }
                         }
+                        childProject.extensions.findByType(BaseExtension.class).registerTransform(new ComponentTransform())
                     } else {
                         childProject.apply plugin: Constants.PLUGIN_LIBRARY
                         Logger.buildOutput("project.apply plugin: com.android.library")

@@ -4,6 +4,15 @@ import com.plugin.component.Constants
 
 class FileUtil {
 
+    static boolean isValidClassFile(File file) {
+        if (file == null || file.name == null) {
+            return false
+        }
+        def name = file.name
+        return name.endsWith(".class") && !name.contains("R\$") &&
+                !name.contains("R.class") && !name.contains("BuildConfig.class")
+    }
+
     /**
      * 是否是有效目标文件
      * @param file
