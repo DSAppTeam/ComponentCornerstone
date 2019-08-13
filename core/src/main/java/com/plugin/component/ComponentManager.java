@@ -2,11 +2,12 @@ package com.plugin.component;
 
 import android.app.Application;
 import android.util.ArrayMap;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.lang.ref.WeakReference;
+import java.util.Set;
 
 /**
  * 组件管理
@@ -16,48 +17,88 @@ import java.lang.ref.WeakReference;
  */
 public class ComponentManager {
 
+    private static final String TAG = "component-core";
+
     private static Application sApplication;
     private static ArrayMap<Class, ComponentInfo> sComponentInfoArrayMap;
 
-    public ComponentInfo findSdk() {
+    public static Application getApplication() {
+        return sApplication;
+    }
 
+    public static void setApplication(Application sApplication) {
+        ComponentManager.sApplication = sApplication;
+    }
+
+    public static ComponentInfo findComponentInfoBySdk(Class sdkKey) {
+        if (sComponentInfoArrayMap == null) {
+            return null;
+        }
+        Set<Class> classes = sComponentInfoArrayMap.keySet();
+        for (Class clazz : classes) {
+            ComponentInfo componentInfo = sComponentInfoArrayMap.get(clazz);
+            if (componentInfo.hasSdk(sdkKey)) {
+                return componentInfo;
+            }
+        }
+        return null;
+    }
+
+
+    public static ComponentInfo hasRegister(@NonNull Object componentObjectOrClass) {
+        boolean isComponentImplClass = componentObjectOrClass instanceof Class;
+        Class realComponentClass = isComponentImplClass ? (Class) componentObjectOrClass : componentObjectOrClass.getClass();
+        return sComponentInfoArrayMap.get(realComponentClass);
     }
 
 
     /**
      * 注册组件实现累必须实现 IComponent
      *
-     * @param componentObjectOrClass 支持 class 类型 或者 object 类型
+     * @param componentImplObjectOrClass 支持 class 类型 或者 object 类型
      *                               class 类型用于自动注册或者获取sdk时懒初始化
      *                               object 类型用于手动注册，不支持 sdk 加载时再懒初始化
      */
-    public static void registerComponent(@NonNull Object componentObjectOrClass) {
+    public static ComponentInfo registerComponent(@NonNull Object componentImplObjectOrClass) {
         Class componentClass = IComponent.class;
 
-        if (componentObjectOrClass.getClass().isInterface()) {
+        if (componentImplObjectOrClass.getClass().isInterface()) {
             throw new IllegalArgumentException("register component object must not be interface.");
         }
 
-        boolean isComponentImplClass = componentObjectOrClass instanceof Class;
+        boolean isComponentImplClass = componentImplObjectOrClass instanceof Class;
 
-        Class realClass = isComponentImplClass ? (Class) componentObjectOrClass : componentObjectOrClass.getClass();
+        Class realClass = isComponentImplClass ? (Class) componentImplObjectOrClass : componentImplObjectOrClass.getClass();
 
         if (!componentClass.isAssignableFrom(realClass)) {
-            throw new IllegalArgumentException(String.format("register service object must implement interface %s.", componentClass));
+            throw new IllegalArgumentException(String.format("register component object must implement interface %s.", componentClass));
         }
 
         if (sComponentInfoArrayMap == null) {
             sComponentInfoArrayMap = new ArrayMap<>();
         }
-
-        if (isComponentImplClass) {
-            ComponentInfo componentInfo = new ComponentInfo((Class) componentObjectOrClass);
-            sComponentInfoArrayMap.put(realClass, componentInfo);
+        ComponentInfo componentInfo = sComponentInfoArrayMap.get(realClass);
+        if (componentInfo != null) {
+            //如果已经存在当时未初始化且当前覆盖的为实现类
+            if (componentInfo.componentImpl == null && !isComponentImplClass) {
+                componentInfo.componentImpl = (IComponent) componentImplObjectOrClass;
+                componentInfo.componentImpl.attachComponent(sApplication);
+                sComponentInfoArrayMap.put(realClass, componentInfo);
+                Log.d(TAG, String.format("register component[ %s ] success, with object that overriding class, doing attachComponent ", realClass));
+            }
         } else {
-            ComponentInfo componentInfo = new ComponentInfo((IComponent) componentObjectOrClass);
-            componentInfo.componentObject.attachComponent(sApplication);
-            sComponentInfoArrayMap.put(realClass, componentInfo);
+            if (isComponentImplClass) {
+                componentInfo = new ComponentInfo((Class) componentImplObjectOrClass);
+                sComponentInfoArrayMap.put(realClass, componentInfo);
+                Log.d(TAG, String.format("register component[ %s ] success, with class", realClass));
+            } else {
+                componentInfo = new ComponentInfo((IComponent) componentImplObjectOrClass);
+                componentInfo.componentImpl.attachComponent(sApplication);
+                sComponentInfoArrayMap.put(realClass, componentInfo);
+                Log.d(TAG, String.format("register component[ %s ] success, with object", realClass));
+            }
         }
+        return componentInfo;
     }
 
     /**
@@ -69,20 +110,32 @@ public class ComponentManager {
      */
     public static <T extends IComponent> boolean unregisterComponent(@NonNull Class<T> component) {
         if (sComponentInfoArrayMap == null) {
+            Log.d(TAG, String.format("unregister component[ %s ] fail, sComponentInfoArrayMap is null.", component));
             return false;
         }
         ComponentInfo componentInfo = sComponentInfoArrayMap.get(component);
         if (componentInfo == null) {
+            Log.d(TAG, String.format("unregister component[ %s ] fail, didn't register %s.", component, component));
             return false;
         }
-        if (componentInfo.componentObject != null) {
-            componentInfo.componentObject.detachComponent();
+        if (componentInfo.componentImpl != null) {
+            componentInfo.componentImpl.detachComponent();
+            Log.d(TAG, String.format("unregister component[ %s ] success, doing detachComponent", component));
+        } else {
+            Log.d(TAG, String.format("unregister component[ %s ] success", component));
         }
         sComponentInfoArrayMap.remove(component);
         return false;
     }
 
 
+    /**
+     * 获取组件，如果组件未初始化，则需要初始化组件
+     *
+     * @param component
+     * @param <T>
+     * @return
+     */
     @Nullable
     public static <T extends IComponent> IComponent getComponent(@NonNull Class<T> component) {
         if (sComponentInfoArrayMap == null) {
@@ -92,7 +145,7 @@ public class ComponentManager {
         if (componentInfo == null) {
             return null;
         }
-        IComponent result = componentInfo.componentObject;
+        IComponent result = componentInfo.componentImpl;
         //如果已经初始化，则直接返回
         if (result != null) {
             return result;
@@ -100,7 +153,7 @@ public class ComponentManager {
             try {
                 result = (IComponent) componentInfo.componentClass.newInstance();
                 result.attachComponent(sApplication);
-                componentInfo.componentObject = result;
+                componentInfo.componentImpl = result;
                 return result;
             } catch (IllegalAccessException e) {
                 e.printStackTrace();

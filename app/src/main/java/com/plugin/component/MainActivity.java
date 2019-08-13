@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-        ((TextView) findViewById(R.id.text)).setText(SdkManager.getService(IAction.class).getName());
+        ((TextView) findViewById(R.id.text)).setText(SdkManager.getSdk(IAction.class).getName());
     }
 
     @Override

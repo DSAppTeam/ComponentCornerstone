@@ -11,14 +11,34 @@ public class ComponentInfo {
         this.componentClass = componentClass;
     }
 
-    public ComponentInfo(IComponent componentObject) {
-        this.componentClass = componentObject.getClass();
-        this.componentObject = componentObject;
+    public ComponentInfo(IComponent componentImpl) {
+        this.componentClass = componentImpl.getClass();
+        this.componentImpl = componentImpl;
     }
 
     public Class componentClass;
-    public IComponent componentObject;
-    public ArrayMap<Class, Class> sdkMap;
+    public IComponent componentImpl;
+
+    private ArrayMap<Class, Object> sdkMap = new ArrayMap<>();
 
 
+    public void registerSdk(Class sdkClass, Object sdkImpl) {
+        sdkMap.put(sdkClass, sdkImpl);
+    }
+
+    public boolean unregisterSdk(Class sdkKey) {
+        if (sdkMap.containsKey(sdkKey)) {
+            sdkMap.remove(sdkKey);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean hasSdk(Class sdkKey) {
+        return sdkMap.containsKey(sdkKey);
+    }
+
+    public Object getSdk(Class sdkKey) {
+        return sdkMap.get(sdkKey);
+    }
 }
