@@ -51,8 +51,10 @@ public class SdkManager {
                     Log.d(TAG, String.format("before getting sdk[ %s ] , component[ %s ] doing attachComponent.", sdkKey, componentInfo.componentClass));
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
+                    Log.d(TAG, String.format("before getting sdk[ %s ] , component[ %s ] init fail." + e.getMessage(), sdkKey, componentInfo.componentClass));
                 } catch (InstantiationException e) {
                     e.printStackTrace();
+                    Log.d(TAG, String.format("before getting sdk[ %s ] , component[ %s ] init fail.", sdkKey, componentInfo.componentClass));
                 }
             }
 
