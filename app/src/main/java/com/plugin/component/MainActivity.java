@@ -4,8 +4,9 @@ import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.plugin.library.IAction;
-import com.plugin.library.LibraryAction;
+
+import com.plugin.component.anno.AutoInjectComponent;
+import com.plugin.component.anno.MethodCost;
 import com.plugin.module.R;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+@AutoInjectComponent(name = "asssss")
 public class MainActivity extends AppCompatActivity {
 
     @MethodCost
@@ -25,7 +27,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        SdkManager.register(IAction.class, new LibraryAction());
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -34,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-        ((TextView) findViewById(R.id.text)).setText(SdkManager.getSdk(IAction.class).getName());
+        ((TextView) findViewById(R.id.text)).setText("23333");
     }
 
     @Override

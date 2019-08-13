@@ -10,7 +10,7 @@ import com.android.build.api.transform.TransformException
 import com.android.build.api.transform.TransformInput
 import com.android.build.api.transform.TransformInvocation
 import com.android.build.gradle.internal.pipeline.TransformManager
-
+import com.plugin.component.asm.ComponentClassVisitor
 import com.plugin.component.asm.MethodCostClassVisitor
 import com.plugin.component.utils.FileUtil
 import org.apache.commons.codec.digest.DigestUtils
@@ -90,7 +90,21 @@ class ComponentTransform extends Transform {
      * @param file
      */
     private void injectComponentCode(File file) {
-
+        if(FileUtil.isValidClassFile(file)){
+            def name = file.name
+            if (name.endsWith(".class") && !name.startsWith("R\$") &&
+                    !("R.class" == name) && !("BuildConfig.class" == name)) {
+                ClassReader cr = new ClassReader(file.bytes)
+                ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS)
+                ClassVisitor cv = new ComponentClassVisitor(cw)
+                cr.accept(cv, ClassReader.EXPAND_FRAMES)
+                byte[] code = cw.toByteArray()
+                FileOutputStream fos = new FileOutputStream(
+                        file.parentFile.absolutePath + File.separator + name)
+                fos.write(code)
+                fos.close()
+            }
+        }
     }
 
 

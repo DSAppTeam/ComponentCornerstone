@@ -1,6 +1,6 @@
 package com.plugin.component.asm;
 
-import com.android.ddmlib.Log;
+import com.plugin.component.Logger;
 import com.plugin.component.anno.MethodCost;
 
 import org.objectweb.asm.AnnotationVisitor;
@@ -12,10 +12,17 @@ import org.objectweb.asm.commons.AdviceAdapter;
 
 public class MethodCostClassVisitor extends ClassVisitor {
 
-    private static final String sCostCachePath = "com.plugin.component/CostCache";
+    private static final String sCostCachePath = "com/plugin/component/CostCache";
+    private String className;
 
     public MethodCostClassVisitor(ClassVisitor classVisitor) {
         super(Opcodes.ASM7, classVisitor);
+    }
+
+    @Override
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        className = name.replaceAll("/", ".");
+        super.visit(version, access, name, signature, superName, interfaces);
     }
 
     @Override
@@ -24,18 +31,15 @@ public class MethodCostClassVisitor extends ClassVisitor {
         mv = new AdviceAdapter(Opcodes.ASM7, mv, access, name, descriptor) {
 
             private boolean cost = false;
+            private String methodName = className + "#" + name;
+
 
             @Override
             protected void onMethodEnter() {
                 if (cost) {
-                    mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-                    mv.visitLdcInsn("========start=========");
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println",
-                            "(Ljava/lang/String;)V", false);
-
-                    mv.visitLdcInsn(name);
-                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "nanoTime", "()J", false);
-                    mv.visitMethodInsn(INVOKESTATIC, sCostCachePath, "setStartTime",
+                    mv.visitLdcInsn(methodName);
+                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "currentTimeMillis", "()J", false);
+                    mv.visitMethodInsn(INVOKESTATIC, sCostCachePath, "start",
                             "(Ljava/lang/String;J)V", false);
                 }
             }
@@ -43,20 +47,15 @@ public class MethodCostClassVisitor extends ClassVisitor {
             @Override
             protected void onMethodExit(int opcode) {
                 if (cost) {
-                    mv.visitLdcInsn(name);
-                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "nanoTime", "()J", false);
-                    mv.visitMethodInsn(INVOKESTATIC, sCostCachePath, "setEndTime",
+                    mv.visitLdcInsn(methodName);
+                    mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "currentTimeMillis", "()J", false);
+                    mv.visitMethodInsn(INVOKESTATIC, sCostCachePath, "end",
                             "(Ljava/lang/String;J)V", false);
 
                     mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-                    mv.visitLdcInsn(name);
-                    mv.visitMethodInsn(INVOKESTATIC, sCostCachePath, "getCostTime",
+                    mv.visitLdcInsn(methodName);
+                    mv.visitMethodInsn(INVOKESTATIC, sCostCachePath, "cost",
                             "(Ljava/lang/String;)Ljava/lang/String;", false);
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println",
-                            "(Ljava/lang/String;)V", false);
-
-                    mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-                    mv.visitLdcInsn("========end=========");
                     mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println",
                             "(Ljava/lang/String;)V", false);
                 }
@@ -67,6 +66,7 @@ public class MethodCostClassVisitor extends ClassVisitor {
                 //判断是否使用某个注解
                 if (Type.getDescriptor(MethodCost.class).equals(descriptor)) {
                     cost = true;
+                    Logger.buildOutput("MethodCostClassVisitor(@MethodCost) ==> " + methodName);
                 }
                 return super.visitAnnotation(descriptor, visible);
             }
