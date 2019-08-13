@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import java.lang.ref.WeakReference;
 
+
 public class SdkManager {
 
     private static ArrayMap<Class, Object> sServiceArrayMap;
@@ -15,12 +16,12 @@ public class SdkManager {
         if (!serviceKey.isInterface()) {
             throw new IllegalArgumentException("register service key must be interface class.");
         }
-
         if (serviceObjectOrClass.getClass().isInterface()) {
             throw new IllegalArgumentException("register service object must not be interface.");
         }
 
         Class realClass = serviceObjectOrClass instanceof Class ? (Class) serviceObjectOrClass : serviceObjectOrClass.getClass();
+
         if (!serviceKey.isAssignableFrom(realClass)) {
             throw new IllegalArgumentException(String.format("register service object must implement interface %s.", serviceKey));
         }
@@ -35,6 +36,7 @@ public class SdkManager {
         if (serviceKey == null || sServiceArrayMap == null) return;
         sServiceArrayMap.remove(serviceKey);
     }
+
 
     public static <T> T getService(Class<T> serviceKey) {
         if (sServiceArrayMap == null) return null;
