@@ -48,6 +48,9 @@ public class ComponentManager {
     public static ComponentInfo hasRegister(@NonNull Object componentObjectOrClass) {
         boolean isComponentImplClass = componentObjectOrClass instanceof Class;
         Class realComponentClass = isComponentImplClass ? (Class) componentObjectOrClass : componentObjectOrClass.getClass();
+        if (sComponentInfoArrayMap == null) {
+            return null;
+        }
         return sComponentInfoArrayMap.get(realComponentClass);
     }
 
@@ -56,8 +59,8 @@ public class ComponentManager {
      * 注册组件实现累必须实现 IComponent
      *
      * @param componentImplObjectOrClass 支持 class 类型 或者 object 类型
-     *                               class 类型用于自动注册或者获取sdk时懒初始化
-     *                               object 类型用于手动注册，不支持 sdk 加载时再懒初始化
+     *                                   class 类型用于自动注册或者获取sdk时懒初始化
+     *                                   object 类型用于手动注册，不支持 sdk 加载时再懒初始化
      */
     public static ComponentInfo registerComponent(@NonNull Object componentImplObjectOrClass) {
         Class componentClass = IComponent.class;
