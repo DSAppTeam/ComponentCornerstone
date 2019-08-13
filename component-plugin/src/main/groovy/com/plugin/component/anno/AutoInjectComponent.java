@@ -12,5 +12,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 public @interface AutoInjectComponent {
 
-    String name() default "DEFAULT";
+    String name() default "";
+
+    Class[] sdk() default {};
+
+    Class[] impl() default {};
 }

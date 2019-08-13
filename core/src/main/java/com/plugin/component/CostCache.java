@@ -19,6 +19,6 @@ public class CostCache {
     public static String cost(String methodName) {
         long start = sStartTime.get(methodName);
         long end = sEndTime.get(methodName);
-        return "method: " + methodName + " cost " + (end - start) + " ns";
+        return "[" + methodName + "] cost " + (end - start) + " ms";
     }
 }

@@ -22,6 +22,7 @@ import org.gradle.api.Project
 /**
  *   ./gradlew --no-daemon ComponentPlugin  -Dorg.gradle.debug=true
  *   ./gradlew --no-daemon [clean, :app:generateDebugSources, :library:generateDebugSources, :module_lib:generateDebugSources]  -Dorg.gradle.debug=true
+ *    ./gradlew --no-daemon :app:assemble  -Dorg.gradle.debug=true
  *  组件插件入口
  *  created by yummylau 2019/08/09
  */
@@ -30,7 +31,6 @@ class ComponentPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         boolean isRoot = project == project.rootProject
-        Logger.buildOutput("\n\n======> " + project.name + " <======\n")
         if (isRoot) {
             handleRootProject(project)
         } else {
@@ -88,6 +88,9 @@ class ComponentPlugin implements Plugin<Project> {
 
 
     private void handleRootProject(Project project) {
+
+        Logger.buildOutput("\n\n======> " + project.name + " <======\n")
+
         PluginRuntime.sSdkDir = new File(project.projectDir, Constants.SDK_DIR)
         if (!PluginRuntime.sSdkDir.exists()) {
             PluginRuntime.sSdkDir.mkdirs()
@@ -168,6 +171,8 @@ class ComponentPlugin implements Plugin<Project> {
             project.allprojects.each {
                 if (it == project) return
                 Project childProject = it
+
+                Logger.buildOutput("\n\n======> " + childProject.name + " <======\n")
 
                 ProjectInfo projectInfo = new ProjectInfo(childProject)
                 if (projectInfo.isVailModulePluginTarget) {
