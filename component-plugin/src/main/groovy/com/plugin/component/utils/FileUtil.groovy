@@ -1,17 +1,36 @@
 package com.plugin.component.utils
 
 import com.plugin.component.Constants
+import com.plugin.component.PluginRuntime
 
 class FileUtil {
 
     static boolean isValidClassFile(File file) {
-        if (file == null || file.name == null) {
+        if (file == null) {
             return false
         }
-        def name = file.name
-        return name.endsWith(".class") && !name.contains("R\$") &&
-                !name.contains("R.class") && !name.contains("BuildConfig.class")
+        return isValidClassFile(file.name)
     }
+
+    static boolean isValidClassFile(String fileName) {
+        if (fileName == null) {
+            return false
+        }
+        return fileName.endsWith(".class") && !fileName.contains("R\$") &&
+                !fileName.contains("R.class") && !fileName.contains("BuildConfig.class")
+    }
+
+
+//    static boolean isFilterPackage(String fileName) {
+//        if (PluginRuntime.ignorePackages == null || fileName == null) return false
+//        for (int i = 0; i < PluginRuntime.ignorePackages.length; i++) {
+//            if (fileName.startsWith(PluginRuntime.ignorePackages[i])) {
+//                return true
+//            }
+//        }
+//        return false
+//    }
+
 
     /**
      * 是否是有效目标文件

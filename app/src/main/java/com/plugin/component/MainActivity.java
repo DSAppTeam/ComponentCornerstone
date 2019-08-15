@@ -20,9 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-@AutoInjectComponent(name = "asssss")
 public class MainActivity extends AppCompatActivity {
-
 
     @MethodCost
     @Override
@@ -32,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = findViewById(R.id.fab);
-        SdkManager.register(B.class, IAction.class, LibraryAction.class);
+//        SdkManager.register(B.class, IAction.class, LibraryAction.class);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -40,7 +38,17 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-        ((TextView) findViewById(R.id.text)).setText(SdkManager.getSdk(IAction.class).getName());
+//        ((TextView) findViewById(R.id.text)).setText(SdkManager.getSdk(IAction.class).getName());
+    }
+
+    @MethodCost
+    public void a() {
+
+    }
+
+    @MethodCost
+    public void a(Integer integer) {
+
     }
 
     @Override
