@@ -1,6 +1,7 @@
 package com.plugin.component;
 
 import android.app.Application;
+import android.content.Context;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -21,19 +22,35 @@ public class ComponentManager {
 
     private static Application sApplication;
     private static ArrayMap<Class, ComponentInfo> sComponentInfoArrayMap;
+    private static boolean sInit = false;
 
-    public static Application getApplication() {
+    /**
+     * 注入代码入口
+     *
+     * @param application
+     */
+    public static void init(Application application) {
+        if (sInit) {
+            return;
+        }
+        ComponentManager.sApplication = application;
+        sComponentInfoArrayMap = new ArrayMap<>();
+        sInit = true;
+    }
+
+    static Application getApplication() {
         return sApplication;
     }
 
-    public static void setApplication(Application sApplication) {
-        ComponentManager.sApplication = sApplication;
+    private static void checkInit() {
+        if (!sInit) {
+            throw new RuntimeException("you should invoke ComponentManager#init() before calling apis");
+        }
     }
 
+
     public static ComponentInfo findComponentInfoBySdk(Class sdkKey) {
-        if (sComponentInfoArrayMap == null) {
-            return null;
-        }
+        checkInit();
         Set<Class> classes = sComponentInfoArrayMap.keySet();
         for (Class clazz : classes) {
             ComponentInfo componentInfo = sComponentInfoArrayMap.get(clazz);
@@ -46,11 +63,9 @@ public class ComponentManager {
 
 
     public static ComponentInfo hasRegister(@NonNull Object componentObjectOrClass) {
+        checkInit();
         boolean isComponentImplClass = componentObjectOrClass instanceof Class;
         Class realComponentClass = isComponentImplClass ? (Class) componentObjectOrClass : componentObjectOrClass.getClass();
-        if (sComponentInfoArrayMap == null) {
-            return null;
-        }
         return sComponentInfoArrayMap.get(realComponentClass);
     }
 
@@ -63,6 +78,7 @@ public class ComponentManager {
      *                                   object 类型用于手动注册，不支持 sdk 加载时再懒初始化
      */
     public static ComponentInfo registerComponent(@NonNull Object componentImplObjectOrClass) {
+        checkInit();
         Class componentClass = IComponent.class;
 
         if (componentImplObjectOrClass.getClass().isInterface()) {
@@ -75,10 +91,6 @@ public class ComponentManager {
 
         if (!componentClass.isAssignableFrom(realClass)) {
             throw new IllegalArgumentException(String.format("register component object must implement interface %s.", componentClass));
-        }
-
-        if (sComponentInfoArrayMap == null) {
-            sComponentInfoArrayMap = new ArrayMap<>();
         }
         ComponentInfo componentInfo = sComponentInfoArrayMap.get(realClass);
         if (componentInfo != null) {
@@ -112,10 +124,7 @@ public class ComponentManager {
      * @return
      */
     public static <T extends IComponent> boolean unregisterComponent(@NonNull Class<T> component) {
-        if (sComponentInfoArrayMap == null) {
-            Log.d(TAG, String.format("unregister component[ %s ] fail, sComponentInfoArrayMap is null.", component));
-            return false;
-        }
+        checkInit();
         ComponentInfo componentInfo = sComponentInfoArrayMap.get(component);
         if (componentInfo == null) {
             Log.d(TAG, String.format("unregister component[ %s ] fail, didn't register %s.", component, component));
@@ -141,9 +150,7 @@ public class ComponentManager {
      */
     @Nullable
     public static <T extends IComponent> IComponent getComponent(@NonNull Class<T> component) {
-        if (sComponentInfoArrayMap == null) {
-            return null;
-        }
+        checkInit();
         ComponentInfo componentInfo = sComponentInfoArrayMap.get(component);
         if (componentInfo == null) {
             return null;

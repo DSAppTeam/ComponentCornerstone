@@ -1,27 +1,34 @@
 package com.plugin.component.asm;
 
-import com.plugin.component.Logger;
+import com.plugin.component.anno.AutoInjectComponent;
 import com.plugin.component.anno.MethodCost;
 
-import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
 
-public class MethodCostClassVisitor extends ClassVisitor {
+/**
+ * component插件注入：
+ * 收集 {@link MethodCost} 目标方法，添加统计代码
+ * 收集 {@link AutoInjectComponent} 目标类，application#onCreate 中添加注册
+ * <p>
+ * visit visitSource? visitOuterClass? ( visitAnnotation | visitAttribute )* ( visitInnerClass | visitField | visitMethod )* visitEnd
+ */
+public class ComponentInjectClassVisitor extends ClassVisitor {
 
     private static final String sCostCachePath = "com/plugin/component/CostCache";
+    private static final String sComponentManagerPath = "com/plugin/component/ComponentManager";
+
     private String className;
 
-    public MethodCostClassVisitor(ClassVisitor classVisitor) {
+    public ComponentInjectClassVisitor(ClassVisitor classVisitor) {
         super(Opcodes.ASM7, classVisitor);
     }
 
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        className = name.replaceAll("/", ".");
+        className = name;
         super.visit(version, access, name, signature, superName, interfaces);
     }
 
@@ -30,13 +37,19 @@ public class MethodCostClassVisitor extends ClassVisitor {
         MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
         mv = new AdviceAdapter(Opcodes.ASM7, mv, access, name, descriptor) {
 
-            private boolean cost = false;
+            private boolean injectMethodCostCode = false;
+            private boolean injectComponentAutoInitCode = false;
             private String methodName = className + "#" + name;
-
 
             @Override
             protected void onMethodEnter() {
-                if (cost) {
+                injectMethodCostCode = ScanRuntime.isCostMethod(className, name, descriptor);
+                injectComponentAutoInitCode =
+                        className == sComponentManagerPath
+                                && name == "init"
+                                && descriptor == "(Landroid/app/Application;)V";
+
+                if (injectMethodCostCode) {
                     mv.visitLdcInsn(methodName);
                     mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "currentTimeMillis", "()J", false);
                     mv.visitMethodInsn(INVOKESTATIC, sCostCachePath, "start",
@@ -46,7 +59,7 @@ public class MethodCostClassVisitor extends ClassVisitor {
 
             @Override
             protected void onMethodExit(int opcode) {
-                if (cost) {
+                if (injectMethodCostCode) {
                     mv.visitLdcInsn(methodName);
                     mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "currentTimeMillis", "()J", false);
                     mv.visitMethodInsn(INVOKESTATIC, sCostCachePath, "end",
@@ -59,16 +72,11 @@ public class MethodCostClassVisitor extends ClassVisitor {
                     mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println",
                             "(Ljava/lang/String;)V", false);
                 }
-            }
 
-            @Override
-            public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-                //判断是否使用某个注解
-                if (Type.getDescriptor(MethodCost.class).equals(descriptor)) {
-                    cost = true;
-                    Logger.buildOutput("MethodCostClassVisitor(@MethodCost) ==> " + methodName);
+                //todo 插入注入代码
+                if (injectComponentAutoInitCode) {
+
                 }
-                return super.visitAnnotation(descriptor, visible);
             }
         };
         return mv;

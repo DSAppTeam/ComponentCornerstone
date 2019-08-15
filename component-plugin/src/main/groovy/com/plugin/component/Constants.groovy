@@ -55,4 +55,5 @@ class Constants {
     public static String RES_PATH = "src/main/res"
     public static String ASSETS_PATH = "src/main/assets"
     public static String JNILIBS_PATH = "src/main/jniLibs"
+    public static String MANIFEST = "src/main/AndroidManifest.xml"
 }
