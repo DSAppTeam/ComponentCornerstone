@@ -3,19 +3,19 @@ package com.plugin.component.asm;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ScanComponentInfo {
+public class ScanSdkInfo {
 
     public String className;
-    public List<Object> impl;
+    public List<Object> sdk;
 
-    public ScanComponentInfo(String className) {
+    public ScanSdkInfo(String className) {
         this.className = className;
-        this.impl = new ArrayList<>();
+        this.sdk = new ArrayList<>();
     }
 
     @Override
     public String toString() {
-        return "ComponentInject ==> " +  className  + "impl" + getString(impl);
+        return "SdkInject ==> " + className + "sdk" + getString(sdk);
     }
 
     public String getString(List<Object> objects) {

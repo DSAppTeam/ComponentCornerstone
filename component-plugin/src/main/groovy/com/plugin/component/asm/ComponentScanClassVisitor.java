@@ -1,7 +1,7 @@
 package com.plugin.component.asm;
 
-import com.plugin.component.Logger;
 import com.plugin.component.anno.AutoInjectComponent;
+import com.plugin.component.anno.AutoInjectImpl;
 import com.plugin.component.anno.MethodCost;
 
 import org.objectweb.asm.AnnotationVisitor;
@@ -39,36 +39,15 @@ public class ComponentScanClassVisitor extends ClassVisitor {
              *  ( visit | visitEnum | visitAnnotation | visitArray )* visitEnd
              */
             return new AnnotationVisitor(Opcodes.ASM7, annotationVisitor) {
-                @Override
-                public void visit(String name, Object value) {
-                    super.visit(name, value);
-                    String componentName = "";
-                    if (name == null && value != null) {
-                        componentName = (String) value;
-                    }
-                    if (name == "name") {
-                        componentName = (String) value;
-                    }
-
-                    if (name == "") {
-                        componentName = className;
-                    }
-                    scanComponentInfo.name = componentName;
-                }
 
                 @Override
                 public AnnotationVisitor visitArray(String arrayName) {
                     return new AnnotationVisitor(Opcodes.ASM7, super.visitArray(arrayName)) {
                         @Override
                         public void visit(String name, Object value) {
-                            if (arrayName != null && arrayName.equals("sdk")) {
-                                if (value != null) {
-                                    scanComponentInfo.sdks.add(value);
-                                }
-                            }
                             if (arrayName != null && arrayName.equals("impl")) {
                                 if (value != null) {
-                                    scanComponentInfo.impls.add(value);
+                                    scanComponentInfo.impl.add(value);
                                 }
                             }
                             super.visit(name, value);
@@ -79,6 +58,31 @@ public class ComponentScanClassVisitor extends ClassVisitor {
                 @Override
                 public void visitEnd() {
                     ScanRuntime.addComponentInfo(scanComponentInfo);
+                    super.visitEnd();
+                }
+            };
+        } else if (Type.getDescriptor(AutoInjectImpl.class).equals(descriptor)) {
+
+            ScanSdkInfo scanSdkInfo = new ScanSdkInfo(className);
+
+            return new AnnotationVisitor(Opcodes.ASM7, annotationVisitor) {
+                @Override
+                public AnnotationVisitor visitArray(String arrayName) {
+                    return new AnnotationVisitor(Opcodes.ASM7, super.visitArray(arrayName)) {
+                        @Override
+                        public void visit(String name, Object value) {
+                            if (arrayName != null && arrayName.equals("sdk")) {
+                                if (value != null) {
+                                    scanSdkInfo.sdk.add(value);
+                                }
+                            }
+                            super.visit(name, value);
+                        }
+                    };
+                }
+                @Override
+                public void visitEnd() {
+                    ScanRuntime.addSdkInfo(scanSdkInfo);
                     super.visitEnd();
                 }
             };

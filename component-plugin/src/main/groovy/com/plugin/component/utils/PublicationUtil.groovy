@@ -153,7 +153,7 @@ class PublicationUtil {
                 publication.dependencies.compileOnly.each {
                     if (it instanceof String && it.startsWith(Constants.SDK_PRE)) {
                         String[] gav = filterGAV(it.replace(Constants.SDK_PRE, ''))
-                        PublicationOption existPublication = publicationManager.getPublicationByKey(gav[0] + '-' + gav[1])
+                        PublicationOption existPublication = PluginRuntime.sPublicationManager.getPublicationByKey(gav[0] + '-' + gav[1])
                         if (existPublication != null) {
                             if (existPublication.useLocal) {
                                 compileOnly.add(':' + Constants.SDK_PRE + existPublication.groupId + '-' + existPublication.artifactId + ':')
@@ -172,7 +172,7 @@ class PublicationUtil {
                 publication.dependencies.implementation.each {
                     if (it instanceof String && it.startsWith(Constants.SDK_PRE)) {
                         String[] gav = filterGAV(it.replace(Constants.SDK_PRE, ''))
-                        PublicationOption existPublication = publicationManager.getPublicationByKey(gav[0] + '-' + gav[1])
+                        PublicationOption existPublication = PluginRuntime.sPublicationManager.getPublicationByKey(gav[0] + '-' + gav[1])
                         if (existPublication != null) {
                             if (existPublication.useLocal) {
                                 implementation.add(':' + Constants.SDK_PRE + existPublication.groupId + '-' + existPublication.artifactId + ':')

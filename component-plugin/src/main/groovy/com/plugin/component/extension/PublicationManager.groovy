@@ -1,5 +1,6 @@
 package com.plugin.component.extension
 
+import com.plugin.component.Logger
 import com.plugin.component.PluginRuntime
 import com.plugin.component.extension.module.Digraph
 import com.plugin.component.extension.module.SourceFile
@@ -29,7 +30,8 @@ class PublicationManager {
     private static PublicationManager sPublicationManager
 
     private File misDir
-    private Map<String, PublicationOption> publicationManifest        //maven Id 映射 PublicationOption
+    private Map<String, PublicationOption> publicationManifest
+    //maven Id 映射 PublicationOption
 
     Digraph<String> dependencyGraph
     Map<String, PublicationOption> publicationDependencies
@@ -56,9 +58,11 @@ class PublicationManager {
         rootProject.gradle.buildFinished {
             PluginRuntime.resetProjectInfoScript()
             if (it.failure != null) {
+                Logger.buildOutput("build fail!")
                 return
             }
             saveManifest()
+            Logger.buildOutput("build finished!")
         }
 
         File publicationManifest = new File(misDir, 'publicationManifest.xml')
