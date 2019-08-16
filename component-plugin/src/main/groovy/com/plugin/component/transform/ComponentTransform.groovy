@@ -12,10 +12,7 @@ import com.android.build.api.transform.TransformInvocation
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.plugin.component.asm.ComponentInjectClassVisitor
 import com.plugin.component.asm.ComponentScanClassVisitor
-import com.plugin.component.asm.ScanRuntime
 import com.plugin.component.utils.FileUtil
-import org.apache.commons.codec.digest.DigestUtils
-import org.apache.commons.io.FileUtils
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
@@ -24,6 +21,7 @@ import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
 import java.util.zip.ZipEntry
+import com.plugin.component.asm.ScanRuntime
 
 /**
  * 插入方法统计transform
@@ -54,7 +52,7 @@ class ComponentTransform extends Transform {
 
 
     @Override
-    public void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
+    void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
 
         transformInvocation.inputs.each { TransformInput input ->
             input.directoryInputs.each { DirectoryInput directoryInput ->
