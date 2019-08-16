@@ -18,7 +18,7 @@ component {
             // or
             implementation 'com.google.code.gson:gson:2.8.1'
 
-//                compileOnly component('com.eastwood.demo:module-mainModuleName-sdk')
+//                compileOnly component('com.eastwood.demo:module-mainModuleName-impl')
         }
     }
 }

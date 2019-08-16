@@ -46,7 +46,7 @@ class ComponentPlugin implements Plugin<Project> {
             PublicationUtil.parseComponent(projectInfo, value)
         }
 
-        //实现模块导入 sdk
+        //实现模块导入 impl
         List<PublicationOption> publications = PluginRuntime.sPublicationManager.getPublicationByProject(project)
         project.dependencies {
             publications.each {

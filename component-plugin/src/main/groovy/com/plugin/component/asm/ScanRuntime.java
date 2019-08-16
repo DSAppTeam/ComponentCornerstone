@@ -16,6 +16,7 @@ public class ScanRuntime {
 
     static Set<String> sMethodCostInfo = new HashSet<>();
     static List<ScanComponentInfo> sComponentInfo = new ArrayList<>();
+    static List<ScanSdkInfo> sSdkInfo = new ArrayList<>();
 
     public static void addCostMethod(String className, String methodName, String descriptor) {
         if (descriptor == null) {
@@ -36,7 +37,10 @@ public class ScanRuntime {
         sComponentInfo.add(scanComponentInfo);
     }
 
-
+    public static void addSdkInfo(@NonNull ScanSdkInfo scanSdkInfo) {
+        sSdkInfo.add(scanSdkInfo);
+    }
+    
     public static void logScanInfo() {
         for (String string : sMethodCostInfo) {
             Logger.buildOutput("MethodCost ==> " + string);

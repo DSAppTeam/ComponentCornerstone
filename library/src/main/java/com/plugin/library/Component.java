@@ -6,18 +6,16 @@ import com.plugin.component.anno.AutoInjectComponent;
 import com.plugin.component.IComponent;
 
 
-@AutoInjectComponent(
-        name = "default",
-        sdk = {IAction.class},
-        impl = {LibraryAction.class}
-)
-public class LibraryComponent implements IComponent {
+@AutoInjectComponent(impl = {SdkImpl.class, SdkImpl2.class})
+public class Component implements IComponent {
 
     @Override
     public void attachComponent(Application application) {
+        //todo init code
     }
 
     @Override
     public void detachComponent() {
+        //todo release code
     }
 }

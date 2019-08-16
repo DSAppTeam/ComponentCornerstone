@@ -1,15 +1,13 @@
 package com.plugin.component;
 
-import android.app.Application;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
-import com.plugin.component.anno.AutoInjectComponent;
 import com.plugin.component.anno.MethodCost;
-import com.plugin.library.IAction;
-import com.plugin.library.LibraryAction;
+//import com.plugin.library.ISdk;
+import com.plugin.library.SdkImpl;
 import com.plugin.module.R;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,7 +36,8 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-//        ((TextView) findViewById(R.id.text)).setText(SdkManager.getSdk(IAction.class).getName());
+
+        ((TextView) findViewById(R.id.text)).setText(new SdkImpl().getSdkName());
     }
 
     @MethodCost

@@ -1,6 +1,5 @@
 package com.plugin.component.asm;
 
-import com.plugin.component.anno.AutoInjectComponent;
 import com.plugin.component.anno.MethodCost;
 
 import org.objectweb.asm.ClassVisitor;
@@ -31,6 +30,9 @@ public class ComponentInjectClassVisitor extends ClassVisitor {
         className = name;
         super.visit(version, access, name, signature, superName, interfaces);
     }
+
+
+
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
