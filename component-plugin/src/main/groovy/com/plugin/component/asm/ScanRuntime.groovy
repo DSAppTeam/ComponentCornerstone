@@ -49,4 +49,33 @@ class ScanRuntime {
         }
     }
 
+    static void clearScanInfo(){
+        sMethodCostInfo.clear()
+        sSdkInfo.clear()
+        sComponentInfo.clear()
+    }
+
+    static List<ComponentSdkInfo> buildComponentSdkInfos() {
+        List<ComponentSdkInfo> componentSdkInfoList = new ArrayList<>()
+        for (ScanSdkInfo scanSdkInfo : sSdkInfo) {
+            if (scanSdkInfo.sdk != null && !scanSdkInfo.sdk.isEmpty()) {
+                for (String sdk : scanSdkInfo.sdk) {
+                    ComponentSdkInfo componentSdkInfo = new ComponentSdkInfo()
+                    componentSdkInfo.sdk = sdk
+                    componentSdkInfo.impl = scanSdkInfo.className + ";"
+                    componentSdkInfoList.add(componentSdkInfo)
+                }
+            }
+        }
+        for (ScanComponentInfo scanComponentInfo : sComponentInfo) {
+            if (scanComponentInfo.sdk != null && !scanComponentInfo.impl.isEmpty()) {
+                for (ComponentSdkInfo componentSdkInfo : componentSdkInfoList) {
+                    if (componentSdkInfo.impl == scanComponentInfo.impl) {
+                        componentSdkInfo.componentClassName = scanComponentInfo.className + ";"
+                    }
+                }
+            }
+        }
+        return componentSdkInfoList
+    }
 }

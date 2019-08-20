@@ -6,6 +6,7 @@ import com.plugin.component.SdkManager;
 public class A {
 
     public void init() {
+        ComponentManager.registerComponent(new Component());
         ComponentManager.registerComponent(Component.class);
         SdkManager.register(Component.class, ISdk.class, SdkImpl.class);
         SdkManager.register(Component.class, ISdk2.class, SdkImpl2.class);

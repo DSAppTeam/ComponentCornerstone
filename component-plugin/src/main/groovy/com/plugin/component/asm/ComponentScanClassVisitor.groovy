@@ -10,7 +10,7 @@ import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 import org.objectweb.asm.commons.AdviceAdapter
 
-class ComponentScanClassVisitor extends ClassVisitor{
+class ComponentScanClassVisitor extends ClassVisitor {
 
     private String className
 
@@ -27,63 +27,56 @@ class ComponentScanClassVisitor extends ClassVisitor{
     @Override
     AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
         AnnotationVisitor annotationVisitor = super.visitAnnotation(descriptor, visible)
-        if (Type.getDescriptor(AutoInjectComponent.class) == descriptor) {
+        ScanComponentInfo scanComponentInfo = null
+        ScanSdkInfo scanSdkInfo = null
+        return new AnnotationVisitor(Opcodes.ASM7, annotationVisitor) {
 
-            ScanComponentInfo scanComponentInfo = new ScanComponentInfo(className)
-            /**
-             *  ( visit | visitEnum | visitAnnotation | visitArray )* visitEnd
-             */
-            return new AnnotationVisitor(Opcodes.ASM7, annotationVisitor) {
+            @Override
+            AnnotationVisitor visitArray(String arrayName) {
 
-                @Override
-                AnnotationVisitor visitArray(String arrayName) {
-                    return new AnnotationVisitor(Opcodes.ASM7, super.visitArray(arrayName)) {
-                        @Override
-                        void visit(String name, Object value) {
+                return new AnnotationVisitor(Opcodes.ASM7, super.visitArray(arrayName)) {
+                    @Override
+                    void visit(String name, Object value) {
+                        if (Type.getDescriptor(AutoInjectComponent.class) == descriptor) {
                             if (arrayName != null && arrayName == "impl") {
                                 if (value != null) {
-                                    scanComponentInfo.impl.add(value)
+                                    if (scanComponentInfo == null) {
+                                        scanComponentInfo = new ScanComponentInfo(className)
+                                    }
+                                    scanComponentInfo.impl.add((String) value)
                                 }
                             }
-                            super.visit(name, value)
                         }
-                    }
-                }
 
-                @Override
-                public void visitEnd() {
-                    ScanRuntime.addComponentInfo(scanComponentInfo)
-                    super.visitEnd()
-                }
-            }
-        } else if (Type.getDescriptor(AutoInjectImpl.class).equals(descriptor)) {
-
-            ScanSdkInfo scanSdkInfo = new ScanSdkInfo(className)
-
-            return new AnnotationVisitor(Opcodes.ASM7, annotationVisitor) {
-                @Override
-                AnnotationVisitor visitArray(String arrayName) {
-                    return new AnnotationVisitor(Opcodes.ASM7, super.visitArray(arrayName)) {
-                        @Override
-                        void visit(String name, Object value) {
+                        if (Type.getDescriptor(AutoInjectImpl.class) == descriptor) {
                             if (arrayName != null && arrayName == "sdk") {
                                 if (value != null) {
-                                    scanSdkInfo.sdk.add(value)
+                                    if (scanSdkInfo == null) {
+                                        scanSdkInfo = new ScanSdkInfo(className)
+                                    }
+                                    scanSdkInfo.sdk.add((String) value)
                                 }
                             }
-                            super.visit(name, value)
                         }
+                        super.visit(name, value)
                     }
-                }
 
-                @Override
-                void visitEnd() {
-                    ScanRuntime.addSdkInfo(scanSdkInfo)
-                    super.visitEnd()
                 }
             }
+
+            @Override
+            void visitEnd() {
+                if (scanComponentInfo != null) {
+                    ScanRuntime.addComponentInfo(scanComponentInfo)
+                    scanComponentInfo = null
+                }
+                if (scanSdkInfo != null) {
+                    ScanRuntime.addSdkInfo(scanSdkInfo)
+                    scanSdkInfo = null
+                }
+                super.visitEnd()
+            }
         }
-        return annotationVisitor
     }
 
 

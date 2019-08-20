@@ -3,7 +3,7 @@ package com.plugin.component.asm
 class ScanComponentInfo {
 
     public String className
-    public List<Object> impl
+    public List<String> impl
 
     ScanComponentInfo(String className) {
         this.className = className
@@ -12,7 +12,7 @@ class ScanComponentInfo {
 
     @Override
     String toString() {
-        return "ComponentInject ==> " + className + "impl[" + impl.join(",Au") + "]"
+        return "ComponentInject ==> " + className + "impl[" + impl.join(" ") + "]"
     }
 
 }

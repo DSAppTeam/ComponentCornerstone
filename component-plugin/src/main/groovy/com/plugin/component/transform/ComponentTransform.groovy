@@ -10,6 +10,7 @@ import com.android.build.api.transform.TransformException
 import com.android.build.api.transform.TransformInput
 import com.android.build.api.transform.TransformInvocation
 import com.android.build.gradle.internal.pipeline.TransformManager
+import com.android.utils.FileUtils
 import com.plugin.component.asm.ComponentInjectClassVisitor
 import com.plugin.component.asm.ComponentScanClassVisitor
 import com.plugin.component.utils.FileUtil
@@ -47,12 +48,12 @@ class ComponentTransform extends Transform {
 
     @Override
     boolean isIncremental() {
-        return true
+        return false
     }
 
 
     @Override
-    void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
+    public void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
 
         transformInvocation.inputs.each { TransformInput input ->
             input.directoryInputs.each { DirectoryInput directoryInput ->
@@ -70,15 +71,17 @@ class ComponentTransform extends Transform {
             input.directoryInputs.each { DirectoryInput directoryInput ->
                 def dest = transformInvocation.outputProvider.getContentLocation(directoryInput.name,
                         directoryInput.contentTypes, directoryInput.scopes, Format.DIRECTORY)
-                com.android.utils.FileUtils.copyDirectory(directoryInput.file, dest)
+                FileUtils.copyDirectory(directoryInput.file, dest)
                 injectClass(dest)
             }
             input.jarInputs.each { JarInput jarInput ->
                 def dest = transformInvocation.outputProvider.getContentLocation(jarInput.name, jarInput.contentTypes, jarInput.scopes, Format.JAR)
-                com.android.utils.FileUtils.copyFile(jarInput.file, dest)
+                FileUtils.copyFile(jarInput.file, dest)
                 injectClass(dest)
             }
         }
+
+        ScanRuntime.clearScanInfo()
     }
 
 
@@ -124,11 +127,12 @@ class ComponentTransform extends Transform {
     }
 
     private void injectClass(File source) {
+
         if (source.isDirectory()) {
             source.eachFileRecurse { File file ->
                 String filename = file.getName()
                 if (filterClass(filename)) return
-                ClassReader cr = new ClassReader(file.readBytes())
+                ClassReader cr = new ClassReader(file.bytes)
                 ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS)
                 ClassVisitor cv = new ComponentInjectClassVisitor(cw)
                 cr.accept(cv, ClassReader.EXPAND_FRAMES)
@@ -188,5 +192,4 @@ class ComponentTransform extends Transform {
             jarFile.close()
         }
     }
-
 }
