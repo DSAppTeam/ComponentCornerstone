@@ -3,14 +3,14 @@ package com.plugin.component.asm
 class ComponentSdkInfo {
 
     public String componentClassName
-    public Object sdk
-    public Object impl
+    public String sdk = ""
+    public String impl = ""
 
-    boolean isVaild() {
-        return componentClassName != null && !componentClassName.isEmpty() && sdk instanceof Class && impl instanceof Class
+    boolean isValid() {
+        return componentClassName != null && !componentClassName.isEmpty() && !sdk.isEmpty() && !impl.isEmpty()
     }
 
     String toString() {
-        return "componentClassName(" + componentClassName + ") " +"sdk(" + sdk + ") " + "impl(" + impl + ")"
+        return "componentClassName(" + componentClassName + ") " + "sdk(" + sdk + ") " + "impl(" + impl + ")"
     }
 }

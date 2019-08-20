@@ -66,6 +66,7 @@ class ComponentTransform extends Transform {
 
         //log
         ScanRuntime.logScanInfo()
+        ScanRuntime.buildComponentSdkInfo()
 
         transformInvocation.inputs.each { TransformInput input ->
             input.directoryInputs.each { DirectoryInput directoryInput ->
@@ -81,6 +82,7 @@ class ComponentTransform extends Transform {
             }
         }
 
+        ScanRuntime.loadInjectInfo()
         ScanRuntime.clearScanInfo()
     }
 
