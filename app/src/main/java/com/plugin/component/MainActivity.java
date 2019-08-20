@@ -6,8 +6,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import com.plugin.component.anno.MethodCost;
-//import com.plugin.library.ISdk;
-import com.plugin.library.SdkImpl;
+import com.plugin.library.ISdk;
 import com.plugin.module.R;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,7 +27,6 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = findViewById(R.id.fab);
-//        SdkManager.register(B.class, IAction.class, LibraryAction.class);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -36,8 +34,8 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-
-        ((TextView) findViewById(R.id.text)).setText(new SdkImpl().getSdkName());
+        ComponentManager.init(getApplication());
+        ((TextView) findViewById(R.id.text)).setText(SdkManager.getSdk(ISdk.class).getSdkName());
     }
 
     @MethodCost

@@ -1,7 +1,6 @@
 package com.plugin.component.asm
 
 import com.plugin.component.Logger
-import com.plugin.component.asm.ScanRuntime
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
@@ -47,7 +46,7 @@ class ComponentInjectClassVisitor extends ClassVisitor {
             protected void onMethodEnter() {
                 injectMethodCostCode = ScanRuntime.isCostMethod(className, name, descriptor)
                 injectComponentAutoInitCode =
-                        className == sComponentManagerPath && name == "init" && descriptor == "(Landroid/app/Application)V"
+                        className == sComponentManagerPath && name == "init" && descriptor == "(Landroid/app/Application;)V"
                 methodName = className + "#" + name
 
                 if (injectMethodCostCode) {
@@ -74,16 +73,16 @@ class ComponentInjectClassVisitor extends ClassVisitor {
                             "(Ljava/lang/String;)V", false)
                 }
 
-//                if (injectComponentAutoInitCode) {
-//                    List<ComponentSdkInfo> componentSdkInfo = ScanRuntime.buildComponentSdkInfos()
-//                    for (ComponentSdkInfo item : componentSdkInfo) {
-//                        Logger.buildOutput(item.toString())
-//                        mv.visitLdcInsn(Type.getType(item.componentClassName))
-//                        mv.visitLdcInsn(Type.getType(item.sdk))
-//                        mv.visitLdcInsn(Type.getType(item.impl))
-//                        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/plugin/component/SdkManager", "register", "(Ljava/lang/Object;Ljava/lang/Class;Ljava/lang/Object;)V", false);
-//                    }
-//                }
+                if (injectComponentAutoInitCode) {
+                    for (ComponentSdkInfo item : ScanRuntime.getComponentSdkInfoList()) {
+                        if (item.isValid()) {
+                            mv.visitLdcInsn(Type.getType(item.componentClassName))
+                            mv.visitLdcInsn(Type.getType(item.sdk))
+                            mv.visitLdcInsn(Type.getType(item.impl))
+                            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/plugin/component/SdkManager", "register", "(Ljava/lang/Object;Ljava/lang/Class;Ljava/lang/Object;)V", false)
+                        }
+                    }
+                }
             }
         }
         return mv
