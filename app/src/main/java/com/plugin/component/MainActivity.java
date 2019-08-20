@@ -7,6 +7,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import com.plugin.component.anno.MethodCost;
 import com.plugin.library.ISdk;
+import com.plugin.library.ISdk2;
 import com.plugin.module.R;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         ComponentManager.init(getApplication());
-        ((TextView) findViewById(R.id.text)).setText(SdkManager.getSdk(ISdk.class).getSdkName());
+        ((TextView) findViewById(R.id.text)).setText(SdkManager.getSdk(ISdk2.class).getSdk2Name());
     }
 
     @MethodCost
