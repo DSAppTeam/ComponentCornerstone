@@ -1,9 +1,11 @@
 package com.plugin.component.asm
 
+import com.plugin.component.Logger
 import com.plugin.component.asm.ScanRuntime
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
+import org.objectweb.asm.Type
 import org.objectweb.asm.commons.AdviceAdapter
 
 /**
@@ -39,19 +41,20 @@ class ComponentInjectClassVisitor extends ClassVisitor {
 
             private boolean injectMethodCostCode = false
             private boolean injectComponentAutoInitCode = false
-            private String methodName = className + "#" + name
+            private String methodName
 
             @Override
             protected void onMethodEnter() {
                 injectMethodCostCode = ScanRuntime.isCostMethod(className, name, descriptor)
                 injectComponentAutoInitCode =
                         className == sComponentManagerPath && name == "init" && descriptor == "(Landroid/app/Application)V"
+                methodName = className + "#" + name
 
                 if (injectMethodCostCode) {
                     mv.visitLdcInsn(methodName)
                     mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "currentTimeMillis", "()J", false)
                     mv.visitMethodInsn(INVOKESTATIC, sCostCachePath, "start",
-                            "(Ljava/lang/StringJ)V", false)
+                            "(Ljava/lang/String;J)V", false)
                 }
             }
 
@@ -61,20 +64,26 @@ class ComponentInjectClassVisitor extends ClassVisitor {
                     mv.visitLdcInsn(methodName)
                     mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "currentTimeMillis", "()J", false)
                     mv.visitMethodInsn(INVOKESTATIC, sCostCachePath, "end",
-                            "(Ljava/lang/StringJ)V", false)
+                            "(Ljava/lang/String;J)V", false)
 
-                    mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream")
+                    mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;")
                     mv.visitLdcInsn(methodName)
                     mv.visitMethodInsn(INVOKESTATIC, sCostCachePath, "cost",
-                            "(Ljava/lang/String)Ljava/lang/String", false)
+                            "(Ljava/lang/String;)Ljava/lang/String;", false)
                     mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println",
-                            "(Ljava/lang/String)V", false)
+                            "(Ljava/lang/String;)V", false)
                 }
 
-                //todo 插入注入代码
-                if (injectComponentAutoInitCode) {
-
-                }
+//                if (injectComponentAutoInitCode) {
+//                    List<ComponentSdkInfo> componentSdkInfo = ScanRuntime.buildComponentSdkInfos()
+//                    for (ComponentSdkInfo item : componentSdkInfo) {
+//                        Logger.buildOutput(item.toString())
+//                        mv.visitLdcInsn(Type.getType(item.componentClassName))
+//                        mv.visitLdcInsn(Type.getType(item.sdk))
+//                        mv.visitLdcInsn(Type.getType(item.impl))
+//                        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/plugin/component/SdkManager", "register", "(Ljava/lang/Object;Ljava/lang/Class;Ljava/lang/Object;)V", false);
+//                    }
+//                }
             }
         }
         return mv
