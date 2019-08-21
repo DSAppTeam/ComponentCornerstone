@@ -66,3 +66,11 @@ android modular plugin.
 
 
 待外放...
+
+
+todo list
+
+1. 自定义scope逻辑，统一配置
+2. 仓库管理
+3. transform 优化
+4. kotlin 模块测试，相互依赖测试

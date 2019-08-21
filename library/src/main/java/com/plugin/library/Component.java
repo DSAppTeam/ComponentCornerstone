@@ -1,6 +1,7 @@
 package com.plugin.library;
 
 import android.app.Application;
+import android.util.Log;
 
 import com.plugin.component.anno.AutoInjectComponent;
 import com.plugin.component.IComponent;
@@ -11,11 +12,11 @@ public class Component implements IComponent {
 
     @Override
     public void attachComponent(Application application) {
-        //todo init code
+        Log.d("component-plugin", "Component#attachComponent");
     }
 
     @Override
     public void detachComponent() {
-        //todo release code
+        Log.d("component-plugin", "Component#detachComponent");
     }
 }
