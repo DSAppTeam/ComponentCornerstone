@@ -42,15 +42,19 @@ class ComponentPlugin implements Plugin<Project> {
 
         ProjectInfo projectInfo = PluginRuntime.sProjectInfoMap.get(project.name)
 
-        project.dependencies.metaClass.component { Object value ->
-            PublicationUtil.parseComponent(projectInfo, value)
+        project.dependencies.metaClass.component { String value ->
+            return PublicationUtil.parseComponent(projectInfo, value)
+        }
+
+        DependenciesOption.metaClass.component { String value ->
+            return PublicationUtil.parseComponent(projectInfo, value)
         }
 
         //实现模块导入 impl
         List<PublicationOption> publications = PluginRuntime.sPublicationManager.getPublicationByProject(project)
         project.dependencies {
             publications.each {
-                api PublicationUtil.getPublication(it.groupId, it.artifactId)
+                api PublicationUtil.getPublication(it)
             }
         }
 
@@ -86,15 +90,19 @@ class ComponentPlugin implements Plugin<Project> {
         }
     }
 
-
-    private void handleRootProject(Project project) {
-
+    private resetDir(Project project) {
         Logger.buildOutput("\n\n======> " + project.name + " <======\n")
-
         PluginRuntime.sSdkDir = new File(project.projectDir, Constants.SDK_DIR)
+        PluginRuntime.sImplDir = new File(project.projectDir, Constants.IMPL_DIR)
+
         if (!PluginRuntime.sSdkDir.exists()) {
             PluginRuntime.sSdkDir.mkdirs()
             Logger.buildOutput("create File[" + PluginRuntime.sSdkDir.name + "]")
+        }
+
+        if (!PluginRuntime.sImplDir.exists()) {
+            PluginRuntime.sImplDir.mkdirs()
+            Logger.buildOutput("create File[" + PluginRuntime.sImplDir.name + "]")
         }
 
         ProjectUtil.getTasks(project).each {
@@ -102,26 +110,41 @@ class ComponentPlugin implements Plugin<Project> {
                 if (!PluginRuntime.sSdkDir.deleteDir()) {
                     throw new RuntimeException("unable to delete dir " + PluginRuntime.sSdkDir.absolutePath)
                 }
+                if (!PluginRuntime.sImplDir.deleteDir()) {
+                    throw new RuntimeException("unable to delete dir " + PluginRuntime.sImplDir.absolutePath)
+                }
                 PluginRuntime.sSdkDir.mkdirs()
                 Logger.buildOutput("reset File[" + PluginRuntime.sSdkDir.name + "]")
+
+                PluginRuntime.sImplDir.mkdirs()
+                Logger.buildOutput("reset File[" + PluginRuntime.sImplDir.name + "]")
             }
         }
-
         project.repositories {
             flatDir {
                 dirs PluginRuntime.sSdkDir.absolutePath
                 Logger.buildOutput(project.name + "-flatDir Dir[" + PluginRuntime.sSdkDir.absolutePath + "]")
+
+                dirs PluginRuntime.sImplDir.absolutePath
+                Logger.buildOutput(project.name + "-flatDir Dir[" + PluginRuntime.sImplDir.absolutePath + "]")
             }
         }
+
+    }
+
+
+    private void handleRootProject(Project project) {
+
+        resetDir(project)
         PluginRuntime.sPublicationManager = PublicationManager.getInstance()
-        PluginRuntime.sPublicationManager.loadManifest(project, PluginRuntime.sSdkDir)
+        PluginRuntime.sPublicationManager.loadManifest(project)
         PluginRuntime.sModuleExtension = project.getExtensions().create(Constants.COMPONENT, ComponentExtension, new OnModuleExtensionListener() {
 
             @Override
             void onPublicationOptionAdded(Project childProject, PublicationOption publication) {
                 PublicationUtil.initPublication(childProject, publication)
                 PluginRuntime.sPublicationManager.addDependencyGraph(publication)
-                PluginRuntime.sPublicationMap.put(childProject.name, publication)
+                PluginRuntime.sSdkPublicationMap.put(childProject.name, publication)
             }
 
             @Override
@@ -134,11 +157,6 @@ class ComponentPlugin implements Plugin<Project> {
 
             PluginRuntime.sAndroidJarPath = ProjectUtil.getAndroidJarPath(project, PluginRuntime.sModuleExtension.compileSdkVersion)
             Logger.buildOutput("sAndroidJarPath", PluginRuntime.sAndroidJarPath)
-
-            DependenciesOption.metaClass.component { String value ->
-                String[] gav = PublicationUtil.filterGAV(value)
-                return Constants.SDK_PRE + gav[0] + ':' + gav[1] + ':' + gav[2]
-            }
 
             project.allprojects.each {
                 if (it == project) return
@@ -187,7 +205,7 @@ class ComponentPlugin implements Plugin<Project> {
                     Logger.buildOutput("compileModuleName", projectInfo.compileModuleName)
                     Logger.buildOutput("taskNames", projectInfo.taskNames)
                     Logger.buildOutput("moduleName", projectInfo.currentModuleName)
-                    Logger.buildOutput("isAssemble", projectInfo.isAssembleTask())
+                    Logger.buildOutput("isSyncTask", projectInfo.isSync())
                     Logger.buildOutput("isRunAlone", projectInfo.isRunAlone)
 
                     childProject.plugins.whenObjectAdded {
@@ -210,9 +228,6 @@ class ComponentPlugin implements Plugin<Project> {
                                     assets.srcDirs = [Constants.ASSETS_PATH, Constants.AFTER_ASSETS_PATH]
                                     jniLibs.srcDirs = [Constants.JNILIBS_PATH, Constants.AFTER_JNILIBS_PATH]
                                 }
-                            }
-                            if (projectInfo.isCompileModuleAndAssemble()) {
-//                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new CodeTransform(childProject))
                             }
                         }
                         childProject.extensions.findByType(BaseExtension.class).registerTransform(new ComponentTransform())

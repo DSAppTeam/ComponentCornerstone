@@ -24,6 +24,7 @@ class ComponentExtension {
 
     public RunAloneOption runAloneOption
     public PublicationOption publicationOption
+    public PublicationOption implPublicationOption
 
     Project currentChildProject                      //子项目
 
@@ -32,6 +33,9 @@ class ComponentExtension {
         compileOptions = new CompileOption()
         runAloneOption = new RunAloneOption()
         publicationOption = new PublicationOption()
+        publicationOption.isSdk = true
+        implPublicationOption = new PublicationOption()
+        implPublicationOption.isSdk = false
     }
 
 
@@ -80,8 +84,17 @@ class ComponentExtension {
      * sdk配置
      * @param action
      */
-    void service(Action<PublicationOption> action) {
+    void sdk(Action<PublicationOption> action) {
         action.execute(this.publicationOption)
+        listener.onPublicationOptionAdded(currentChildProject, publicationOption)
+    }
+
+    /**
+     * impl配置
+     * @param action
+     */
+    void impl(Action<PublicationOption> action) {
+        action.execute(this.implPublicationOption)
         listener.onPublicationOptionAdded(currentChildProject, publicationOption)
     }
 }

@@ -1,4 +1,5 @@
 package com.plugin.component.utils
+
 import com.plugin.component.Constants
 import com.plugin.component.PluginRuntime
 import com.plugin.component.extension.module.ProjectInfo
@@ -7,36 +8,65 @@ import com.plugin.component.extension.module.SourceSet
 import com.plugin.component.extension.option.PublicationOption
 import com.plugin.component.task.CompileSdkTask
 import org.gradle.api.Project
+import org.gradle.api.publish.Publication
 import org.gradle.api.publish.maven.MavenPublication
 
 class PublicationUtil {
 
-    static parseComponent(ProjectInfo projectInfo, Object value) {
-        String[] gav = filterGAV(value)
-        if (projectInfo.isRunAlone && projectInfo.isAssembleTask()) {
-            projectInfo.project.dependencies {
-                implementation getPublication(gav[0], gav[1])
-            }
-            return projectInfo.project.project(':library')
-        }
-        return getPublication(gav[0], gav[1])
+    static getPublicationId(PublicationOption publication) {
+        return publication.groupId + '-' + publication.artifactId
     }
 
-    static getPublication(String groupId, String artifactId) {
-        PublicationOption publication = PluginRuntime.sPublicationManager.getPublication(groupId, artifactId)
+    static getJarName(PublicationOption publication) {
+        return publication.groupId + '-' + publication.artifactId + '.jar'
+    }
+
+    static getMavenGAV(PublicationOption publication) {
+        return publication.groupId + ':' + publication.artifactId + ':' + publication.version
+    }
+
+    static getLocalGAV(PublicationOption publication) {
+        return ':' + publication.groupId + '-' + publication.artifactId + ':'
+    }
+
+    /**
+     * 解析 component 依赖
+     * @param projectInfo
+     * @param value
+     * @return
+     */
+    static parseComponent(ProjectInfo projectInfo, String value) {
+        String key = value.replaceAll(":", "")
+        PublicationOption publication = PluginRuntime.sSdkPublicationMap.get(key)
+        if (publication != null) {
+            if (projectInfo.runnableAndNoSync()) {
+                projectInfo.project.dependencies {
+                    implementation getPublication(publication)
+                }
+                return projectInfo.project.project(':' + key)
+            }
+        }
+        return []
+    }
+
+    /**
+     * 获取 publication 依赖
+     * @param publication
+     * @return
+     */
+    static getPublication(PublicationOption publication) {
         if (publication != null) {
             if (publication.invalid) {
                 return []
             } else if (publication.useLocal) {
-                return ':' + Constants.SDK_PRE + publication.groupId + '-' + publication.artifactId + ':'
+                return getLocalGAV(publication)
             } else {
-                return publication.groupId + ':' + publication.artifactId + ':' + publication.version
+                return getMavenGAV(publication)
             }
         } else {
             return []
         }
     }
-
 
     static void addPublicationDependencies(Project project, PublicationOption publication) {
         if (publication.dependencies == null) return
@@ -60,33 +90,35 @@ class PublicationUtil {
      * @param publication
      */
     static void initPublication(Project project, PublicationOption publication) {
-        String displayName = project.getDisplayName()
-        publication.project = displayName.substring(displayName.indexOf("'") + 1, displayName.lastIndexOf("'"))
-        def buildSdk = new File(project.projectDir, Constants.BUILD_SDK_DIR)
+        if (publication.isSdk) {
+            String displayName = project.getDisplayName()
+            publication.project = displayName.substring(displayName.indexOf("'") + 1, displayName.lastIndexOf("'"))
+            def buildSdk = new File(project.projectDir, Constants.BUILD_SDK_DIR)
 
-        publication.sourceSetName = publication.name
-        publication.buildDir = new File(buildSdk, publication.name)
+            publication.sourceSetName = publication.name
+            publication.buildDir = new File(buildSdk, publication.name)
 
-        SourceSet misSourceSet = new SourceSet()
-        def misDir
-        if (publication.sourceSetName.contains('/')) {
-            misDir = new File(project.projectDir, publication.sourceSetName + '/sdk/')
-        } else {
-            misDir = new File(project.projectDir, 'src/' + publication.sourceSetName + '/sdk/')
-        }
-        misSourceSet.path = misDir.absolutePath
-        misSourceSet.lastModifiedSourceFile = new HashMap<>()
-        project.fileTree(misDir).each {
-            if (FileUtil.isValidPackSource(it)) {
-                SourceFile sourceFile = new SourceFile()
-                sourceFile.path = it.path
-                sourceFile.lastModified = it.lastModified()
-                misSourceSet.lastModifiedSourceFile.put(sourceFile.path, sourceFile)
+            SourceSet misSourceSet = new SourceSet()
+            def misDir
+            if (publication.sourceSetName.contains('/')) {
+                misDir = new File(project.projectDir, publication.sourceSetName + '/sdk/')
+            } else {
+                misDir = new File(project.projectDir, 'src/' + publication.sourceSetName + '/sdk/')
             }
-        }
+            misSourceSet.path = misDir.absolutePath
+            misSourceSet.lastModifiedSourceFile = new HashMap<>()
+            project.fileTree(misDir).each {
+                if (FileUtil.isValidPackSource(it)) {
+                    SourceFile sourceFile = new SourceFile()
+                    sourceFile.path = it.path
+                    sourceFile.lastModified = it.lastModified()
+                    misSourceSet.lastModifiedSourceFile.put(sourceFile.path, sourceFile)
+                }
+            }
 
-        publication.misSourceSet = misSourceSet
-        publication.invalid = misSourceSet.lastModifiedSourceFile.isEmpty()
+            publication.misSourceSet = misSourceSet
+            publication.invalid = misSourceSet.lastModifiedSourceFile.isEmpty()
+        }
     }
 
     static void createPublishingPublication(Project project, PublicationOption publication, String publicationName) {
@@ -139,7 +171,7 @@ class PublicationUtil {
             if (it.name.startsWith(publishTaskNamePrefix)) {
                 it.dependsOn compileTask
                 it.doLast {
-                    new File(misDir, Constants.SDK_PRE + publication.groupId + '-' + publication.artifactId + '.jar').delete()
+                    new File(misDir, PublicationUtil.getJarName(publication)).delete()
                 }
             }
         }
@@ -156,9 +188,9 @@ class PublicationUtil {
                         PublicationOption existPublication = PluginRuntime.sPublicationManager.getPublicationByKey(gav[0] + '-' + gav[1])
                         if (existPublication != null) {
                             if (existPublication.useLocal) {
-                                compileOnly.add(':' + Constants.SDK_PRE + existPublication.groupId + '-' + existPublication.artifactId + ':')
+                                compileOnly.add(getLocalGAV(existPublication))
                             } else {
-                                compileOnly.add(existPublication.groupId + ':' + existPublication.artifactId + ':' + existPublication.version)
+                                compileOnly.add(getMavenGAV(existPublication))
                             }
                         }
                     } else {
@@ -175,9 +207,9 @@ class PublicationUtil {
                         PublicationOption existPublication = PluginRuntime.sPublicationManager.getPublicationByKey(gav[0] + '-' + gav[1])
                         if (existPublication != null) {
                             if (existPublication.useLocal) {
-                                implementation.add(':' + Constants.SDK_PRE + existPublication.groupId + '-' + existPublication.artifactId + ':')
+                                implementation.add(getLocalGAV(existPublication))
                             } else {
-                                implementation.add(existPublication.groupId + ':' + existPublication.artifactId + ':' + existPublication.version)
+                                implementation.add(getMavenGAV(existPublication))
                             }
                         }
                     } else {

@@ -118,7 +118,7 @@ class ProjectInfo {
      */
     void initRunAlone() {
         this.isRunAlone = ProjectUtil.isRunAlone(project)
-        if (isRunAlone && isAssembleTask()) {
+        if (isRunAlone && !isSync()) {
             //当前编译的模块才需要设置为true
             if (currentModuleName == compileModuleName) {
                 isRunAlone = true
@@ -131,16 +131,12 @@ class ProjectInfo {
         }
     }
 
+    boolean runnableAndNoSync() {
+        return isRunAlone && !isSync()
+    }
+
     boolean isMainModule() {
         return currentModuleName == ProjectUtil.getMainModuleName()
-    }
-
-    boolean isCompileModuleAndAssemble() {
-        return isAssembleTask() && currentModuleName == compileModuleName
-    }
-
-    boolean isAssembleTask() {
-        return !isSync()
     }
 
     boolean isSync() {

@@ -6,24 +6,11 @@ package com.plugin.component.extension.option
  */
 class RunAloneOption {
 
-    String name
-
-    boolean isRegisterComponentAuto
-
     String applicationName
 
-    boolean runAlone
-
-    void isRegisterComponentAuto(boolean auto) {
-        this.isRegisterComponentAuto = auto
-    }
+    boolean runAlone = true
 
     void applicationName(String applicationName) {
         this.applicationName = applicationName
     }
-
-    void runAlone(boolean runAlone) {
-        this.runAlone = runAlone
-    }
-
 }

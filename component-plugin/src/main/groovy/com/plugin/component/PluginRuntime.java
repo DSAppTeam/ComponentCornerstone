@@ -17,13 +17,17 @@ import java.util.Set;
  */
 public class PluginRuntime {
 
-    public static Map<String, PublicationOption> sPublicationMap = new HashMap<>();               //发布信息
-    public static Map<String, RunAloneOption> sRunAloneMap = new HashMap<>();                     //配置信息
+    public static Map<String, PublicationOption> sSdkPublicationMap = new HashMap<>();             //sdk 发布信息
+    public static Map<String, PublicationOption> sImplPublicationMap = new HashMap<>();            //impl 发布信息
+    public static Map<String, RunAloneOption> sRunAloneMap = new HashMap<>();                      //配置信息
+    public static Map<String, ProjectInfo> sProjectInfoMap = new HashMap<>();                      //项目信息
+
     public static String sAndroidJarPath;                                                         //本地 android jar 路径
     public static PublicationManager sPublicationManager;
     public static ComponentExtension sModuleExtension;
     public static File sSdkDir;
-    public static Map<String, ProjectInfo> sProjectInfoMap = new HashMap<>();
+    public static File sImplDir;
+
 
     public static void resetProjectInfoScript() {
         Set<String> keys = sProjectInfoMap.keySet();
