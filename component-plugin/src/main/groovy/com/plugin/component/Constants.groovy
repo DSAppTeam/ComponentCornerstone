@@ -16,7 +16,7 @@ class Constants {
     public static String COMPONENT = "component"
     public static String JAVA = "java"
     public static String JAVA_FILE_END = ".java"
-    public static String KOTLIN_FILE_END = ".kotlin"
+    public static String KOTLIN_FILE_END = ".kt"
     public static String PLUGIN_APPLICATION = "com.android.application"
     public static String PLUGIN_LIBRARY = "com.android.library"
     public static String PLUGIN_COMPONENT = "com.android.component"

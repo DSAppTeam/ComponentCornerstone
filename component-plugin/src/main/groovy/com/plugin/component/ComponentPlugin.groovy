@@ -142,9 +142,11 @@ class ComponentPlugin implements Plugin<Project> {
 
             @Override
             void onPublicationOptionAdded(Project childProject, PublicationOption publication) {
-                PublicationUtil.initPublication(childProject, publication)
-                PluginRuntime.sPublicationManager.addDependencyGraph(publication)
-                PluginRuntime.sSdkPublicationMap.put(childProject.name, publication)
+                if(publication.isSdk){
+                    PublicationUtil.initPublication(childProject, publication)
+                    PluginRuntime.sPublicationManager.addDependencyGraph(publication)
+                    PluginRuntime.sSdkPublicationMap.put(childProject.name, publication)
+                }
             }
 
             @Override

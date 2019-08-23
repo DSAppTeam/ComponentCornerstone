@@ -70,7 +70,8 @@ android modular plugin.
 
 todo list
 
-1. 自定义scope逻辑，统一配置
-2. 仓库管理
-3. transform 优化
-4. kotlin 模块测试，相互依赖测试
+1. 自定义scope逻辑，统一配置(done)
+2. 模块内互相引用
+3. 仓库管理
+5. transform 优化
+6. kotlin 模块测试，相互依赖测试

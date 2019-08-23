@@ -32,10 +32,6 @@ class ComponentExtension {
         this.listener = listener
         compileOptions = new CompileOption()
         debugOption = new DebugOption()
-        publicationOption = new PublicationOption()
-        publicationOption.isSdk = true
-        implPublicationOption = new PublicationOption()
-        implPublicationOption.isSdk = false
     }
 
 
@@ -85,7 +81,9 @@ class ComponentExtension {
      * @param action
      */
     void sdk(Action<PublicationOption> action) {
-        action.execute(this.publicationOption)
+        publicationOption = new PublicationOption()
+        publicationOption.isSdk = true
+        action.execute(publicationOption)
         listener.onPublicationOptionAdded(currentChildProject, publicationOption)
     }
 
@@ -94,7 +92,9 @@ class ComponentExtension {
      * @param action
      */
     void impl(Action<PublicationOption> action) {
+        implPublicationOption = new PublicationOption()
+        implPublicationOption.isSdk = false
         action.execute(this.implPublicationOption)
-        listener.onPublicationOptionAdded(currentChildProject, publicationOption)
+        listener.onPublicationOptionAdded(currentChildProject, implPublicationOption)
     }
 }
