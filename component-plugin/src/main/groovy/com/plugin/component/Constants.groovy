@@ -43,12 +43,12 @@ class Constants {
     public static String IMPL_PRE = 'impl-'
     public static String COMPONENT_SCRIPT = 'component.gradle'
 
-    //sourceSet - runalone
-    public static String AFTER_MANIFEST_PATH = "src/main/runalone/AndroidManifest.xml"
-    public static String AFTER_JAVA_PATH = "src/main/runalone/java"
-    public static String AFTER_RES_PATH = "src/main/runalone/res"
-    public static String AFTER_ASSETS_PATH = "src/main/runalone/assets"
-    public static String AFTER_JNILIBS_PATH = "src/main/runalone/jniLibs"
+    //sourceSet - debug
+    public static String DEBUG_MANIFEST_PATH = "src/main/debug/AndroidManifest.xml"
+    public static String DEBUG_JAVA_PATH = "src/main/debug/java"
+    public static String DEBUG_RES_PATH = "src/main/debug/res"
+    public static String DEBUG_ASSETS_PATH = "src/main/debug/assets"
+    public static String DEBUG_JNILIBS_PATH = "src/main/debug/jniLibs"
 
     //sourceSet - default
     public static String JAVA_PATH = "src/main/java"

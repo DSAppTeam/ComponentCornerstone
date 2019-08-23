@@ -3,7 +3,7 @@ package com.plugin.component;
 import com.plugin.component.extension.ComponentExtension;
 import com.plugin.component.extension.PublicationManager;
 import com.plugin.component.extension.option.PublicationOption;
-import com.plugin.component.extension.option.RunAloneOption;
+import com.plugin.component.extension.option.DebugOption;
 import com.plugin.component.extension.module.ProjectInfo;
 
 import java.io.File;
@@ -19,7 +19,7 @@ public class PluginRuntime {
 
     public static Map<String, PublicationOption> sSdkPublicationMap = new HashMap<>();             //sdk 发布信息
     public static Map<String, PublicationOption> sImplPublicationMap = new HashMap<>();            //impl 发布信息
-    public static Map<String, RunAloneOption> sRunAloneMap = new HashMap<>();                      //配置信息
+    public static Map<String, DebugOption> sDebugMap = new HashMap<>();                      //配置信息
     public static Map<String, ProjectInfo> sProjectInfoMap = new HashMap<>();                      //项目信息
 
     public static String sAndroidJarPath;                                                         //本地 android jar 路径

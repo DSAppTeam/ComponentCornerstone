@@ -42,10 +42,10 @@ class ProjectUtil {
         if ((getModuleName(project)) == getMainModuleName()) {
             return true
         }
-        if (PluginRuntime.sRunAloneMap.get(project.name) == null) {
+        if (PluginRuntime.sDebugMap.get(project.name) == null) {
             return false
         }
-        return PluginRuntime.sRunAloneMap.get(project.name).runAlone
+        return PluginRuntime.sDebugMap.get(project.name).enable
     }
 
     static List<String> getTasks(Project project) {

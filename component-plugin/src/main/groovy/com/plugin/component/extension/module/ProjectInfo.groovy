@@ -21,7 +21,7 @@ class ProjectInfo {
 
     public String currentProjectName
     public String currentModuleName
-    public boolean isRunAlone
+    public boolean debugEnable
 
     //入口任务信息
     public String taskNames
@@ -117,22 +117,22 @@ class ProjectInfo {
      * 决定是否打开单独运行
      */
     void initRunAlone() {
-        this.isRunAlone = ProjectUtil.isRunAlone(project)
-        if (isRunAlone && !isSync()) {
+        this.debugEnable = ProjectUtil.isRunAlone(project)
+        if (debugEnable && !isSync()) {
             //当前编译的模块才需要设置为true
             if (currentModuleName == compileModuleName) {
-                isRunAlone = true
+                debugEnable = true
             } else {
                 //如果当前模块不是编译模块且不是main模块，需要更改为false
                 if (!isMainModule()) {
-                    isRunAlone = false
+                    debugEnable = false
                 }
             }
         }
     }
 
-    boolean runnableAndNoSync() {
-        return isRunAlone && !isSync()
+    boolean debugEnableAndNoSync() {
+        return debugEnable && !isSync()
     }
 
     boolean isMainModule() {

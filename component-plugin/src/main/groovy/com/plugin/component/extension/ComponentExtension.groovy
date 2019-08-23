@@ -2,7 +2,7 @@ package com.plugin.component.extension
 
 import com.plugin.component.extension.option.CompileOption
 import com.plugin.component.extension.option.PublicationOption
-import com.plugin.component.extension.option.RunAloneOption
+import com.plugin.component.extension.option.DebugOption
 import com.plugin.component.listener.OnModuleExtensionListener
 import org.gradle.api.Action
 
@@ -22,7 +22,7 @@ class ComponentExtension {
     Action<? super RepositoryHandler> configure     //仓库配置
     OnModuleExtensionListener listener              //发布监听器
 
-    public RunAloneOption runAloneOption
+    public DebugOption debugOption
     public PublicationOption publicationOption
     public PublicationOption implPublicationOption
 
@@ -31,7 +31,7 @@ class ComponentExtension {
     ComponentExtension(OnModuleExtensionListener listener) {
         this.listener = listener
         compileOptions = new CompileOption()
-        runAloneOption = new RunAloneOption()
+        debugOption = new DebugOption()
         publicationOption = new PublicationOption()
         publicationOption.isSdk = true
         implPublicationOption = new PublicationOption()
@@ -75,9 +75,9 @@ class ComponentExtension {
      * 独立运行配置
      * @param action
      */
-    void runalone(Action<RunAloneOption> action) {
-        action.execute(this.runAloneOption)
-        listener.onRunAloneOptionAdded(currentChildProject, runAloneOption)
+    void debug(Action<DebugOption> action) {
+        action.execute(this.debugOption)
+        listener.onDebugOptionAdded(currentChildProject, debugOption)
     }
 
     /**
