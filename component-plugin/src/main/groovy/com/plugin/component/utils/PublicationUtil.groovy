@@ -8,7 +8,6 @@ import com.plugin.component.extension.module.SourceSet
 import com.plugin.component.extension.option.PublicationOption
 import com.plugin.component.task.CompileSdkTask
 import org.gradle.api.Project
-import org.gradle.api.publish.Publication
 import org.gradle.api.publish.maven.MavenPublication
 
 class PublicationUtil {
@@ -39,11 +38,13 @@ class PublicationUtil {
         String key = value.replaceAll(":", "")
         PublicationOption publication = PluginRuntime.sSdkPublicationMap.get(key)
         if (publication != null) {
-            if (projectInfo.runnableAndNoSync()) {
+            if (projectInfo.debugEnableAndNoSync()) {
                 projectInfo.project.dependencies {
                     implementation getPublication(publication)
                 }
-                return projectInfo.project.project(':' + key)
+                return projectInfo.project.project(':library')
+            } else {
+                return getPublication(publication)
             }
         }
         return []

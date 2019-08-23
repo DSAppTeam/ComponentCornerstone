@@ -6,7 +6,7 @@ import com.android.build.gradle.LibraryPlugin
 import com.plugin.component.extension.option.DependenciesOption
 import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.option.PublicationOption
-import com.plugin.component.extension.option.RunAloneOption
+import com.plugin.component.extension.option.DebugOption
 import com.plugin.component.listener.OnModuleExtensionListener
 
 import com.plugin.component.transform.ComponentTransform
@@ -148,8 +148,8 @@ class ComponentPlugin implements Plugin<Project> {
             }
 
             @Override
-            void onRunAloneOptionAdded(Project childProject, RunAloneOption aloneConfiguration) {
-                PluginRuntime.sRunAloneMap.put(childProject.name, aloneConfiguration)
+            void onDebugOptionAdded(Project childProject, DebugOption aloneConfiguration) {
+                PluginRuntime.sDebugMap.put(childProject.name, aloneConfiguration)
             }
         })
 
@@ -198,6 +198,8 @@ class ComponentPlugin implements Plugin<Project> {
                         flatDir {
                             dirs PluginRuntime.sSdkDir.absolutePath
                             Logger.buildOutput(childProject.name + "-flatDir Dir[" + PluginRuntime.sSdkDir.absolutePath + "]")
+                            dirs PluginRuntime.sImplDir.absolutePath
+                            Logger.buildOutput(childProject.name + "-flatDir Dir[" + PluginRuntime.sImplDir.absolutePath + "]")
                         }
                     }
                     PluginRuntime.sProjectInfoMap.put(childProject.name, projectInfo)
@@ -206,7 +208,7 @@ class ComponentPlugin implements Plugin<Project> {
                     Logger.buildOutput("taskNames", projectInfo.taskNames)
                     Logger.buildOutput("moduleName", projectInfo.currentModuleName)
                     Logger.buildOutput("isSyncTask", projectInfo.isSync())
-                    Logger.buildOutput("isRunAlone", projectInfo.isRunAlone)
+                    Logger.buildOutput("debugEnable", projectInfo.debugEnable)
 
                     childProject.plugins.whenObjectAdded {
                         if (it instanceof AppPlugin || it instanceof LibraryPlugin) {
@@ -215,18 +217,18 @@ class ComponentPlugin implements Plugin<Project> {
                         }
                     }
 
-                    if (projectInfo.isRunAlone) {
+                    if (projectInfo.debugEnable) {
                         childProject.apply plugin: Constants.PLUGIN_APPLICATION
                         Logger.buildOutput("project.apply plugin: com.android.application")
 
                         if (!projectInfo.isMainModule()) {
                             childProject.android.sourceSets {
                                 main {
-                                    manifest.srcFile Constants.AFTER_MANIFEST_PATH
-                                    java.srcDirs = [Constants.JAVA_PATH, Constants.AFTER_JAVA_PATH]
-                                    res.srcDirs = [Constants.RES_PATH, Constants.AFTER_RES_PATH]
-                                    assets.srcDirs = [Constants.ASSETS_PATH, Constants.AFTER_ASSETS_PATH]
-                                    jniLibs.srcDirs = [Constants.JNILIBS_PATH, Constants.AFTER_JNILIBS_PATH]
+                                    manifest.srcFile Constants.DEBUG_MANIFEST_PATH
+                                    java.srcDirs = [Constants.JAVA_PATH, Constants.DEBUG_JAVA_PATH]
+                                    res.srcDirs = [Constants.RES_PATH, Constants.DEBUG_RES_PATH]
+                                    assets.srcDirs = [Constants.ASSETS_PATH, Constants.DEBUG_ASSETS_PATH]
+                                    jniLibs.srcDirs = [Constants.JNILIBS_PATH, Constants.DEBUG_JNILIBS_PATH]
                                 }
                             }
                         }

@@ -1,12 +1,12 @@
 component {
 
-    runalone {
+    debug {
         applicationName 'com.plugin.library.LibraryApplication'
     }
 
     sdk {
         groupId 'com.effective.android'
-        artifactId 'library-sdk'
+        artifactId 'librarySdk'
 //            version '1.0.0' // 初次配置时不设置，发布至maven时设置
         dependencies {
             // 只支持 compileOnly 和 implementation
@@ -17,7 +17,7 @@ component {
 
     impl {
         groupId 'com.effective.android'
-        artifactId 'library-impl'
+        artifactId 'libraryImpl'
         //            version '1.0.0' // 初次配置时不设置，发布至maven时设置
     }
 }
