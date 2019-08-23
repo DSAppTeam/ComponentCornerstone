@@ -176,7 +176,7 @@ class JarUtil {
         def result = p.waitFor()
         p.waitFor()
         if (result != 0) {
-            throw new RuntimeException("failure to package classes.jar: \n" +  p.err.text)
+            throw new RuntimeException("failure to package classes.jar: \n" + p.err.text)
         }
         return new File(classesDir.parentFile, 'outputs/classes.jar')
     }
@@ -331,7 +331,7 @@ class JarUtil {
     }
 
     static void handleMavenJar(Project project, PublicationOption publication) {
-        File target = new File(PluginRuntime.sSdkDir, Constants.SDK_PRE + publication.groupId + '-' + publication.artifactId + '.jar')
+        File target = new File(PluginRuntime.sSdkDir, PublicationUtil.getJarName(publication))
         if (publication.invalid) {
             PluginRuntime.sPublicationManager.addPublication(publication)
             if (target.exists()) {
@@ -400,7 +400,7 @@ class JarUtil {
     }
 
     static void handleLocalJar(Project project, PublicationOption publication) {
-        File target = new File(PluginRuntime.sSdkDir, Constants.SDK_PRE + publication.groupId + '-' + publication.artifactId + '.jar')
+        File target = new File(PluginRuntime.sSdkDir, PublicationUtil.getJarName(publication))
 
         if (publication.invalid) {
             PluginRuntime.sPublicationManager.addPublication(publication)

@@ -1,5 +1,6 @@
 package com.plugin.component.extension.option
 
+
 import com.plugin.component.extension.module.SourceSet
 import org.gradle.util.ConfigureUtil
 
@@ -15,6 +16,7 @@ class PublicationOption {
     String project                      //模块project路径
     SourceSet misSourceSet              //资源集，如果当前maven不可用，则需要记录源码及最后修改时间信息
     String versionNew
+    boolean isSdk
     boolean invalid                     //是否非法
     boolean hit                         //是否隐藏
     boolean useLocal                    //是否使用本地jar

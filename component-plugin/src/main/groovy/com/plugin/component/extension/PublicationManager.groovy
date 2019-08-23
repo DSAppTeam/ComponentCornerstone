@@ -29,9 +29,8 @@ class PublicationManager {
 
     private static PublicationManager sPublicationManager
 
-    private File misDir
-    private Map<String, PublicationOption> publicationManifest
-    //maven Id 映射 PublicationOption
+    private Map<String, PublicationOption> sdkPublicationManifest
+    private Map<String, PublicationOption> implPublicationManifest
 
     Digraph<String> dependencyGraph
     Map<String, PublicationOption> publicationDependencies
@@ -44,14 +43,12 @@ class PublicationManager {
     }
 
     /**
-     * 加载 publicationManifest.xml，其用于记录依赖项目依赖管理
+     * 目前只处理sdk
      * @param rootProject
-     * @param misDir
      */
-    void loadManifest(Project rootProject, File misDir) {
-        this.misDir = misDir
+    void loadManifest(Project rootProject) {
 
-        publicationManifest = new HashMap<>()
+        sdkPublicationManifest = new HashMap<>()
         dependencyGraph = new Digraph<String>()
         publicationDependencies = new HashMap<>()
 
@@ -65,13 +62,19 @@ class PublicationManager {
             Logger.buildOutput("build finished!")
         }
 
-        File publicationManifest = new File(misDir, 'publicationManifest.xml')
-        if (!publicationManifest.exists()) {
+        File sdkPublicationManifest = new File(PluginRuntime.sSdkDir, 'PublicationManifest.xml')
+        File implPublicationManifest = new File(PluginRuntime.sImplDir, 'PublicationManifest.xml')
+
+        if (!sdkPublicationManifest.exists()) {
+            return
+        }
+
+        if (!implPublicationManifest.exists()) {
             return
         }
 
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance()
-        Document document = builderFactory.newDocumentBuilder().parse(publicationManifest)
+        Document document = builderFactory.newDocumentBuilder().parse(sdkPublicationManifest)
 
         //搜寻所有publication节点
         NodeList publicationNodeList = document.documentElement.getElementsByTagName("publication")
@@ -105,24 +108,25 @@ class PublicationManager {
                 publication.misSourceSet = sourceSet
             }
 
-            this.publicationManifest.put(publication.groupId + '-' + publication.artifactId, publication)
+            this.sdkPublicationManifest.put(getPublicationId(true), publication)
         }
 
     }
 
     /**
-     * 保存 publicationManifest.xml
+     * 保存 sdkPublicationManifest.xml
      */
     private void saveManifest() {
-        if (!misDir.exists()) {
-            misDir.mkdirs()
+        if (!PluginRuntime.sSdkDir.exists()) {
+            PluginRuntime.sSdkDir.mkdirs()
         }
-        File publicationManifest = new File(misDir, 'publicationManifest.xml')
+        File sdkPublicationManifestFile = new File(PluginRuntime.sSdkDir, 'PublicationManifest.xml')
+        File implPublicationManifest = new File(PluginRuntime.sSdkDir, 'PublicationManifest.xml')
 
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance()
         Document document = builderFactory.newDocumentBuilder().newDocument()
         Element manifestElement = document.createElement("manifest")
-        this.publicationManifest.each {
+        this.sdkPublicationManifest.each {
             PublicationOption publication = it.value
 
             if (!publication.hit || publication.invalid) return
@@ -153,16 +157,17 @@ class PublicationManager {
         transformer.setOutputProperty(OutputKeys.INDENT, "yes")
         transformer.setOutputProperty(OutputKeys.CDATA_SECTION_ELEMENTS, "yes")
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2")
-        transformer.transform(new DOMSource(manifestElement), new StreamResult(publicationManifest))
+        transformer.transform(new DOMSource(manifestElement), new StreamResult(sdkPublicationManifestFile))
     }
 
     void addDependencyGraph(PublicationOption publication) {
-        def key = publication.groupId + '-' + publication.artifactId
+        def key = PublicationUtil.getPublicationId(publication)
         publicationDependencies.put(key, publication)
         dependencyGraph.add(key)
         if (publication.dependencies != null) {
             if (publication.dependencies.implementation != null) {
                 publication.dependencies.implementation.each {
+                    //todo
                     if (it instanceof String && it.startsWith(Constants.SDK_PRE)) {
                         String[] gav = PublicationUtil.filterGAV(it.replace(Constants.SDK_PRE, ''))
                         dependencyGraph.add(key, gav[0] + '-' + gav[1])
@@ -176,6 +181,7 @@ class PublicationManager {
 
             if (publication.dependencies.compileOnly != null) {
                 publication.dependencies.compileOnly.each {
+                    //todo
                     if (it instanceof String && it.startsWith(Constants.SDK_PRE)) {
                         String[] gav = PublicationUtil.filterGAV(it.replace(Constants.SDK_PRE, ''))
                         dependencyGraph.add(key, gav[0] + '-' + gav[1])
@@ -195,7 +201,7 @@ class PublicationManager {
      * @return
      */
     boolean hasModified(PublicationOption publication) {
-        PublicationOption lastPublication = publicationManifest.get(publication.groupId + '-' + publication.artifactId)
+        PublicationOption lastPublication = sdkPublicationManifest.get(publication.groupId + '-' + publication.artifactId)
         if (lastPublication == null) {
             return true
         }
@@ -227,15 +233,15 @@ class PublicationManager {
     }
 
     void addPublication(PublicationOption publication) {
-        publicationManifest.put(publication.groupId + '-' + publication.artifactId, publication)
+        sdkPublicationManifest.put(publication.groupId + '-' + publication.artifactId, publication)
     }
 
     PublicationOption getPublication(String groupId, String artifactId) {
-        return publicationManifest.get(groupId + '-' + artifactId)
+        return sdkPublicationManifest.get(groupId + '-' + artifactId)
     }
 
     PublicationOption getPublicationByKey(String key) {
-        return publicationManifest.get(key)
+        return sdkPublicationManifest.get(key)
     }
 
     List<PublicationOption> getPublicationByProject(Project project) {
@@ -243,7 +249,7 @@ class PublicationManager {
         String projectName = displayName.substring(displayName.indexOf("'") + 1, displayName.lastIndexOf("'"))
 
         List<PublicationOption> publications = new ArrayList<>()
-        publicationManifest.each {
+        sdkPublicationManifest.each {
             if (projectName == it.value.project) {
                 publications.add(it.value)
             }
@@ -252,7 +258,7 @@ class PublicationManager {
     }
 
     void hitPublication(PublicationOption publication) {
-        PublicationOption existsPublication = publicationManifest.get(publication.groupId + '-' + publication.artifactId)
+        PublicationOption existsPublication = sdkPublicationManifest.get(publication.groupId + '-' + publication.artifactId)
         if (existsPublication == null) return
 
         if (existsPublication.hit) {
