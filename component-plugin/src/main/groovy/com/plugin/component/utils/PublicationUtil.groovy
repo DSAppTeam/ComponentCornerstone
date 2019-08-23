@@ -42,7 +42,7 @@ class PublicationUtil {
                 projectInfo.project.dependencies {
                     implementation getPublication(publication)
                 }
-                return projectInfo.project.project(':library')
+                return projectInfo.project.project(':' + value)
             } else {
                 return getPublication(publication)
             }
@@ -91,35 +91,33 @@ class PublicationUtil {
      * @param publication
      */
     static void initPublication(Project project, PublicationOption publication) {
-        if (publication.isSdk) {
-            String displayName = project.getDisplayName()
-            publication.project = displayName.substring(displayName.indexOf("'") + 1, displayName.lastIndexOf("'"))
-            def buildSdk = new File(project.projectDir, Constants.BUILD_SDK_DIR)
+        String displayName = project.getDisplayName()
+        publication.project = displayName.substring(displayName.indexOf("'") + 1, displayName.lastIndexOf("'"))
+        def buildSdk = new File(project.projectDir, publication.isSdk ? Constants.BUILD_SDK_DIR : Constants.BUILD_IMPL_DIR)
 
-            publication.sourceSetName = publication.name
-            publication.buildDir = new File(buildSdk, publication.name)
+        publication.sourceSetName = publication.name
+        publication.buildDir = new File(buildSdk, publication.name)
 
-            SourceSet misSourceSet = new SourceSet()
-            def misDir
-            if (publication.sourceSetName.contains('/')) {
-                misDir = new File(project.projectDir, publication.sourceSetName + '/sdk/')
-            } else {
-                misDir = new File(project.projectDir, 'src/' + publication.sourceSetName + '/sdk/')
-            }
-            misSourceSet.path = misDir.absolutePath
-            misSourceSet.lastModifiedSourceFile = new HashMap<>()
-            project.fileTree(misDir).each {
-                if (FileUtil.isValidPackSource(it)) {
-                    SourceFile sourceFile = new SourceFile()
-                    sourceFile.path = it.path
-                    sourceFile.lastModified = it.lastModified()
-                    misSourceSet.lastModifiedSourceFile.put(sourceFile.path, sourceFile)
-                }
-            }
-
-            publication.misSourceSet = misSourceSet
-            publication.invalid = misSourceSet.lastModifiedSourceFile.isEmpty()
+        SourceSet misSourceSet = new SourceSet()
+        def misDir
+        if (publication.sourceSetName.contains('/')) {
+            misDir = new File(project.projectDir, publication.sourceSetName + '/sdk/')
+        } else {
+            misDir = new File(project.projectDir, 'src/' + publication.sourceSetName + '/sdk/')
         }
+        misSourceSet.path = misDir.absolutePath
+        misSourceSet.lastModifiedSourceFile = new HashMap<>()
+        project.fileTree(misDir).each {
+            if (FileUtil.isValidPackSource(it)) {
+                SourceFile sourceFile = new SourceFile()
+                sourceFile.path = it.path
+                sourceFile.lastModified = it.lastModified()
+                misSourceSet.lastModifiedSourceFile.put(sourceFile.path, sourceFile)
+            }
+        }
+
+        publication.misSourceSet = misSourceSet
+        publication.invalid = misSourceSet.lastModifiedSourceFile.isEmpty()
     }
 
     static void createPublishingPublication(Project project, PublicationOption publication, String publicationName) {
