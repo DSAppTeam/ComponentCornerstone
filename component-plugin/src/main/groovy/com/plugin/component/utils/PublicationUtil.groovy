@@ -16,6 +16,10 @@ class PublicationUtil {
         return publication.groupId + '-' + publication.artifactId
     }
 
+    static getPublicationId(String groupId,String artifactId) {
+        return groupId + '-' + artifactId
+    }
+
     static getJarName(PublicationOption publication) {
         return publication.groupId + '-' + publication.artifactId + '.jar'
     }
@@ -66,17 +70,25 @@ class PublicationUtil {
         }
     }
 
-    static void addPublicationDependencies(Project project, PublicationOption publication) {
+    static void addPublicationDependencies(ProjectInfo projectInfo, PublicationOption publication) {
         if (publication.dependencies == null) return
-        project.dependencies {
+        projectInfo.project.dependencies {
             if (publication.dependencies.compileOnly != null) {
                 publication.dependencies.compileOnly.each {
-                    compileOnly it
+                    if (it instanceof String && it.startsWith(Constants.COMPONENT)) {
+                        compileOnly parseComponent(projectInfo, it.replace(Constants.COMPONENT, ""))
+                    } else {
+                        compileOnly it
+                    }
                 }
             }
             if (publication.dependencies.implementation != null) {
                 publication.dependencies.implementation.each {
-                    implementation it
+                    if (it instanceof String && it.startsWith(Constants.COMPONENT)) {
+                        implementation parseComponent(projectInfo, it.replace(Constants.COMPONENT, ""))
+                    } else {
+                        implementation it
+                    }
                 }
             }
         }
@@ -174,14 +186,17 @@ class PublicationUtil {
         PublicationUtil.createPublishingPublication(project, publication, publicationName)
     }
 
+    /**
+     * 把插件定义的依赖过滤出来
+     * @param publication
+     */
     static void filterPublicationDependencies(PublicationOption publication) {
         if (publication.dependencies != null) {
             if (publication.dependencies.compileOnly != null) {
                 List<Object> compileOnly = new ArrayList<>()
                 publication.dependencies.compileOnly.each {
-                    if (it instanceof String && it.startsWith(Constants.SDK_PRE)) {
-                        String[] gav = filterGAV(it.replace(Constants.SDK_PRE, ''))
-                        PublicationOption existPublication = PluginRuntime.sPublicationManager.getPublicationByKey(gav[0] + '-' + gav[1])
+                    if (it instanceof String && it.startsWith(Constants.COMPONENT_PRE)) {
+                        PublicationOption existPublication = PluginRuntime.sPublicationManager.getPublicationByKey(getPublicationId(publication))
                         if (existPublication != null) {
                             if (existPublication.useLocal) {
                                 compileOnly.add(getLocalGAV(existPublication))
@@ -198,9 +213,8 @@ class PublicationUtil {
             if (publication.dependencies.implementation != null) {
                 List<Object> implementation = new ArrayList<>()
                 publication.dependencies.implementation.each {
-                    if (it instanceof String && it.startsWith(Constants.SDK_PRE)) {
-                        String[] gav = filterGAV(it.replace(Constants.SDK_PRE, ''))
-                        PublicationOption existPublication = PluginRuntime.sPublicationManager.getPublicationByKey(gav[0] + '-' + gav[1])
+                    if (it instanceof String && it.startsWith(Constants.COMPONENT_PRE)) {
+                        PublicationOption existPublication = PluginRuntime.sPublicationManager.getPublicationByKey(getPublicationId(publication))
                         if (existPublication != null) {
                             if (existPublication.useLocal) {
                                 implementation.add(getLocalGAV(existPublication))
@@ -215,37 +229,5 @@ class PublicationUtil {
                 publication.dependencies.implementation = implementation
             }
         }
-    }
-
-    static String[] filterGAV(Object value) {
-        String groupId = null, artifactId = null, version = null
-        if (value instanceof String) {
-            String[] values = value.split(":")
-            if (values.length >= 3) {
-                groupId = values[0]
-                artifactId = values[1]
-                version = values[2]
-            } else if (values.length == 2) {
-                groupId = values[0]
-                artifactId = values[1]
-                version = null
-            }
-        } else if (value instanceof Map<String, ?>) {
-            groupId = value.groupId
-            artifactId = value.artifactId
-            version = value.version
-        }
-
-        if (version == "") {
-            version = null
-        }
-
-        if (groupId == null || artifactId == null) {
-            throw new IllegalArgumentException("'${value}' is illege argument of component(), the following types/formats are supported:" +
-                    "\n  - String or CharSequence values, for example 'org.gradle:gradle-core:1.0'." +
-                    "\n  - Maps, for example [groupId: 'org.gradle', artifactId: 'gradle-core', version: '1.0'].")
-        }
-
-        return [groupId, artifactId, version]
     }
 }

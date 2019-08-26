@@ -60,7 +60,7 @@ class ComponentPlugin implements Plugin<Project> {
         //sdk 模块，则当前project需要依赖当前声明
         if (projectInfo.isSync()) {
             publications.each {
-                PublicationUtil.addPublicationDependencies(project, it)
+                PublicationUtil.addPublicationDependencies(projectInfo, it)
             }
         }
 
