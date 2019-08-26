@@ -1,4 +1,4 @@
-package com.plugin.component.asm
+package com.plugin.component.transform.info
 
 class ScanSdkInfo {
 

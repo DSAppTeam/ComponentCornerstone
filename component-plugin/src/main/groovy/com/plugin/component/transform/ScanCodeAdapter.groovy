@@ -1,20 +1,19 @@
-package com.plugin.component.asm
+package com.plugin.component.transform
 
 import com.plugin.component.anno.AutoInjectComponent
 import com.plugin.component.anno.AutoInjectImpl
 import com.plugin.component.anno.MethodCost
-import org.objectweb.asm.AnnotationVisitor
-import org.objectweb.asm.ClassVisitor
-import org.objectweb.asm.MethodVisitor
-import org.objectweb.asm.Opcodes
-import org.objectweb.asm.Type
+import com.plugin.component.transform.info.ScanComponentInfo
+import com.plugin.component.transform.info.ScanRuntime
+import com.plugin.component.transform.info.ScanSdkInfo
+import org.objectweb.asm.*
 import org.objectweb.asm.commons.AdviceAdapter
 
-class ComponentScanClassVisitor extends ClassVisitor {
+class ScanCodeAdapter extends ClassVisitor {
 
     private String className
 
-    ComponentScanClassVisitor(ClassVisitor classVisitor) {
+    ScanCodeAdapter(ClassVisitor classVisitor) {
         super(Opcodes.ASM7, classVisitor)
     }
 
