@@ -41,6 +41,7 @@ class Constants {
     public static String BUILD_OUTPUT_DIR = 'outputs'
     public static String SDK_PRE = 'sdk-'
     public static String IMPL_PRE = 'impl-'
+    public static String COMPONENT_PRE = 'component-'
     public static String COMPONENT_SCRIPT = 'component.gradle'
 
     //sourceSet - debug

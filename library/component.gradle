@@ -11,7 +11,7 @@ component {
         dependencies {
             // 只支持 compileOnly 和 implementation
             implementation 'com.google.code.gson:gson:2.8.1'
-//                compileOnly component('com.eastwood.demo:module-mainModuleName-impl')
+//            implementation component(':libraryKotlin')
         }
     }
 
