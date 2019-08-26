@@ -62,8 +62,8 @@ class PublicationManager {
             Logger.buildOutput("build finished!")
         }
 
-        File sdkPublicationManifest = new File(PluginRuntime.sSdkDir, 'PublicationManifest.xml')
-        File implPublicationManifest = new File(PluginRuntime.sImplDir, 'PublicationManifest.xml')
+        File sdkPublicationManifest = new File(PluginRuntime.sSdkDir, 'publicationManifest.xml')
+        File implPublicationManifest = new File(PluginRuntime.sImplDir, 'publicationManifest.xml')
 
         if (!sdkPublicationManifest.exists()) {
             return
@@ -108,7 +108,7 @@ class PublicationManager {
                 publication.misSourceSet = sourceSet
             }
 
-            this.sdkPublicationManifest.put(getPublicationId(true), publication)
+            this.sdkPublicationManifest.put(PublicationUtil.getPublicationId(publication), publication)
         }
 
     }
@@ -120,8 +120,8 @@ class PublicationManager {
         if (!PluginRuntime.sSdkDir.exists()) {
             PluginRuntime.sSdkDir.mkdirs()
         }
-        File sdkPublicationManifestFile = new File(PluginRuntime.sSdkDir, 'PublicationManifest.xml')
-        File implPublicationManifest = new File(PluginRuntime.sSdkDir, 'PublicationManifest.xml')
+        File sdkPublicationManifestFile = new File(PluginRuntime.sSdkDir, 'publicationManifest.xml')
+        File implPublicationManifest = new File(PluginRuntime.sSdkDir, 'publicationManifest.xml')
 
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance()
         Document document = builderFactory.newDocumentBuilder().newDocument()
@@ -197,7 +197,7 @@ class PublicationManager {
      * @return
      */
     boolean hasModified(PublicationOption publication) {
-        PublicationOption lastPublication = sdkPublicationManifest.get(publication.groupId + '-' + publication.artifactId)
+        PublicationOption lastPublication = sdkPublicationManifest.get(PublicationUtil.getPublicationId(publication))
         if (lastPublication == null) {
             return true
         }
@@ -229,11 +229,11 @@ class PublicationManager {
     }
 
     void addPublication(PublicationOption publication) {
-        sdkPublicationManifest.put(publication.groupId + '-' + publication.artifactId, publication)
+        sdkPublicationManifest.put(PublicationUtil.getPublicationId(publication), publication)
     }
 
     PublicationOption getPublication(String groupId, String artifactId) {
-        return sdkPublicationManifest.get(groupId + '-' + artifactId)
+        return sdkPublicationManifest.get(PublicationUtil.getPublicationId(groupId, artifactId))
     }
 
     PublicationOption getPublicationByKey(String key) {
@@ -254,7 +254,7 @@ class PublicationManager {
     }
 
     void hitPublication(PublicationOption publication) {
-        PublicationOption existsPublication = sdkPublicationManifest.get(publication.groupId + '-' + publication.artifactId)
+        PublicationOption existsPublication = sdkPublicationManifest.get(PublicationUtil.getPublicationId(publication))
         if (existsPublication == null) return
 
         if (existsPublication.hit) {

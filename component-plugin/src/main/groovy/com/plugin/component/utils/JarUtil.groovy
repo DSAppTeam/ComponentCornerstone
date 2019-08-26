@@ -56,12 +56,21 @@ class JarUtil {
         if (publication.dependencies != null) {
             if (publication.dependencies.implementation != null) {
                 publication.dependencies.implementation.each {
-                    project.dependencies.add(name, it)
+                    if (it instanceof String && it.startsWith(Constants.COMPONENT_PRE)) {
+                        project.dependencies.add(name,PublicationUtil.parseComponent(it))
+                    }else{
+                        project.dependencies.add(name, it)
+                    }
+
                 }
             }
             if (publication.dependencies.compileOnly != null) {
                 publication.dependencies.compileOnly.each {
-                    project.dependencies.add(name, it)
+                    if (it instanceof String && it.startsWith(Constants.COMPONENT_PRE)) {
+                        project.dependencies.add(name,PublicationUtil.parseComponent(it))
+                    }else{
+                        project.dependencies.add(name, it)
+                    }
                 }
             }
         }
