@@ -1,10 +1,14 @@
 package com.plugin.library;
 
 import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.plugin.component.ComponentManager;
+import com.plugin.component.SdkManager;
 
 public class LibraryMainActivity extends AppCompatActivity {
 
@@ -12,6 +16,7 @@ public class LibraryMainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_layout);
-        Toast.makeText(this, new SdkImpl().getSdkName(), Toast.LENGTH_LONG).show();
+        ComponentManager.init(getApplication());
+//        ((TextView) findViewById(R.id.text)).setText(SdkManager.getSdk(IKotlinSdk.class).getSdk2Name());
     }
 }
