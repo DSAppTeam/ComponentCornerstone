@@ -11,6 +11,7 @@ import com.android.build.api.transform.TransformInput
 import com.android.build.api.transform.TransformInvocation
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.utils.FileUtils
+import com.plugin.component.Logger
 import com.plugin.component.asm.ComponentInjectClassVisitor
 import com.plugin.component.asm.ComponentScanClassVisitor
 import com.plugin.component.utils.FileUtil
@@ -55,6 +56,7 @@ class ComponentTransform extends Transform {
     @Override
     public void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
 
+        long startTime = System.currentTimeMillis();
         transformInvocation.inputs.each { TransformInput input ->
             input.directoryInputs.each { DirectoryInput directoryInput ->
                 scanClass(directoryInput.file)
@@ -84,6 +86,7 @@ class ComponentTransform extends Transform {
 
         ScanRuntime.loadInjectInfo()
         ScanRuntime.clearScanInfo()
+        Logger.buildOutput("transform cost : " + System.currentTimeMillis() - startTime + "ms")
     }
 
 
