@@ -42,15 +42,14 @@ class ComponentPlugin implements Plugin<Project> {
 
         ProjectInfo projectInfo = PluginRuntime.sProjectInfoMap.get(project.name)
 
+        //解析 component
+        //比如 A 声明  component(':library') 且 A是可运行的
+        //则A需要导入 library 中 sdk 和 impl 模块，其中 sdk 为模块内可见 implementation，impl 为纯 impl，其依赖的 sdk 需要模块哇可见 api
         project.dependencies.metaClass.component { String value ->
             return PublicationUtil.parseComponent(projectInfo, value)
         }
 
-        DependenciesOption.metaClass.component { String value ->
-            return PublicationUtil.parseComponent(projectInfo, value)
-        }
-
-        //实现模块导入 impl
+        //独立模块内 依赖sdk为api，由于该模块可能被依赖，所以sdk需要模块外暴露
         List<PublicationOption> publications = PluginRuntime.sPublicationManager.getPublicationByProject(project)
         project.dependencies {
             publications.each {
@@ -58,7 +57,7 @@ class ComponentPlugin implements Plugin<Project> {
             }
         }
 
-        //实现模块导入 sdk依赖
+        //sdk 模块，则当前project需要依赖当前声明
         if (projectInfo.isSync()) {
             publications.each {
                 PublicationUtil.addPublicationDependencies(project, it)
@@ -142,10 +141,10 @@ class ComponentPlugin implements Plugin<Project> {
 
             @Override
             void onPublicationOptionAdded(Project childProject, PublicationOption publication) {
-                if(publication.isSdk){
+                if (publication.isSdk) {
                     PublicationUtil.initPublication(childProject, publication)
-                    PluginRuntime.sPublicationManager.addDependencyGraph(publication)
                     PluginRuntime.sSdkPublicationMap.put(childProject.name, publication)
+                    PluginRuntime.sPublicationManager.addDependencyGraph(childProject.name, publication)
                 }
             }
 
@@ -154,6 +153,10 @@ class ComponentPlugin implements Plugin<Project> {
                 PluginRuntime.sDebugMap.put(childProject.name, aloneConfiguration)
             }
         })
+
+        DependenciesOption.metaClass.component { String value ->
+            return Constants.COMPONENT_PRE + value
+        }
 
         project.afterEvaluate {
 

@@ -12,6 +12,21 @@ import org.gradle.api.Project
 class ProjectUtil {
 
     /**
+     * example: 兼容 component(:library) 和 component(library)
+     * @param componentValue
+     * @return
+     */
+    static String getComponentValue(String componentValue) {
+        if (componentValue == null || componentValue.isEmpty()) {
+            return componentValue
+        }
+        if (componentValue.startsWith(":")) {
+            componentValue = componentValue.substring(1, componentValue.length())
+        }
+        return componentValue
+    }
+
+    /**
      * 是否有效注入的对象，只有实现application
      * @param project
      * @return

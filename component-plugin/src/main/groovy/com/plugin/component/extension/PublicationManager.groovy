@@ -160,20 +160,18 @@ class PublicationManager {
         transformer.transform(new DOMSource(manifestElement), new StreamResult(sdkPublicationManifestFile))
     }
 
-    void addDependencyGraph(PublicationOption publication) {
+    void addDependencyGraph(String projectName, PublicationOption publication) {
         def key = PublicationUtil.getPublicationId(publication)
         publicationDependencies.put(key, publication)
         dependencyGraph.add(key)
         if (publication.dependencies != null) {
             if (publication.dependencies.implementation != null) {
                 publication.dependencies.implementation.each {
-                    //todo
-                    if (it instanceof String && it.startsWith(Constants.SDK_PRE)) {
-                        String[] gav = PublicationUtil.filterGAV(it.replace(Constants.SDK_PRE, ''))
-                        dependencyGraph.add(key, gav[0] + '-' + gav[1])
+                    if (it instanceof String && it.startsWith(Constants.COMPONENT_PRE)) {
+                        String sdkDependency = PublicationUtil.getPublication(publication)
+                        dependencyGraph.add(key, sdkDependency)
                         if (!dependencyGraph.isDag()) {
-                            def component = gav[0] + ':' + gav[1] + (gav[2] == null ? (":" + gav[2]) : "")
-                            throw new RuntimeException("Circular dependency between component publication '${publication.groupId}:${publication.artifactId}' and '${component}'.")
+                            throw new RuntimeException("Circular dependency in project [${projectName}] with '${sdkDependency}'.")
                         }
                     }
                 }
@@ -181,13 +179,11 @@ class PublicationManager {
 
             if (publication.dependencies.compileOnly != null) {
                 publication.dependencies.compileOnly.each {
-                    //todo
-                    if (it instanceof String && it.startsWith(Constants.SDK_PRE)) {
-                        String[] gav = PublicationUtil.filterGAV(it.replace(Constants.SDK_PRE, ''))
-                        dependencyGraph.add(key, gav[0] + '-' + gav[1])
+                    if (it instanceof String && it.startsWith(Constants.COMPONENT_PRE)) {
+                        String sdkDependency = PublicationUtil.getPublication(publication)
+                        dependencyGraph.add(key, sdkDependency)
                         if (!dependencyGraph.isDag()) {
-                            def component = gav[0] + ':' + gav[1] + (gav[2] == null ? (":" + gav[2]) : "")
-                            throw new RuntimeException("Circular dependency between component publication '${publication.groupId}:${publication.artifactId}' and '${component}'.")
+                            throw new RuntimeException("Circular dependency in project [${projectName}] with '${sdkDependency}'.")
                         }
                     }
                 }

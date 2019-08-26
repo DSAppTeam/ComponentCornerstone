@@ -35,13 +35,10 @@ class PublicationUtil {
      * @return
      */
     static parseComponent(ProjectInfo projectInfo, String value) {
-        String key = value.replaceAll(":", "")
+        String key = ProjectUtil.getComponentValue(value)
         PublicationOption publication = PluginRuntime.sSdkPublicationMap.get(key)
         if (publication != null) {
             if (projectInfo.debugEnableAndNoSync()) {
-                projectInfo.project.dependencies {
-                    implementation getPublication(publication)
-                }
                 return projectInfo.project.project(':' + value)
             } else {
                 return getPublication(publication)
