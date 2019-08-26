@@ -1,8 +1,7 @@
-package com.plugin.component.asm
+package com.plugin.component.transform.info
 
 import com.android.annotations.NonNull
 import com.android.annotations.Nullable
-import com.android.builder.sdk.SdkInfo
 import com.plugin.component.Logger
 
 class ScanRuntime {
@@ -50,7 +49,7 @@ class ScanRuntime {
         }
     }
 
-    static void loadInjectInfo() {
+    static void logInjectInfo() {
         for (ComponentSdkInfo componentSdkInfo : componentSdkInfoList) {
             Logger.buildOutput(componentSdkInfo.toString())
         }

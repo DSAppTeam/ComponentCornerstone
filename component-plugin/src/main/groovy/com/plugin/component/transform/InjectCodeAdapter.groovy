@@ -1,6 +1,8 @@
-package com.plugin.component.asm
+package com.plugin.component.transform
 
-import com.plugin.component.Logger
+
+import com.plugin.component.transform.info.ComponentSdkInfo
+import com.plugin.component.transform.info.ScanRuntime
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
@@ -15,14 +17,14 @@ import org.objectweb.asm.commons.AdviceAdapter
  * <p>
  * visit visitSource? visitOuterClass? ( visitAnnotation | visitAttribute )* ( visitInnerClass | visitField | visitMethod )* visitEnd
  */
-class ComponentInjectClassVisitor extends ClassVisitor {
+class InjectCodeAdapter extends ClassVisitor {
 
     private static final String sCostCachePath = "com/plugin/component/CostCache"
     private static final String sComponentManagerPath = "com/plugin/component/ComponentManager"
 
     private String className
 
-    ComponentInjectClassVisitor(ClassVisitor classVisitor) {
+    InjectCodeAdapter(ClassVisitor classVisitor) {
         super(Opcodes.ASM7, classVisitor)
     }
 
