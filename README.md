@@ -65,13 +65,7 @@ android modular plugin.
 而在实现完全被隔离的情况下，如何实现解决这个问题呢 ？ Transform + annotation + asm 技术。通过自定义插件注册自定义的 transform 完成 Class 文件中 annotation 的扫描可收集目的信息（注解内容，注解类等）， 用 asm 封装好的字节码指令完成对目标类字节内容的修改达到注入代码的目的。
 
 
-待外放...
 
 
-todo list
+未来规划： 支持sdk及impl maven仓库存储
 
-1. 自定义scope逻辑，统一配置(done)
-2. 模块内互相引用 （done）
-3. 仓库管理
-5. transform 优化  gradle增量前7秒多 多线程+增量编译  快了1.5倍 3s
-6. kotlin 模块测试 （done）

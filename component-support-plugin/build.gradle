@@ -2,14 +2,12 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 
 group = 'com.effective.plugins'
-archivesBaseName = 'component'
+archivesBaseName = 'component-support'
 version = '1.0.0'
 
-//设置本地发布路径
 uploadArchives {
     repositories {
         mavenDeployer {
-            /**配置Maven部署器，将工件上传到本地目录，这里是放到与该项目同级目录的repo目录下*/
             repository(url: uri('../repo'))
         }
     }
@@ -19,7 +17,6 @@ dependencies {
     implementation gradleApi()
     implementation localGroovy()
     implementation 'com.android.tools.build:gradle:3.3.0'
-    implementation 'org.jetbrains.kotlin:kotlin-compiler-embeddable:1.3.50'
     implementation 'org.ow2.asm:asm:7.1'
     implementation 'org.ow2.asm:asm-commons:7.1'
     implementation 'org.ow2.asm:asm-util:7.1'
