@@ -8,9 +8,9 @@ import com.quinn.hunter.transform.HunterTransform
 import com.quinn.hunter.transform.RunVariant
 import org.gradle.api.Project
 
-class ScanCodeTransform extends HunterTransform {
+class MethodCostTransform extends HunterTransform {
 
-    ScanCodeTransform(Project project) {
+    MethodCostTransform(Project project) {
         super(project)
         this.bytecodeWeaver = new MethodCostWeaver()
     }

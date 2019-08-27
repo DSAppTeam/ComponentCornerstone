@@ -4,7 +4,7 @@ import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.plugin.component.anno.MethodCost;
+import com.plugin.component.support.anno.MethodCost;
 import com.plugin.library.ISdk2;
 import com.plugin.librarykotlin.IKotlinSdk;
 import com.plugin.module.R;

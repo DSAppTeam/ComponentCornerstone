@@ -30,6 +30,7 @@ dependencies {
     implementation component(':library')
     implementation component(':librarykotlin')
     implementation project(':component-core')
+    implementation project(':component-support-core')
 }
 
 

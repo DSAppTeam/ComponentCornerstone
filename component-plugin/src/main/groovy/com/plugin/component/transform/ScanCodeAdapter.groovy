@@ -2,12 +2,10 @@ package com.plugin.component.transform
 
 import com.plugin.component.anno.AutoInjectComponent
 import com.plugin.component.anno.AutoInjectImpl
-import com.plugin.component.anno.MethodCost
 import com.plugin.component.transform.info.ScanComponentInfo
 import com.plugin.component.transform.info.ScanRuntime
 import com.plugin.component.transform.info.ScanSdkInfo
 import org.objectweb.asm.*
-import org.objectweb.asm.commons.AdviceAdapter
 
 class ScanCodeAdapter extends ClassVisitor {
 
@@ -76,21 +74,5 @@ class ScanCodeAdapter extends ClassVisitor {
                 super.visitEnd()
             }
         }
-    }
-
-
-    @Override
-    MethodVisitor visitMethod(int access, String name, String methodDescriptor, String signature, String[] exceptions) {
-        MethodVisitor mv = super.visitMethod(access, name, methodDescriptor, signature, exceptions)
-        mv = new AdviceAdapter(Opcodes.ASM7, mv, access, name, methodDescriptor) {
-            @Override
-            AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-                if (Type.getDescriptor(MethodCost.class) == descriptor) {
-                    ScanRuntime.addCostMethod(className, name, methodDescriptor)
-                }
-                return super.visitAnnotation(descriptor, visible)
-            }
-        }
-        return mv
     }
 }

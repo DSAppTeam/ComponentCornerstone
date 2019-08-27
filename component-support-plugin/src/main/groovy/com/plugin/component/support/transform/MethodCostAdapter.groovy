@@ -6,7 +6,7 @@ import org.objectweb.asm.commons.AdviceAdapter
 
 class MethodCostAdapter extends ClassVisitor {
 
-    private static final String sCostCachePath = "com/plugin/component/CostCache"
+    private static final String sCostCachePath = "com/plugin/component/support/CostCache"
     private String className
 
     MethodCostAdapter(ClassVisitor classVisitor) {

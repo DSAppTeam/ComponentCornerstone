@@ -1,4 +1,4 @@
-package com.plugin.component;
+package com.plugin.component.support;
 
 import java.util.HashMap;
 import java.util.Map;
