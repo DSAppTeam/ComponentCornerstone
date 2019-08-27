@@ -7,25 +7,9 @@ import com.plugin.component.Logger
 class ScanRuntime {
 
 
-    static Set<String> sMethodCostInfo = new HashSet<>()
     static List<ScanComponentInfo> sComponentInfo = new ArrayList<>()
     static List<ScanSdkInfo> sSdkInfo = new ArrayList<>()
     static List<ComponentSdkInfo> componentSdkInfoList = new ArrayList<>()
-
-    static void addCostMethod(String className, String methodName, String descriptor) {
-        if (descriptor == null) {
-            descriptor = ""
-        }
-        sMethodCostInfo.add(className + "#" + methodName + "(" + descriptor + ")")
-    }
-
-    @Nullable
-    static boolean isCostMethod(String className, String methodName, String descriptor) {
-        if (descriptor == null) {
-            descriptor = ""
-        }
-        return sMethodCostInfo.contains(className + "#" + methodName + "(" + descriptor + ")")
-    }
 
     static void addComponentInfo(@NonNull ScanComponentInfo scanComponentInfo) {
         sComponentInfo.add(scanComponentInfo)
@@ -36,10 +20,6 @@ class ScanRuntime {
     }
 
     static void logScanInfo() {
-        for (String string : sMethodCostInfo) {
-            Logger.buildOutput("MethodCost ==> " + string)
-        }
-
         for (ScanSdkInfo sdkInfo : sSdkInfo) {
             Logger.buildOutput(sdkInfo.toString())
         }
@@ -56,7 +36,6 @@ class ScanRuntime {
     }
 
     static void clearScanInfo() {
-        sMethodCostInfo.clear()
         sSdkInfo.clear()
         sComponentInfo.clear()
     }
