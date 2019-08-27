@@ -1,4 +1,4 @@
-package com.plugin.component.anno;
+package com.plugin.component.support.anno;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
