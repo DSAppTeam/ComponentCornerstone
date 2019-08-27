@@ -1,4 +1,5 @@
-include ':app', ':library', ':core', ':librarykotlin'
+include ':app', ':library', ':component-core', ':librarykotlin', ':component-support-core'
+
 
 //调试插件使用
 includeBuild './component-plugin'

@@ -1,4 +1,4 @@
-package com.plugin.component.extension
+package com.plugin.component.support.extension
 /**
  * 插件配置
  * created by yummylau 2019/08/09
