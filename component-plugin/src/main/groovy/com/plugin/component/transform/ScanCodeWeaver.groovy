@@ -8,6 +8,6 @@ class ScanCodeWeaver extends BaseWeaver {
 
     @Override
     protected ClassVisitor wrapClassWriter(ClassWriter classWriter) {
-        return new InjectCodeAdapter(classWriter)
+        return new ScanCodeAdapter(classWriter)
     }
 }
