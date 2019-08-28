@@ -1,3 +1,5 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.1"
@@ -30,3 +32,14 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }
+
+
+publish {
+    userOrg = 'yummylau'
+    groupId = 'com.effective.android'
+    artifactId = 'component-core'
+    publishVersion = '1.0.0'
+    desc = 'Android component core code'
+    website = 'https://github.com/YummyLau/ComponentPlugin'
+}
+

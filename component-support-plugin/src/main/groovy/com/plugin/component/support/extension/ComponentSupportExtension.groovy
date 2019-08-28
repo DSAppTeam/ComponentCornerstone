@@ -5,13 +5,22 @@ package com.plugin.component.support.extension
  */
 class ComponentSupportExtension {
 
-    public boolean openMethodCost = true
+    public boolean methodCostEnable = true
+    public String filterModule = ""
 
     /**
      * 编译sdk
      * @param version
      */
-    void openMethodCost(boolean openMethodCost) {
-        this.openMethodCost = openMethodCost
+    void methodCostEnable(boolean methodCostEnable) {
+        this.methodCostEnable = methodCostEnable
+    }
+
+    /**
+     * 过滤哪些模块，格式为 ':library,:libraryKotlin' 或者 ':library,libraryKotlin' 不带 ":"
+     * @param filterModule
+     */
+    void filterModule(String filterModule) {
+        this.filterModule = filterModule
     }
 }

@@ -1,7 +1,6 @@
-package com.plugin.component
+package com.plugin.component.support
 
-import com.android.build.gradle.BaseExtension
-import com.plugin.component.support.transform.MethodCostTransform
+import com.plugin.component.support.extension.ComponentSupportExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -11,10 +10,28 @@ import org.gradle.api.Project
  */
 class ComponentSupportPlugin implements Plugin<Project> {
 
+    ComponentSupportExtension extension
+
     @Override
     void apply(Project project) {
-        if (project != project.rootProject) {
-            project.extensions.findByType(BaseExtension.class).registerTransform(new MethodCostTransform(childProject))
+        boolean isRoot = project == project.rootProject
+        if (!isRoot) {
+            return
+        }
+
+        extension = project.getExtensions().create(Constants.COMPONENT_SUPPORT, ComponentSupportExtension.class)
+        project.afterEvaluate {
+
+            String filterModule = extension.
+
+            project.allprojects.each {
+                if (it == project) return
+                Project childProject = it
+                childProject.apply plugin: 'com.android.component.support'
+                childProject.dependencies {
+                    implementation 'com.effective.android:component-support-core:1.0.0'
+                }
+            }
         }
     }
 }

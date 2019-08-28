@@ -3,7 +3,7 @@ package com.plugin.component.support;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CostCache {
+public class MethodCostHelper {
 
     public static Map<String, Long> sStartTime = new HashMap<>();
     public static Map<String, Long> sEndTime = new HashMap<>();
