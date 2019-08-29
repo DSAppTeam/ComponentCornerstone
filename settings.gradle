@@ -4,3 +4,5 @@ include ':app', ':library', ':librarykotlin'
 //调试插件使用
 includeBuild './component-plugin'
 includeBuild './component-support-plugin'
+
+exclude
