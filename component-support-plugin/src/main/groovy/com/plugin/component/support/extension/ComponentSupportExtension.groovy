@@ -6,7 +6,8 @@ package com.plugin.component.support.extension
 class ComponentSupportExtension {
 
     public boolean methodCostEnable = true
-    public String filterModule = ""
+    public String includes = ""
+    public String excludes = ""
 
     /**
      * 编译sdk
@@ -17,10 +18,25 @@ class ComponentSupportExtension {
     }
 
     /**
-     * 过滤哪些模块，格式为 ':library,:libraryKotlin' 或者 ':library,libraryKotlin' 不带 ":"
-     * @param filterModule
+     * 过滤或者包含功能说明
+     * 如果只存在include，则插件只作用incilude
+     * 如果只存在exclude，则插件默认作用的模块为（all modules - exclude）
+     * 如果两者都存在，则只取 include 
      */
-    void filterModule(String filterModule) {
-        this.filterModule = filterModule
+
+    /**
+     * 过滤哪些模块，格式为 ':library' 或者 'library' ，多个使用 "," 隔开  比如 "library,:libraryKotlin"
+     * @param modules
+     */
+    void include(String modules) {
+        this.includes = modules
+    }
+
+    /**
+     * 包含哪些模块，格式为 ':library' 或者 'library' ，多个使用 "," 隔开  比如 "library,:libraryKotlin"
+     * @param modules
+     */
+    void exclude(String modules){
+        this.excludes = modules
     }
 }
