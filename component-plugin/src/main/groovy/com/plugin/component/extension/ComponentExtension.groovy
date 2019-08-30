@@ -21,6 +21,8 @@ class ComponentExtension {
     CompileOption compileOptions                    //编译选项
     Action<? super RepositoryHandler> configure     //仓库配置
     OnModuleExtensionListener listener              //发布监听器
+    String includes = ""
+    String excludes = ""
 
     public DebugOption debugOption
     public PublicationOption publicationOption
@@ -34,6 +36,29 @@ class ComponentExtension {
         debugOption = new DebugOption()
     }
 
+    /**
+     * 过滤或者包含功能说明
+     * 如果只存在include，则插件只作用incilude
+     * 如果只存在exclude，则插件默认作用的模块为（all modules - exclude）
+     * 如果两者都存在，则取 include
+     * 如果两则都不存在，则取 exclude 即所有
+     */
+
+    /**
+     * 过滤哪些模块，格式为 ':library' 或者 'library' ，多个使用 "," 隔开  比如 "library,:libraryKotlin"
+     * @param modules
+     */
+    void include(String modules) {
+        this.includes = modules
+    }
+
+    /**
+     * 包含哪些模块，格式为 ':library' 或者 'library' ，多个使用 "," 隔开  比如 "library,:libraryKotlin"
+     * @param modules
+     */
+    void exclude(String modules){
+        this.excludes = modules
+    }
 
     /**
      * 编译sdk
