@@ -24,18 +24,25 @@ class ComponentSupportPlugin implements Plugin<Project> {
             Logger.buildOutput("")
             Logger.buildOutput("ComponentSupportPlugin >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             project.afterEvaluate {
+                Logger.buildOutput("methodCostEnable", extension.methodCostEnable)
+                Logger.buildOutput("includes", extension.includes)
+                Logger.buildOutput("excludes", extension.excludes)
                 Set<String> includeModules = ProjectUtil.getModuleName(extension.includes)
                 Set<String> excludeModules = ProjectUtil.getModuleName(extension.excludes)
                 boolean includeModel = !includeModules.isEmpty()
-
+                Logger.buildOutput("select module by " + (includeModel ? "include" : "exclude"))
                 project.allprojects.each {
                     if (it == project) return
                     Project childProject = it
                     String projectName = ProjectUtil.getModuleName(childProject)
-                    if (includeModel && includeModules.contains(projectName)) {
-                        addPluginToProject(childProject)
-                    } else if (!excludeModules.contains(projectName)) {
-                        addPluginToProject(childProject)
+                    if (includeModel) {
+                        if (includeModules.contains(projectName)) {
+                            addPluginToProject(childProject)
+                        }
+                    } else {
+                        if (!excludeModules.contains(projectName)) {
+                            addPluginToProject(childProject)
+                        }
                     }
                 }
             }
@@ -54,8 +61,8 @@ class ComponentSupportPlugin implements Plugin<Project> {
         project.dependencies {
             implementation Constants.SUPPORT_DEPENDENCY
         }
-        Logger.buildOutput("")
         Logger.buildOutput("project[" + project.name + "] apply plugin: " + Constants.SUPPORT_PLUGIN)
         Logger.buildOutput("project[" + project.name + "] implementation " + Constants.SUPPORT_DEPENDENCY)
+        Logger.buildOutput("")
     }
 }
