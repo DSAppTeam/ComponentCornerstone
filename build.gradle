@@ -74,8 +74,6 @@ apply plugin: 'com.android.component.support'
 componentSupport {
 
     methodCostEnable true
-
-    include ':app'
 }
 
 
