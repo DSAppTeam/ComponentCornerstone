@@ -91,7 +91,6 @@ class ComponentPlugin implements Plugin<Project> {
     }
 
     private resetDir(Project project) {
-        Logger.buildOutput("\n\n======> " + project.name + " <======\n")
         PluginRuntime.sSdkDir = new File(project.projectDir, Constants.SDK_DIR)
         PluginRuntime.sImplDir = new File(project.projectDir, Constants.IMPL_DIR)
 
@@ -134,6 +133,8 @@ class ComponentPlugin implements Plugin<Project> {
 
 
     private void handleRootProject(Project project) {
+        Logger.buildOutput("")
+        Logger.buildOutput("ComponentPlugin >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
         resetDir(project)
         PluginRuntime.sPublicationManager = PublicationManager.getInstance()
@@ -196,36 +197,36 @@ class ComponentPlugin implements Plugin<Project> {
                 if (it == project) return
                 Project childProject = it
 
-                Logger.buildOutput("\n\n======> " + childProject.name + " <======\n")
+                Logger.buildOutput("")
 
                 ProjectInfo projectInfo = new ProjectInfo(childProject)
                 if (projectInfo.isVailModulePluginTarget) {
                     childProject.repositories {
                         flatDir {
                             dirs PluginRuntime.sSdkDir.absolutePath
-                            Logger.buildOutput(childProject.name + "-flatDir Dir[" + PluginRuntime.sSdkDir.absolutePath + "]")
+                            Logger.buildOutput("project[" + childProject.name + "]" +  "-flatDir Dir[" + PluginRuntime.sSdkDir.absolutePath + "]")
                             dirs PluginRuntime.sImplDir.absolutePath
-                            Logger.buildOutput(childProject.name + "-flatDir Dir[" + PluginRuntime.sImplDir.absolutePath + "]")
+                            Logger.buildOutput("project[" + childProject.name + "]" +  "-flatDir Dir[" + PluginRuntime.sImplDir.absolutePath + "]")
                         }
                     }
                     PluginRuntime.sProjectInfoMap.put(childProject.name, projectInfo)
 
-                    Logger.buildOutput("compileModuleName", projectInfo.compileModuleName)
-                    Logger.buildOutput("taskNames", projectInfo.taskNames)
-                    Logger.buildOutput("moduleName", projectInfo.currentModuleName)
-                    Logger.buildOutput("isSyncTask", projectInfo.isSync())
-                    Logger.buildOutput("debugEnable", projectInfo.debugEnable)
+                    Logger.buildOutput("project[" + childProject.name + "]" + "compileModuleName", projectInfo.compileModuleName)
+                    Logger.buildOutput("project[" + childProject.name + "]" + "taskNames", projectInfo.taskNames)
+                    Logger.buildOutput("project[" + childProject.name + "]" + "moduleName", projectInfo.currentModuleName)
+                    Logger.buildOutput("project[" + childProject.name + "]" + "isSyncTask", projectInfo.isSync())
+                    Logger.buildOutput("project[" + childProject.name + "]" + "debugEnable", projectInfo.debugEnable)
 
                     childProject.plugins.whenObjectAdded {
                         if (it instanceof AppPlugin || it instanceof LibraryPlugin) {
                             childProject.pluginManager.apply(Constants.PLUGIN_COMPONENT)
-                            Logger.buildOutput("project.apply plugin: com.android.component")
+                            Logger.buildOutput("project[" + childProject.name + "]" +  "apply plugin: com.android.component")
                         }
                     }
 
                     if (projectInfo.debugEnable) {
                         childProject.apply plugin: Constants.PLUGIN_APPLICATION
-                        Logger.buildOutput("project.apply plugin: com.android.application")
+                        Logger.buildOutput("project[" + childProject.name + "]" +  "apply plugin: com.android.application")
 
                         if (!projectInfo.isMainModule()) {
                             childProject.android.sourceSets {
@@ -242,7 +243,7 @@ class ComponentPlugin implements Plugin<Project> {
                         childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
                     } else {
                         childProject.apply plugin: Constants.PLUGIN_LIBRARY
-                        Logger.buildOutput("project.apply plugin: com.android.library")
+                        Logger.buildOutput("project[" + childProject.name + "]" +  "apply plugin: com.android.library")
                     }
                 }
             }

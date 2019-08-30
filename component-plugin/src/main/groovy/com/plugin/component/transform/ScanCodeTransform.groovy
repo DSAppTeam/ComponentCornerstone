@@ -23,7 +23,7 @@ class ScanCodeTransform extends HunterTransform {
         super.transform(context, inputs, referencedInputs, outputProvider, isIncremental)
         ScanRuntime.logScanInfo()
         ScanRuntime.buildComponentSdkInfo()
-        Logger.buildOutput("scan code cost : " + (System.currentTimeMillis() - startTime) + "ms")
+        Logger.buildOutput("ScanCodeTransform cost : " + (System.currentTimeMillis() - startTime) + "ms")
     }
 
     @Override

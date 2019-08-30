@@ -4,6 +4,7 @@ import com.android.build.api.transform.Context
 import com.android.build.api.transform.TransformException
 import com.android.build.api.transform.TransformInput
 import com.android.build.api.transform.TransformOutputProvider
+import com.plugin.component.support.Logger
 import com.quinn.hunter.transform.HunterTransform
 import com.quinn.hunter.transform.RunVariant
 import org.gradle.api.Project
@@ -19,7 +20,7 @@ class MethodCostTransform extends HunterTransform {
     void transform(Context context, Collection<TransformInput> inputs, Collection<TransformInput> referencedInputs, TransformOutputProvider outputProvider, boolean isIncremental) throws IOException, TransformException, InterruptedException {
         long startTime = System.currentTimeMillis()
         super.transform(context, inputs, referencedInputs, outputProvider, isIncremental)
-        Logger.buildOutput("scan code cost : " + (System.currentTimeMillis() - startTime) + "ms")
+        Logger.buildOutput("MethodCostTransform cost : " + (System.currentTimeMillis() - startTime) + "ms")
     }
 
     @Override

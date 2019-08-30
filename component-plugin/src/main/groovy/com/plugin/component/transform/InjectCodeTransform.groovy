@@ -23,7 +23,7 @@ class InjectCodeTransform extends HunterTransform {
         super.transform(context, inputs, referencedInputs, outputProvider, isIncremental)
         ScanRuntime.logInjectInfo()
         ScanRuntime.clearScanInfo()
-        Logger.buildOutput("inject code cost : " + (System.currentTimeMillis() - startTime) + "ms")
+        Logger.buildOutput("InjectCodeTransform cost : " + (System.currentTimeMillis() - startTime) + "ms")
     }
 
     @Override
