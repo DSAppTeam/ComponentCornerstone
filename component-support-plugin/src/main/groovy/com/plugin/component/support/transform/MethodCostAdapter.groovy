@@ -1,5 +1,6 @@
 package com.plugin.component.support.transform
 
+import com.plugin.component.support.Logger
 import com.plugin.component.support.anno.MethodCost
 import org.objectweb.asm.*
 import org.objectweb.asm.commons.AdviceAdapter
@@ -27,20 +28,18 @@ class MethodCostAdapter extends ClassVisitor {
 
             private boolean injectMethodCostCode = false
             private String methodName
+            private String methodNameDescriptor
 
             @Override
             AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-                if (Type.getDescriptor(MethodCost.class) == descriptor) {
-                    ScanRuntime.addCostMethod(className, name, methodDescriptor)
-                }
+                injectMethodCostCode = Type.getDescriptor(MethodCost.class) == descriptor
+                methodName = className + "#" + name
+                methodNameDescriptor = methodName + "(" + methodDescriptor + ")"
                 return super.visitAnnotation(descriptor, visible)
             }
 
             @Override
             protected void onMethodEnter() {
-                injectMethodCostCode = ScanRuntime.isCostMethod(className, name, descriptor)
-                methodName = className + "#" + name
-
                 if (injectMethodCostCode) {
                     mv.visitLdcInsn(methodName)
                     mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "currentTimeMillis", "()J", false)
@@ -63,6 +62,7 @@ class MethodCostAdapter extends ClassVisitor {
                             "(Ljava/lang/String;)Ljava/lang/String;", false)
                     mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println",
                             "(Ljava/lang/String;)V", false)
+                    Logger.buildOutput("methodCost(" + methodNameDescriptor + ")")
                 }
             }
         }

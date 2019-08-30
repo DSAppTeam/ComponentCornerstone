@@ -17,38 +17,45 @@ class ComponentSupportPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
+
         boolean isRoot = project == project.rootProject
-        if (!isRoot) {
-            return
-        }
         extension = project.getExtensions().create(Constants.COMPONENT_SUPPORT, ComponentSupportExtension.class)
-        project.afterEvaluate {
+        if (isRoot) {
+            Logger.buildOutput("")
+            Logger.buildOutput("ComponentSupportPlugin >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            project.afterEvaluate {
+                Set<String> includeModules = ProjectUtil.getModuleName(extension.includes)
+                Set<String> excludeModules = ProjectUtil.getModuleName(extension.excludes)
+                boolean includeModel = !includeModules.isEmpty()
 
-            Set<String> includeModules = ProjectUtil.getModuleName(extension.includes)
-            Set<String> excludeModules = ProjectUtil.getModuleName(extension.excludes)
-            boolean includeModel = !includeModules.isEmpty()
-
-            project.allprojects.each {
-                if (it == project) return
-                Project childProject = it
-                String projectName = ProjectUtil.getModuleName(childProject)
-                if (includeModel && includeModules.contains(projectName)) {
-                    addPluginToProject(childProject)
-                } else if (!excludeModules.contains(projectName)) {
-                    addPluginToProject(childProject)
+                project.allprojects.each {
+                    if (it == project) return
+                    Project childProject = it
+                    String projectName = ProjectUtil.getModuleName(childProject)
+                    if (includeModel && includeModules.contains(projectName)) {
+                        addPluginToProject(childProject)
+                    } else if (!excludeModules.contains(projectName)) {
+                        addPluginToProject(childProject)
+                    }
+                }
+            }
+        } else {
+            if (project.plugins.hasPlugin('com.android.application')) {
+                if (extension.methodCostEnable) {
+                    Logger.buildOutput("project[" + project.name + "] enable methodCost")
+                    project.extensions.findByType(BaseExtension.class).registerTransform(new MethodCostTransform(project))
                 }
             }
         }
     }
 
-
     void addPluginToProject(Project project) {
-        project.apply plugin: 'com.android.component.support'
+        project.apply plugin: Constants.SUPPORT_PLUGIN
         project.dependencies {
-            implementation 'com.effective.android:component-support-core:1.0.0'
+            implementation Constants.SUPPORT_DEPENDENCY
         }
-        if (extension.methodCostEnable) {
-            project.extensions.findByType(BaseExtension.class).registerTransform(new MethodCostTransform(project))
-        }
+        Logger.buildOutput("")
+        Logger.buildOutput("project[" + project.name + "] apply plugin: " + Constants.SUPPORT_PLUGIN)
+        Logger.buildOutput("project[" + project.name + "] implementation " + Constants.SUPPORT_DEPENDENCY)
     }
 }
