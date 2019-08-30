@@ -1,4 +1,4 @@
-include ':app', ':library', ':librarykotlin'
+include ':app', ':library', ':librarykotlin', ':librarywithoutplugin'
 
 
 //调试插件使用
