@@ -66,6 +66,4 @@ class Runtimes {
     static ProjectInfo getProjectInfo(String projectName) {
         return sProjectInfoMap.get(projectName)
     }
-
-
 }
