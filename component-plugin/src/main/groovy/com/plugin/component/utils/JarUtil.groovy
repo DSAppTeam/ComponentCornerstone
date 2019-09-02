@@ -1,7 +1,9 @@
 package com.plugin.component.utils
 
 import com.plugin.component.Constants
-import com.plugin.component.PluginRuntime
+import com.plugin.component.Runtimes
+import com.plugin.component.Runtimes
+import com.plugin.component.extension.PublicationManager
 import com.plugin.component.extension.option.CompileOption
 import com.plugin.component.extension.option.PublicationOption
 import org.gradle.api.GradleException
@@ -340,23 +342,23 @@ class JarUtil {
     }
 
     static void handleMavenJar(Project project, PublicationOption publication) {
-        File target = new File(PluginRuntime.sSdkDir, PublicationUtil.getJarName(publication))
+        File target = new File(Runtimes.sSdkDir, PublicationUtil.getJarName(publication))
         if (publication.invalid) {
-            PluginRuntime.sPublicationManager.addPublication(publication)
+            PublicationManager.getInstance().addPublication(publication)
             if (target.exists()) {
                 target.delete()
             }
             return
         }
 
-        boolean hasModifiedSource = PluginRuntime.sPublicationManager.hasModified(publication)
+        boolean hasModifiedSource = PublicationManager.getInstance().hasModified(publication)
 
         if (target.exists()) {
             if (hasModifiedSource) {
-                def releaseJar = JarUtil.packJavaSourceJar(project, publication, PluginRuntime.sAndroidJarPath, PluginRuntime.sModuleExtension.compileOptions, true)
+                def releaseJar = JarUtil.packJavaSourceJar(project, publication, Runtimes.sAndroidJarPath, Runtimes.sCompileOption, true)
                 if (releaseJar == null) {
                     publication.invalid = true
-                    PluginRuntime.sPublicationManager.addPublication(publication)
+                    PublicationManager.getInstance().addPublication(publication)
                     if (target.exists()) {
                         target.delete()
                     }
@@ -366,29 +368,29 @@ class JarUtil {
             }
             publication.invalid = false
             publication.useLocal = true
-            PluginRuntime.sPublicationManager.addPublication(publication)
+            PublicationManager.getInstance().addPublication(publication)
         } else if (!hasModifiedSource) {
-            PublicationOption lastPublication = PluginRuntime.sPublicationManager.getPublication(publication.groupId, publication.artifactId)
+            PublicationOption lastPublication = PublicationManager.getInstance().getPublication(publication.groupId, publication.artifactId)
             if (lastPublication.version != publication.version) {
                 publication.versionNew = publication.version
                 publication.version = lastPublication.version
             }
             publication.invalid = false
             publication.useLocal = false
-            PluginRuntime.sPublicationManager.addPublication(publication)
+            PublicationManager.getInstance().addPublication(publication)
             return
         } else {
-            def releaseJar = JarUtil.packJavaSourceJar(project, publication, PluginRuntime.sAndroidJarPath, PluginRuntime.sModuleExtension.compileOptions, false)
+            def releaseJar = JarUtil.packJavaSourceJar(project, publication, Runtimes.sAndroidJarPath, Runtimes.sCompileOption, false)
             if (releaseJar == null) {
                 publication.invalid = true
-                PluginRuntime.sPublicationManager.addPublication(publication)
+                PublicationManager.getInstance().addPublication(publication)
                 if (target.exists()) {
                     target.delete()
                 }
                 return
             }
 
-            PublicationOption lastPublication = PluginRuntime.sPublicationManager.getPublication(publication.groupId, publication.artifactId)
+            PublicationOption lastPublication = PublicationManager.getInstance().getPublication(publication.groupId, publication.artifactId)
             if (lastPublication == null) {
                 lastPublication = publication
             }
@@ -399,20 +401,20 @@ class JarUtil {
                 }
                 publication.useLocal = false
             } else {
-                releaseJar = JarUtil.packJavaSourceJar(project, publication, PluginRuntime.sAndroidJarPath, PluginRuntime.sModuleExtension.compileOptions, true)
+                releaseJar = JarUtil.packJavaSourceJar(project, publication, Runtimes.sAndroidJarPath, Runtimes.sCompileOption, true)
                 FileUtil.copyFile(releaseJar, target)
                 publication.useLocal = true
             }
             publication.invalid = false
-            PluginRuntime.sPublicationManager.addPublication(publication)
+            PublicationManager.getInstance().addPublication(publication)
         }
     }
 
     static void handleLocalJar(Project project, PublicationOption publication) {
-        File target = new File(PluginRuntime.sSdkDir, PublicationUtil.getJarName(publication))
+        File target = new File(Runtimes.sSdkDir, PublicationUtil.getJarName(publication))
 
         if (publication.invalid) {
-            PluginRuntime.sPublicationManager.addPublication(publication)
+            PublicationManager.getInstance().addPublication(publication)
             if (target.exists()) {
                 target.delete()
             }
@@ -420,19 +422,19 @@ class JarUtil {
         }
 
         if (target.exists()) {
-            boolean hasModifiedSource = PluginRuntime.sPublicationManager.hasModified(publication)
+            boolean hasModifiedSource = PublicationManager.getInstance().hasModified(publication)
             if (!hasModifiedSource) {
                 publication.invalid = false
                 publication.useLocal = true
-                PluginRuntime.sPublicationManager.addPublication(publication)
+                PublicationManager.getInstance().addPublication(publication)
                 return
             }
         }
 
-        File releaseJar = JarUtil.packJavaSourceJar(project, publication, PluginRuntime.sAndroidJarPath, PluginRuntime.sModuleExtension.compileOptions, true)
+        File releaseJar = JarUtil.packJavaSourceJar(project, publication, Runtimes.sAndroidJarPath, Runtimes.sCompileOption, true)
         if (releaseJar == null) {
             publication.invalid = true
-            PluginRuntime.sPublicationManager.addPublication(publication)
+            PublicationManager.getInstance().addPublication(publication)
             if (target.exists()) {
                 target.delete()
             }
@@ -442,6 +444,6 @@ class JarUtil {
         FileUtil.copyFile(releaseJar, target)
         publication.invalid = false
         publication.useLocal = true
-        PluginRuntime.sPublicationManager.addPublication(publication)
+        PublicationManager.getInstance().addPublication(publication)
     }
 }

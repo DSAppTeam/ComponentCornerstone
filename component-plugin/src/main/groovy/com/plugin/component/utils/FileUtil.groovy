@@ -1,7 +1,6 @@
 package com.plugin.component.utils
 
 import com.plugin.component.Constants
-import com.plugin.component.PluginRuntime
 
 class FileUtil {
 
@@ -22,9 +21,9 @@ class FileUtil {
 
 
 //    static boolean isFilterPackage(String fileName) {
-//        if (PluginRuntime.ignorePackages == null || fileName == null) return false
-//        for (int i = 0; i < PluginRuntime.ignorePackages.length; i++) {
-//            if (fileName.startsWith(PluginRuntime.ignorePackages[i])) {
+//        if (PluginRuntime2.ignorePackages == null || fileName == null) return false
+//        for (int i = 0; i < PluginRuntime2.ignorePackages.length; i++) {
+//            if (fileName.startsWith(PluginRuntime2.ignorePackages[i])) {
 //                return true
 //            }
 //        }
