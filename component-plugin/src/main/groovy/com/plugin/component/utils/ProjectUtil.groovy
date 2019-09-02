@@ -10,6 +10,28 @@ import org.gradle.api.Project
 class ProjectUtil {
 
     /**
+     * 解析include exclude
+     * @param modules
+     * @return
+     */
+    static Set<String> getModuleName(String modules) {
+        Set<String> result = new HashSet<>()
+        if (modules != null && !modules.isEmpty()) {
+            String[] strings = modules.split(",")
+            if (strings != null && strings.length > 0) {
+                for (String string : strings) {
+                    if (string.startsWith(":")) {
+                        result.add(string.substring(1, string.length()))
+                    } else {
+                        result.add(string)
+                    }
+                }
+            }
+        }
+        return result
+    }
+
+    /**
      * example: 兼容 component(:library) 和 component(library)
      * @param componentValue
      * @return

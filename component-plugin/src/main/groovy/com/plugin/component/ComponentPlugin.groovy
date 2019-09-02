@@ -29,7 +29,7 @@ import org.gradle.api.Project
  */
 class ComponentPlugin implements Plugin<Project> {
 
-    private ComponentExtension mComponentExtension;
+    private ComponentExtension mComponentExtension
 
     @Override
     void apply(Project project) {
@@ -167,19 +167,22 @@ class ComponentPlugin implements Plugin<Project> {
             Runtimes.sMainModuleName = mComponentExtension.mainModuleName
             Runtimes.sCompileSdkVersion = mComponentExtension.compileSdkVersion
             Runtimes.sCompileOption = mComponentExtension.compileOptions
-            Runtimes.sIncludes = mComponentExtension.includes
-            Runtimes.sExcludes = mComponentExtension.excludes
 
             Logger.buildOutput("project[" + project.name + "]" + "AndroidJarPath", Runtimes.sAndroidJarPath)
             Logger.buildOutput("project[" + project.name + "]" + "mainModuleName", Runtimes.sMainModuleName)
             Logger.buildOutput("project[" + project.name + "]" + "compileSdkVersion", Runtimes.sCompileSdkVersion)
             Logger.buildOutput("project[" + project.name + "]" + "CompileOption", "sourceCompatibility[" + Runtimes.sCompileOption.sourceCompatibility
                     + "] targetCompatibility[" + Runtimes.sCompileOption.targetCompatibility + "]")
-            Logger.buildOutput("project[" + project.name + "]" + "includes", Runtimes.sIncludes)
-            Logger.buildOutput("project[" + project.name + "]" + "excludes", Runtimes.sExcludes)
+            Logger.buildOutput("project[" + project.name + "]" + "includes", mComponentExtension.includes)
+            Logger.buildOutput("project[" + project.name + "]" + "excludes", mComponentExtension.excludes)
+            Set<String> includeModules = ProjectUtil.getModuleName(mComponentExtension.includes)
+            Set<String> excludeModules = ProjectUtil.getModuleName(mComponentExtension.excludes)
+            boolean includeModel = !includeModules.isEmpty()
+            Logger.buildOutput("select module by " + (includeModel ? "include" : "exclude"))
 
             project.allprojects.each {
                 if (it == project) return
+//                if (!isValidPluginModule(it, includeModules, excludeModules, includeModel)) return
                 Project childProject = it
                 def moduleScript = new File(childProject.projectDir, Constants.COMPONENT_SCRIPT)
                 if (moduleScript.exists()) {
@@ -195,7 +198,6 @@ class ComponentPlugin implements Plugin<Project> {
                 if (publication == null) {
                     return
                 }
-
                 Project childProject = project.findProject(publication.project)
                 PublicationUtil.filterPublicationDependencies(publication)
                 if (publication.version != null) {
@@ -208,10 +210,9 @@ class ComponentPlugin implements Plugin<Project> {
 
             project.allprojects.each {
                 if (it == project) return
+//                if (!isValidPluginModule(it, includeModules, excludeModules, includeModel)) return
                 Project childProject = it
-
                 Logger.buildOutput("")
-
                 ProjectInfo projectInfo = new ProjectInfo(childProject)
                 if (projectInfo.isVailModulePluginTarget) {
                     childProject.repositories {
@@ -260,6 +261,14 @@ class ComponentPlugin implements Plugin<Project> {
                     }
                 }
             }
+        }
+    }
+
+    private boolean isValidPluginModule(Project project, Set<String> includeModules, Set<String> excludeModules, boolean includeModel) {
+        if (includeModel) {
+            return includeModules.contains(project.name)
+        } else {
+            return !excludeModules.contains(project.name)
         }
     }
 }
