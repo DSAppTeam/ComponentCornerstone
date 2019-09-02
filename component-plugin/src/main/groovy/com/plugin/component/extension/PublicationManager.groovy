@@ -1,7 +1,7 @@
 package com.plugin.component.extension
 
 import com.plugin.component.Logger
-import com.plugin.component.PluginRuntime
+import com.plugin.component.Runtimes
 import com.plugin.component.extension.module.Digraph
 import com.plugin.component.extension.module.SourceFile
 import com.plugin.component.extension.module.SourceSet
@@ -53,7 +53,7 @@ class PublicationManager {
         publicationDependencies = new HashMap<>()
 
         rootProject.gradle.buildFinished {
-            PluginRuntime.resetProjectInfoScript()
+            Runtimes.resetProjectInfoScript()
             if (it.failure != null) {
                 Logger.buildOutput("build fail!")
                 return
@@ -62,8 +62,8 @@ class PublicationManager {
             Logger.buildOutput("build finished!")
         }
 
-        File sdkPublicationManifest = new File(PluginRuntime.sSdkDir, 'publicationManifest.xml')
-        File implPublicationManifest = new File(PluginRuntime.sImplDir, 'publicationManifest.xml')
+        File sdkPublicationManifest = new File(Runtimes.sSdkDir, 'publicationManifest.xml')
+        File implPublicationManifest = new File(Runtimes.sImplDir, 'publicationManifest.xml')
 
         if (!sdkPublicationManifest.exists()) {
             return
@@ -117,11 +117,11 @@ class PublicationManager {
      * 保存 sdkPublicationManifest.xml
      */
     private void saveManifest() {
-        if (!PluginRuntime.sSdkDir.exists()) {
-            PluginRuntime.sSdkDir.mkdirs()
+        if (!Runtimes.sSdkDir.exists()) {
+            Runtimes.sSdkDir.mkdirs()
         }
-        File sdkPublicationManifestFile = new File(PluginRuntime.sSdkDir, 'publicationManifest.xml')
-        File implPublicationManifest = new File(PluginRuntime.sSdkDir, 'publicationManifest.xml')
+        File sdkPublicationManifestFile = new File(Runtimes.sSdkDir, 'publicationManifest.xml')
+        File implPublicationManifest = new File(Runtimes.sSdkDir, 'publicationManifest.xml')
 
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance()
         Document document = builderFactory.newDocumentBuilder().newDocument()

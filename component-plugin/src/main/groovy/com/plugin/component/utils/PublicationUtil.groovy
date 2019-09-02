@@ -1,7 +1,7 @@
 package com.plugin.component.utils
 
 import com.plugin.component.Constants
-import com.plugin.component.PluginRuntime
+import com.plugin.component.Runtimes
 import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.module.SourceFile
 import com.plugin.component.extension.module.SourceSet
@@ -40,7 +40,7 @@ class PublicationUtil {
      */
     static parseComponent(ProjectInfo projectInfo, String value) {
         String key = ProjectUtil.getComponentValue(value)
-        PublicationOption publication = PluginRuntime.sSdkPublicationMap.get(key)
+        PublicationOption publication = Runtimes.getSdkPublication(key)
         if (publication != null) {
             if (projectInfo.debugEnableAndNoSync()) {
                 return projectInfo.project.project(':' + value)
@@ -196,7 +196,7 @@ class PublicationUtil {
                 List<Object> compileOnly = new ArrayList<>()
                 publication.dependencies.compileOnly.each {
                     if (it instanceof String && it.startsWith(Constants.COMPONENT_PRE)) {
-                        PublicationOption existPublication = PluginRuntime.sPublicationManager.getPublicationByKey(getPublicationId(publication))
+                        PublicationOption existPublication = PublicationManager.getInstance().getPublicationByKey(getPublicationId(publication))
                         if (existPublication != null) {
                             if (existPublication.useLocal) {
                                 compileOnly.add(getLocalGAV(existPublication))
@@ -214,7 +214,7 @@ class PublicationUtil {
                 List<Object> implementation = new ArrayList<>()
                 publication.dependencies.implementation.each {
                     if (it instanceof String && it.startsWith(Constants.COMPONENT_PRE)) {
-                        PublicationOption existPublication = PluginRuntime.sPublicationManager.getPublicationByKey(getPublicationId(publication))
+                        PublicationOption existPublication = PublicationManager.getInstance().getPublicationByKey(getPublicationId(publication))
                         if (existPublication != null) {
                             if (existPublication.useLocal) {
                                 implementation.add(getLocalGAV(existPublication))

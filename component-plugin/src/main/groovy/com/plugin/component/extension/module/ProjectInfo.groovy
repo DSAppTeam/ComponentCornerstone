@@ -11,7 +11,7 @@ import org.gradle.api.Project
  */
 class ProjectInfo {
 
-    public static final String BUILD_GRADLE = "build.gradle"
+    private static final String BUILD_GRADLE = "build.gradle"
 
     public Project project
 
@@ -19,7 +19,6 @@ class ProjectInfo {
     public File buildGradleOriginFile
     public String buildGradleOriginContent = ""
 
-    public String currentProjectName
     public String currentModuleName
     public boolean debugEnable
 
@@ -33,7 +32,6 @@ class ProjectInfo {
     ProjectInfo(Project project) {
         this.project = project
         this.currentModuleName = ProjectUtil.getModuleName(project)
-        this.currentProjectName = project.name
         beforeEvaluateHandlerBuildScript()
         parseEnterTaskInfo()
         initRunAlone()

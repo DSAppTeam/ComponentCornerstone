@@ -1,12 +1,10 @@
 package com.plugin.component.utils
 
 import com.android.build.gradle.AppExtension
-import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
-import com.android.build.gradle.LibraryPlugin
 import com.plugin.component.Constants
-import com.plugin.component.PluginRuntime
+import com.plugin.component.Runtimes
 import org.gradle.api.Project
 
 class ProjectUtil {
@@ -27,20 +25,11 @@ class ProjectUtil {
     }
 
     /**
-     * 是否有效注入的对象，只有实现application
-     * @param project
-     * @return
-     */
-    static boolean isModulePluginTarget(Project project) {
-        return project.plugins.contains(AppPlugin.class) || project.plugins.contains(LibraryPlugin.class)
-    }
-
-    /**
      * 获取项目工程的主模块名，默认 'app'
      * @return
      */
     static String getMainModuleName() {
-        String name = PluginRuntime.sModuleExtension.mainModuleName
+        String name = Runtimes.sMainModuleName
         if (name == null || name.isEmpty()) {
             return Constants.DEFAULT_MAIN_MODULE_NAME
         }
@@ -57,10 +46,10 @@ class ProjectUtil {
         if ((getModuleName(project)) == getMainModuleName()) {
             return true
         }
-        if (PluginRuntime.sDebugMap.get(project.name) == null) {
+        if (Runtimes.getDebugInfo(project.name) == null) {
             return false
         }
-        return PluginRuntime.sDebugMap.get(project.name).enable
+        return Runtimes.getDebugInfo(project.name).enable
     }
 
     static List<String> getTasks(Project project) {

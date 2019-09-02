@@ -1,6 +1,7 @@
 package com.plugin.component.task
 
-import com.plugin.component.PluginRuntime
+
+import com.plugin.component.Runtimes
 import com.plugin.component.extension.PublicationManager
 import com.plugin.component.extension.option.PublicationOption
 import org.gradle.api.DefaultTask
@@ -17,7 +18,7 @@ class CompileSdkTask extends DefaultTask {
     @TaskAction
     void compileSource() {
         def project = getProject()
-        def releaseJar = JarUtil.packJavaSourceJar(project, publication, PluginRuntime.sAndroidJarPath, PluginRuntime.sModuleExtension.compileOptions, false)
+        def releaseJar = JarUtil.packJavaSourceJar(project, publication, Runtimes.sAndroidJarPath, Runtimes.sCompileOption, false)
         if (releaseJar == null) {
             throw new RuntimeException("nothing to push.")
         }
