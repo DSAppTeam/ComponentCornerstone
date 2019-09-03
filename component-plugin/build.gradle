@@ -1,5 +1,6 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
+//apply plugin: 'com.novoda.bintray-release'
 
 group = 'com.effective.plugins'
 archivesBaseName = 'component'
@@ -40,5 +41,15 @@ repositories {
     google()
     mavenCentral()
 }
+
+
+//publish {
+//    userOrg = 'yummylau'
+//    groupId = 'com.effective.plugins'
+//    artifactId = 'component'
+//    publishVersion = '1.0.0'
+//    desc = 'Android component plugin'
+//    website = 'https://github.com/YummyLau/ComponentPlugin'
+//}
 
 
