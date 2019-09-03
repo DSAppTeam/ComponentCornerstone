@@ -73,23 +73,23 @@ class ComponentPlugin implements Plugin<Project> {
             ProjectUtil.addSdkSourceSets(project)
             List<PublicationOption> publicationList = PublicationManager.getInstance().getPublicationByProject(project)
             List<PublicationOption> publicationPublishList = new ArrayList<>()
-            publicationList.each {
-                if (it.version != null) {
-                    publicationPublishList.add(it)
-                }
-            }
-
-            if (publicationPublishList.size() > 0) {
-                project.plugins.apply(Constants.PLUGIN_MAVEN_PUBLISH)
-                def publishing = project.extensions.getByName(Constants.PUBLISHING)
-                if (mComponentExtension != null && mComponentExtension.configure != null) {
-                    publishing.repositories mComponentExtension.configure
-                }
-
-                publicationPublishList.each {
-                    PublicationUtil.createPublishTask(project, it)
-                }
-            }
+//            publicationList.each {
+//                if (it.version != null) {
+//                    publicationPublishList.add(it)
+//                }
+//            }
+//
+//            if (publicationPublishList.size() > 0) {
+//                project.plugins.apply(Constants.PLUGIN_MAVEN_PUBLISH)
+//                def publishing = project.extensions.getByName(Constants.PUBLISHING)
+//                if (mComponentExtension != null && mComponentExtension.configure != null) {
+//                    publishing.repositories mComponentExtension.configure
+//                }
+//
+//                publicationPublishList.each {
+//                    PublicationUtil.createPublishTask(project, it)
+//                }
+//            }
         }
     }
 
