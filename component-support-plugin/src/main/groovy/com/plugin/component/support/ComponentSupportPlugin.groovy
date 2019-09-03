@@ -26,31 +26,31 @@ class ComponentSupportPlugin implements Plugin<Project> {
         boolean isRoot = project == project.rootProject
         if (isRoot) {
             extension = project.getExtensions().create(Constants.COMPONENT_SUPPORT, ComponentSupportExtension.class)
-            Logger.buildOutput("")
-            Logger.buildOutput("ComponentSupportPlugin >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             project.afterEvaluate {
-                Logger.buildOutput("methodCostEnable", extension.methodCostEnable)
-                Logger.buildOutput("includes", extension.includes)
-                Logger.buildOutput("excludes", extension.excludes)
+                Logger.buildOutput("")
+                Logger.buildOutput("ComponentSupportPlugin >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                Logger.buildOutput("Extension-methodCostEnable", extension.methodCostEnable)
+                Logger.buildOutput("Extension-includes", extension.includes)
+                Logger.buildOutput("Extension-excludes", extension.excludes)
                 includeModules = ProjectUtil.getModuleName(extension.includes)
                 excludeModules = ProjectUtil.getModuleName(extension.excludes)
                 includeModel = !includeModules.isEmpty()
-                Logger.buildOutput("select module by " + (includeModel ? "include" : "exclude"))
+                Logger.buildOutput("Select module by " + (includeModel ? "include" : "exclude"))
                 project.allprojects.each {
                     if (it == project) return
                     if (!isValidPluginModule(it)) return
                     Project childProject = it
 
-                    if (childProject.pluginManager.hasPlugin('com.android.application')
-                            || childProject.pluginManager.hasPlugin('com.android.library')) {
-                        addPluginToProject(childProject)
-                    } else {
+//                    if (childProject.pluginManager.hasPlugin('com.android.application')
+//                            || childProject.pluginManager.hasPlugin('com.android.library')) {
+//                        addPluginToProject(childProject)
+//                    } else {
                         childProject.plugins.whenObjectAdded {
                             if (it instanceof AppPlugin || it instanceof LibraryPlugin) {
                                 addPluginToProject(childProject)
                             }
                         }
-                    }
+//                    }
                 }
             }
         } else {
@@ -69,9 +69,8 @@ class ComponentSupportPlugin implements Plugin<Project> {
         project.dependencies {
             implementation Constants.SUPPORT_DEPENDENCY
         }
-        Logger.buildOutput("project[" + project.name + "] implementation " + Constants.SUPPORT_DEPENDENCY)
-        Logger.buildOutput("project[" + project.name + "] apply plugin: " + Constants.SUPPORT_PLUGIN)
-        Logger.buildOutput("")
+        Logger.buildOutput("project[" + project.name + "]implementation " + Constants.SUPPORT_DEPENDENCY)
+        Logger.buildOutput("project[" + project.name + "]apply plugin: " + Constants.SUPPORT_PLUGIN)
     }
 
     private boolean isValidPluginModule(Project project) {

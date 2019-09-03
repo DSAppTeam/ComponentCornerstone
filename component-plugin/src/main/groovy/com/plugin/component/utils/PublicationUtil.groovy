@@ -42,7 +42,7 @@ class PublicationUtil {
         String key = ProjectUtil.getComponentValue(value)
         PublicationOption publication = Runtimes.getSdkPublication(key)
         if (publication != null) {
-            if (projectInfo.debugEnableAndNoSync()) {
+            if (projectInfo.aloneEnableAndNoSync()) {
                 return projectInfo.project.project(':' + value)
             } else {
                 return getPublication(publication)

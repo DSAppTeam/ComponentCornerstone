@@ -69,10 +69,10 @@ class ComponentPlugin implements Plugin<Project> {
         }
 
         project.afterEvaluate {
+            ProjectUtil.modifySourceSets(projectInfo)
 
-            ProjectUtil.addSdkSourceSets(project)
-            List<PublicationOption> publicationList = PublicationManager.getInstance().getPublicationByProject(project)
-            List<PublicationOption> publicationPublishList = new ArrayList<>()
+//            List<PublicationOption> publicationList = PublicationManager.getInstance().getPublicationByProject(project)
+//            List<PublicationOption> publicationPublishList = new ArrayList<>()
 //            publicationList.each {
 //                if (it.version != null) {
 //                    publicationPublishList.add(it)
@@ -94,9 +94,6 @@ class ComponentPlugin implements Plugin<Project> {
     }
 
     private initPlugin(Project project) {
-        Logger.buildOutput("")
-        Logger.buildOutput("ComponentPlugin >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-
         Runtimes.sSdkDir = new File(project.projectDir, Constants.SDK_DIR)
         Runtimes.sImplDir = new File(project.projectDir, Constants.IMPL_DIR)
 
@@ -128,10 +125,10 @@ class ComponentPlugin implements Plugin<Project> {
         project.repositories {
             flatDir {
                 dirs Runtimes.sSdkDir.absolutePath
-                Logger.buildOutput(project.name + "-flatDir Dir[" + Runtimes.sSdkDir.absolutePath + "]")
+                Logger.buildOutput("flatDir Dir[" + Runtimes.sSdkDir.absolutePath + "]")
 
                 dirs Runtimes.sImplDir.absolutePath
-                Logger.buildOutput(project.name + "-flatDir Dir[" + Runtimes.sImplDir.absolutePath + "]")
+                Logger.buildOutput("flatDir Dir[" + Runtimes.sImplDir.absolutePath + "]")
             }
         }
 
@@ -163,34 +160,37 @@ class ComponentPlugin implements Plugin<Project> {
 
         project.afterEvaluate {
 
+            Logger.buildOutput("ComponentPlugin >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             Runtimes.sAndroidJarPath = ProjectUtil.getAndroidJarPath(project, mComponentExtension.compileSdkVersion)
             Runtimes.sMainModuleName = mComponentExtension.mainModuleName
             Runtimes.sCompileSdkVersion = mComponentExtension.compileSdkVersion
             Runtimes.sCompileOption = mComponentExtension.compileOptions
 
-            Logger.buildOutput("project[" + project.name + "]" + "AndroidJarPath", Runtimes.sAndroidJarPath)
-            Logger.buildOutput("project[" + project.name + "]" + "mainModuleName", Runtimes.sMainModuleName)
-            Logger.buildOutput("project[" + project.name + "]" + "compileSdkVersion", Runtimes.sCompileSdkVersion)
-            Logger.buildOutput("project[" + project.name + "]" + "CompileOption", "sourceCompatibility[" + Runtimes.sCompileOption.sourceCompatibility
+            Logger.buildOutput("Extension-AndroidJarPath", Runtimes.sAndroidJarPath)
+            Logger.buildOutput("Extension-mainModuleName", Runtimes.sMainModuleName)
+            Logger.buildOutput("Extension-compileSdkVersion", Runtimes.sCompileSdkVersion)
+            Logger.buildOutput("Extension-CompileOption", "sourceCompatibility[" + Runtimes.sCompileOption.sourceCompatibility
                     + "] targetCompatibility[" + Runtimes.sCompileOption.targetCompatibility + "]")
-            Logger.buildOutput("project[" + project.name + "]" + "includes", mComponentExtension.includes)
-            Logger.buildOutput("project[" + project.name + "]" + "excludes", mComponentExtension.excludes)
+            Logger.buildOutput("Extension-includes", mComponentExtension.includes)
+            Logger.buildOutput("Extension-excludes", mComponentExtension.excludes)
             Set<String> includeModules = ProjectUtil.getModuleName(mComponentExtension.includes)
             Set<String> excludeModules = ProjectUtil.getModuleName(mComponentExtension.excludes)
             boolean includeModel = !includeModules.isEmpty()
-            Logger.buildOutput("select module by " + (includeModel ? "include" : "exclude"))
-
+            Logger.buildOutput("Select module by " + (includeModel ? "include" : "exclude"))
+            Logger.buildOutput("Start apply from sub project' component.gradle")
             project.allprojects.each {
                 if (it == project) return
                 if (!isValidPluginModule(it, includeModules, excludeModules, includeModel)) return
                 Project childProject = it
-                def moduleScript = new File(childProject.projectDir, Constants.COMPONENT_SCRIPT)
+                File moduleScript = new File(childProject.projectDir, Constants.COMPONENT_SCRIPT)
                 if (moduleScript.exists()) {
                     mComponentExtension.currentChildProject = childProject
                     project.apply from: moduleScript
+                    Logger.buildOutput("apply from " + moduleScript.path)
                 }
             }
 
+            Logger.buildOutput("start package sdk jar")
             List<String> topSort = PublicationManager.getInstance().dependencyGraph.topSort()
             Collections.reverse(topSort)
             topSort.each {
@@ -202,8 +202,10 @@ class ComponentPlugin implements Plugin<Project> {
                 PublicationUtil.filterPublicationDependencies(publication)
                 if (publication.version != null) {
                     JarUtil.handleMavenJar(childProject, publication)
+                    Logger.buildOutput("Handle Maven jar " + PublicationUtil.getJarName(publication))
                 } else {
                     JarUtil.handleLocalJar(childProject, publication)
+                    Logger.buildOutput("Handle Local jar " + PublicationUtil.getJarName(publication))
                 }
                 PublicationManager.getInstance().hitPublication(publication)
             }
@@ -213,8 +215,10 @@ class ComponentPlugin implements Plugin<Project> {
                 if (!isValidPluginModule(it, includeModules, excludeModules, includeModel)) return
                 Project childProject = it
                 Logger.buildOutput("")
+                Logger.buildOutput("project[" + childProject.name + "] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                 ProjectInfo projectInfo = new ProjectInfo(childProject)
                 if (projectInfo.isVailModulePluginTarget) {
+                    Logger.buildOutput("project[" + childProject.name + "]" + "can apply component plugin")
                     childProject.repositories {
                         flatDir {
                             dirs Runtimes.sSdkDir.absolutePath
@@ -224,41 +228,35 @@ class ComponentPlugin implements Plugin<Project> {
                         }
                     }
                     Runtimes.addProjectInfo(childProject.name, projectInfo)
-
                     Logger.buildOutput("project[" + childProject.name + "]" + "compileModuleName", projectInfo.compileModuleName)
                     Logger.buildOutput("project[" + childProject.name + "]" + "taskNames", projectInfo.taskNames)
                     Logger.buildOutput("project[" + childProject.name + "]" + "moduleName", projectInfo.currentModuleName)
                     Logger.buildOutput("project[" + childProject.name + "]" + "isSyncTask", projectInfo.isSync())
-                    Logger.buildOutput("project[" + childProject.name + "]" + "debugEnable", projectInfo.debugEnable)
+                    Logger.buildOutput("project[" + childProject.name + "]" + "aloneEnable", projectInfo.aloneEnable)
 
                     childProject.plugins.whenObjectAdded {
                         if (it instanceof AppPlugin || it instanceof LibraryPlugin) {
                             childProject.pluginManager.apply(Constants.PLUGIN_COMPONENT)
+                            if (projectInfo.aloneEnable) {
+                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new ScanCodeTransform(childProject))
+                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
+                                if (!projectInfo.isMainModule()) {
+                                    childProject.android.sourceSets {
+                                        main {
+                                            manifest.srcFile Constants.DEBUG_MANIFEST_PATH
+                                            java.srcDirs = [Constants.JAVA_PATH, Constants.DEBUG_JAVA_PATH]
+                                            res.srcDirs = [Constants.RES_PATH, Constants.DEBUG_RES_PATH]
+                                            assets.srcDirs = [Constants.ASSETS_PATH, Constants.DEBUG_ASSETS_PATH]
+                                            jniLibs.srcDirs = [Constants.JNILIBS_PATH, Constants.DEBUG_JNILIBS_PATH]
+                                        }
+                                    }
+                                }
+                            }
                             Logger.buildOutput("project[" + childProject.name + "]" + "apply plugin: com.android.component")
                         }
                     }
-
-                    if (projectInfo.debugEnable) {
-                        childProject.apply plugin: Constants.PLUGIN_APPLICATION
-                        Logger.buildOutput("project[" + childProject.name + "]" + "apply plugin: com.android.application")
-
-                        if (!projectInfo.isMainModule()) {
-                            childProject.android.sourceSets {
-                                main {
-                                    manifest.srcFile Constants.DEBUG_MANIFEST_PATH
-                                    java.srcDirs = [Constants.JAVA_PATH, Constants.DEBUG_JAVA_PATH]
-                                    res.srcDirs = [Constants.RES_PATH, Constants.DEBUG_RES_PATH]
-                                    assets.srcDirs = [Constants.ASSETS_PATH, Constants.DEBUG_ASSETS_PATH]
-                                    jniLibs.srcDirs = [Constants.JNILIBS_PATH, Constants.DEBUG_JNILIBS_PATH]
-                                }
-                            }
-                        }
-                        childProject.extensions.findByType(BaseExtension.class).registerTransform(new ScanCodeTransform(childProject))
-                        childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
-                    } else {
-                        childProject.apply plugin: Constants.PLUGIN_LIBRARY
-                        Logger.buildOutput("project[" + childProject.name + "]" + "apply plugin: com.android.library")
-                    }
+                } else {
+                    Logger.buildOutput("project[" + childProject.name + "]" + "can't apply component plugin")
                 }
             }
         }
