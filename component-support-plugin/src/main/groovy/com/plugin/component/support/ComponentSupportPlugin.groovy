@@ -1,6 +1,8 @@
 package com.plugin.component.support
 
+import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.LibraryPlugin
 import com.plugin.component.support.extension.ComponentSupportExtension
 import com.plugin.component.support.transform.MethodCostTransform
 import com.plugin.component.support.utils.ProjectUtil
@@ -13,40 +15,46 @@ import org.gradle.api.Project
  */
 class ComponentSupportPlugin implements Plugin<Project> {
 
-    ComponentSupportExtension extension
+    static ComponentSupportExtension extension
+    static Set<String> includeModules
+    static Set<String> excludeModules
+    static boolean includeModel
 
     @Override
     void apply(Project project) {
 
         boolean isRoot = project == project.rootProject
-        extension = project.getExtensions().create(Constants.COMPONENT_SUPPORT, ComponentSupportExtension.class)
         if (isRoot) {
+            extension = project.getExtensions().create(Constants.COMPONENT_SUPPORT, ComponentSupportExtension.class)
             Logger.buildOutput("")
             Logger.buildOutput("ComponentSupportPlugin >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             project.afterEvaluate {
                 Logger.buildOutput("methodCostEnable", extension.methodCostEnable)
                 Logger.buildOutput("includes", extension.includes)
                 Logger.buildOutput("excludes", extension.excludes)
-                Set<String> includeModules = ProjectUtil.getModuleName(extension.includes)
-                Set<String> excludeModules = ProjectUtil.getModuleName(extension.excludes)
-                boolean includeModel = !includeModules.isEmpty()
+                includeModules = ProjectUtil.getModuleName(extension.includes)
+                excludeModules = ProjectUtil.getModuleName(extension.excludes)
+                includeModel = !includeModules.isEmpty()
                 Logger.buildOutput("select module by " + (includeModel ? "include" : "exclude"))
                 project.allprojects.each {
                     if (it == project) return
+                    if (!isValidPluginModule(it)) return
                     Project childProject = it
-                    String projectName = ProjectUtil.getModuleName(childProject)
-                    if (includeModel) {
-                        if (includeModules.contains(projectName)) {
-                            addPluginToProject(childProject)
-                        }
+
+                    if (childProject.pluginManager.hasPlugin('com.android.application')
+                            || childProject.pluginManager.hasPlugin('com.android.library')) {
+                        addPluginToProject(childProject)
                     } else {
-                        if (!excludeModules.contains(projectName)) {
-                            addPluginToProject(childProject)
+                        childProject.plugins.whenObjectAdded {
+                            if (it instanceof AppPlugin || it instanceof LibraryPlugin) {
+                                addPluginToProject(childProject)
+                            }
                         }
                     }
                 }
             }
         } else {
+            if (!isValidPluginModule(project)) return
             if (project.plugins.hasPlugin('com.android.application')) {
                 if (extension.methodCostEnable) {
                     Logger.buildOutput("project[" + project.name + "] enable methodCost")
@@ -61,8 +69,16 @@ class ComponentSupportPlugin implements Plugin<Project> {
         project.dependencies {
             implementation Constants.SUPPORT_DEPENDENCY
         }
-        Logger.buildOutput("project[" + project.name + "] apply plugin: " + Constants.SUPPORT_PLUGIN)
         Logger.buildOutput("project[" + project.name + "] implementation " + Constants.SUPPORT_DEPENDENCY)
+        Logger.buildOutput("project[" + project.name + "] apply plugin: " + Constants.SUPPORT_PLUGIN)
         Logger.buildOutput("")
+    }
+
+    private boolean isValidPluginModule(Project project) {
+        if (includeModel) {
+            return includeModules.contains(project.name)
+        } else {
+            return !excludeModules.contains(project.name)
+        }
     }
 }

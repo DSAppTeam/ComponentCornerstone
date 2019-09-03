@@ -182,7 +182,7 @@ class ComponentPlugin implements Plugin<Project> {
 
             project.allprojects.each {
                 if (it == project) return
-//                if (!isValidPluginModule(it, includeModules, excludeModules, includeModel)) return
+                if (!isValidPluginModule(it, includeModules, excludeModules, includeModel)) return
                 Project childProject = it
                 def moduleScript = new File(childProject.projectDir, Constants.COMPONENT_SCRIPT)
                 if (moduleScript.exists()) {
@@ -210,7 +210,7 @@ class ComponentPlugin implements Plugin<Project> {
 
             project.allprojects.each {
                 if (it == project) return
-//                if (!isValidPluginModule(it, includeModules, excludeModules, includeModel)) return
+                if (!isValidPluginModule(it, includeModules, excludeModules, includeModel)) return
                 Project childProject = it
                 Logger.buildOutput("")
                 ProjectInfo projectInfo = new ProjectInfo(childProject)
