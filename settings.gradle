@@ -1,6 +1,13 @@
 include ':app', ':library', ':librarykotlin', ':librarywithoutplugin'
 
+//发布调试 core
+//include ':component-core'
+//include ':component-support-core'
 
-//调试插件使用
+//发布插件
+//include ':component-plugin'
+//include ':component-support-plugin'
+
+//调试插件
 //includeBuild './component-plugin'
 //includeBuild './component-support-plugin'
