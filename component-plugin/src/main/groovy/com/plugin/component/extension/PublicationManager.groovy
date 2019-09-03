@@ -53,7 +53,7 @@ class PublicationManager {
         publicationDependencies = new HashMap<>()
 
         rootProject.gradle.buildFinished {
-            Runtimes.resetProjectInfoScript()
+            Runtimes.resetBuildGradleFile()
             if (it.failure != null) {
                 Logger.buildOutput("build fail!")
                 return

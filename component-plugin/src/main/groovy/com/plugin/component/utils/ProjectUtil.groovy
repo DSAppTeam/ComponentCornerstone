@@ -5,6 +5,7 @@ import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
 import com.plugin.component.Constants
 import com.plugin.component.Runtimes
+import com.plugin.component.extension.module.ProjectInfo
 import org.gradle.api.Project
 
 class ProjectUtil {
@@ -91,41 +92,42 @@ class ProjectUtil {
                 string.contains("plugin") && (string.contains("com.android.library") || string.contains("com.android.application"))
     }
 
-    static addSdkSourceSets(Project project) {
+    static modifySourceSets(ProjectInfo projectInfo) {
+        Project project = projectInfo.project
         BaseExtension baseExtension = project.extensions.getByName(Constants.ANDROID)
-        addSdkSourceSets(baseExtension, Constants.MAIN)
+        modifySourceSets(baseExtension, Constants.MAIN)
         if (baseExtension instanceof AppExtension) {
             AppExtension appExtension = (AppExtension) baseExtension
             appExtension.getApplicationVariants().each {
-                addSdkSourceSets(baseExtension, it.buildType.name)
+                modifySourceSets(baseExtension, it.buildType.name)
                 it.productFlavors.each {
-                    addSdkSourceSets(baseExtension, it.name)
+                    modifySourceSets(baseExtension, it.name)
                 }
                 if (it.productFlavors.size() >= 1) {
                     if (it.productFlavors.size() > 1) {
-                        addSdkSourceSets(baseExtension, it.flavorName)
+                        modifySourceSets(baseExtension, it.flavorName)
                     }
-                    addSdkSourceSets(baseExtension, it.name)
+                    modifySourceSets(baseExtension, it.name)
                 }
             }
         } else if (baseExtension instanceof LibraryExtension) {
             LibraryExtension libraryExtension = (LibraryExtension) baseExtension
             libraryExtension.getLibraryVariants().each {
-                addSdkSourceSets(baseExtension, it.buildType.name)
+                modifySourceSets(baseExtension, it.buildType.name)
                 it.productFlavors.each {
-                    addSdkSourceSets(baseExtension, it.name)
+                    modifySourceSets(baseExtension, it.name)
                 }
                 if (it.productFlavors.size() >= 1) {
                     if (it.productFlavors.size() > 1) {
-                        addSdkSourceSets(baseExtension, it.flavorName)
+                        modifySourceSets(baseExtension, it.flavorName)
                     }
-                    addSdkSourceSets(baseExtension, it.name)
+                    modifySourceSets(baseExtension, it.name)
                 }
             }
         }
     }
 
-    static addSdkSourceSets(BaseExtension baseExtension, String name) {
+    static modifySourceSets(BaseExtension baseExtension, String name) {
         def obj = baseExtension.sourceSets.getByName(name)
         obj.java.srcDirs.each {
             obj.aidl.srcDirs(it.absolutePath.replace(Constants.JAVA, Constants.SDK))

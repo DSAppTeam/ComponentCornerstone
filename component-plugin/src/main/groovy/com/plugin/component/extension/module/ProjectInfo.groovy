@@ -3,6 +3,7 @@ package com.plugin.component.extension.module
 import com.plugin.component.utils.ProjectUtil
 import com.plugin.component.Constants
 import org.gradle.api.Project
+import com.plugin.component.Runtimes
 
 /**
  * 插件运行时收集的项目信息
@@ -11,7 +12,6 @@ import org.gradle.api.Project
  */
 class ProjectInfo {
 
-    private static final String BUILD_GRADLE = "build.gradle"
 
     public Project project
 
@@ -20,7 +20,7 @@ class ProjectInfo {
     public String buildGradleOriginContent = ""
 
     public String currentModuleName
-    public boolean debugEnable
+    public boolean aloneEnable
 
     //入口任务信息
     public String taskNames
@@ -32,9 +32,9 @@ class ProjectInfo {
     ProjectInfo(Project project) {
         this.project = project
         this.currentModuleName = ProjectUtil.getModuleName(project)
-        beforeEvaluateHandlerBuildScript()
         parseEnterTaskInfo()
         initRunAlone()
+        isVailModulePluginTarget = Runtimes.addBuildGradleFile(this)
     }
 
     /**
@@ -78,63 +78,34 @@ class ProjectInfo {
     }
 
     /**
-     * 修改build.gradle 脚本
-     */
-    void beforeEvaluateHandlerBuildScript() {
-        buildGradleOriginFile = new File(project.projectDir, BUILD_GRADLE)
-        if (buildGradleOriginFile != null && buildGradleOriginFile.exists()) {
-            List<String> lines = buildGradleOriginFile.readLines()
-            buildGradleOriginContent = buildGradleOriginFile.text
-            StringBuilder stringBuilder = new StringBuilder()
-            for (String line : lines) {
-                if (!ProjectUtil.containValidPluginDefine(line)) {
-                    stringBuilder.append(line + "\n")
-                }
-            }
-            buildGradleOriginFile.text = stringBuilder.toString()
-//            Logger.buildOutput(">>>>>> 评估前(" + project.name + ")build.gradle >>>>>>>")
-//            Logger.buildOutput("\n" + buildGradleOriginFile.text)
-            isVailModulePluginTarget = true
-        } else {
-            isVailModulePluginTarget = false
-        }
-    }
-
-    /**
-     * 还原build.gradle 脚本
-     */
-    void afterEvaluateHandlerBuildScript() {
-        if (isVailModulePluginTarget) {
-            buildGradleOriginFile.text = buildGradleOriginContent
-//            Logger.buildOutput(">>>>>> 评估后(" + project.name + ")build.gradle >>>>>>>")
-//            Logger.buildOutput("\n" + buildGradleOriginFile.text)
-        }
-    }
-
-    /**
      * 决定是否打开单独运行
      */
     void initRunAlone() {
-        this.debugEnable = ProjectUtil.isRunAlone(project)
-        if (debugEnable && !isSync()) {
+        this.aloneEnable = ProjectUtil.isRunAlone(project)
+        if (aloneEnable && !isSync()) {
             //当前编译的模块才需要设置为true
             if (currentModuleName == compileModuleName) {
-                debugEnable = true
+                aloneEnable = true
             } else {
                 //如果当前模块不是编译模块且不是main模块，需要更改为false
                 if (!isMainModule()) {
-                    debugEnable = false
+                    aloneEnable = false
                 }
             }
         }
     }
 
-    boolean debugEnableAndNoSync() {
-        return debugEnable && !isSync()
+
+    boolean aloneEnableAndNoSync() {
+        return aloneEnable && !isSync()
     }
 
     boolean isMainModule() {
         return currentModuleName == ProjectUtil.getMainModuleName()
+    }
+
+    boolean shouldMofifyAloneSourceSet() {
+        return ProjectUtil.isRunAlone(project) && !isMainModule()
     }
 
     boolean isSync() {
