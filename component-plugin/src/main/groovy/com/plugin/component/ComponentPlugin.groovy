@@ -237,6 +237,9 @@ class ComponentPlugin implements Plugin<Project> {
                     childProject.plugins.whenObjectAdded {
                         if (it instanceof AppPlugin || it instanceof LibraryPlugin) {
                             childProject.pluginManager.apply(Constants.PLUGIN_COMPONENT)
+                            childProject.dependencies {
+                                implementation Constants.CORE_DEPENDENCY
+                            }
                             if (projectInfo.aloneEnable) {
                                 childProject.extensions.findByType(BaseExtension.class).registerTransform(new ScanCodeTransform(childProject))
                                 childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))

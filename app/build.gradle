@@ -28,8 +28,6 @@ dependencies {
 
     implementation component(':library')
     implementation component(':librarykotlin')
-    implementation 'com.effective.android:component-core:1.0.0'
-    implementation 'com.effective.android:component-support-core:1.0.0'
 }
 
 
