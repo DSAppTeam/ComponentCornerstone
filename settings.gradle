@@ -5,8 +5,8 @@ include ':app', ':library', ':librarykotlin', ':librarywithoutplugin'
 //include ':component-support-core'
 
 //发布插件
-//include ':component-plugin'
-//include ':component-support-plugin'
+include ':component-plugin'
+include ':component-support-plugin'
 
 //调试插件
 //includeBuild './component-plugin'

@@ -69,7 +69,7 @@ class ProjectInfo {
                     && !modules.get(0).equals("all")) {
                 compileModuleName = modules.get(0)
             } else {
-                compileModuleName = Runtimes.sModuleExtension.mainModuleName
+                compileModuleName = Runtimes.sMainModuleName
             }
             if (compileModuleName == null || compileModuleName.trim().isEmpty()) {
                 compileModuleName = Constants.DEFAULT_MAIN_MODULE_NAME
