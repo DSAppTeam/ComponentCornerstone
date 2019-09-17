@@ -43,7 +43,12 @@ class PublicationUtil {
         PublicationOption publication = Runtimes.getSdkPublication(key)
         if (publication != null) {
             if (projectInfo.aloneEnableAndNoSync()) {
-                return projectInfo.project.project(':' + value)
+                //解决多渠道依赖时缺失依赖project渠道信息的问题，0.1.1 版本
+                Map<String,Object> map = new HashMap<>()
+                map.put("path",value)
+                map.put("configuration",'default')
+                return projectInfo.project.getDependencies().project(map)
+//                return projectInfo.project.project(':' + value)
             } else {
                 return getPublication(publication)
             }
