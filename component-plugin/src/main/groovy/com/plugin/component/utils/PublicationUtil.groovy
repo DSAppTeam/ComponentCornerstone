@@ -44,11 +44,12 @@ class PublicationUtil {
         if (publication != null) {
             if (projectInfo.aloneEnableAndNoSync()) {
                 //解决多渠道依赖时缺失依赖project渠道信息的问题，0.1.1 版本
-                Map<String,Object> map = new HashMap<>()
-                map.put("path",value)
-                map.put("configuration",'default')
-                return projectInfo.project.getDependencies().project(map)
-//                return projectInfo.project.project(':' + value)
+//                Map<String,Object> map = new HashMap<>()
+//                map.put("path",value)
+//                map.put("configuration",'default')
+//                return projectInfo.project.getDependencies().project(map)
+                //gradle版本升级解决
+                return projectInfo.project.project(':' + value)
             } else {
                 return getPublication(publication)
             }
