@@ -1,6 +1,6 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
-apply plugin: 'com.novoda.bintray-release'
+//apply plugin: 'com.novoda.bintray-release'
 
 group = 'com.effective.plugins'
 archivesBaseName = 'component-support'
@@ -39,13 +39,13 @@ repositories {
     mavenCentral()
 }
 
-publish {
-    userOrg = 'yummylau'
-    groupId = 'com.effective.plugins'
-    artifactId = 'component-support'
-    publishVersion = '0.0.1'
-    desc = 'Android component support plugin'
-    website = 'https://github.com/YummyLau/ComponentPlugin'
-}
+//publish {
+//    userOrg = 'yummylau'
+//    groupId = 'com.effective.plugins'
+//    artifactId = 'component-support'
+//    publishVersion = '0.0.1'
+//    desc = 'Android component support plugin'
+//    website = 'https://github.com/YummyLau/ComponentPlugin'
+//}
 
 

@@ -28,6 +28,7 @@ class ProjectInfo {
     public boolean isAssemble = false                       //是否是asAssemble
     public boolean isDebug = false                          //是否是debug
     public String compileModuleName                         //入口模块名字
+    public List<String> dependenceComponents = new ArrayList<>()      //使用 component 配置导入的模块
 
     ProjectInfo(Project project) {
         this.project = project
@@ -75,6 +76,7 @@ class ProjectInfo {
                 compileModuleName = Constants.DEFAULT_MAIN_MODULE_NAME
             }
         }
+        Runtimes.sCompileModuleName = compileModuleName
     }
 
     /**

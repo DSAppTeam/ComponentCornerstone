@@ -4,20 +4,22 @@ buildscript {
     ext.component_version = '0.0.1'
 
     repositories {
-        maven {
-            url uri('./repo')
-        }
-        maven {url 'https://dl.bintray.com/yummylau/maven'}
+//        maven {
+//            url uri('./repo')
+//        }
+//        maven {url 'https://dl.bintray.com/yummylau/maven'}
         google()
         jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.3.0'
-        classpath "com.effective.plugins:component:$component_version"
-        classpath "com.effective.plugins:component-support:$component_version"
+//        classpath "com.effective.plugins:component:$component_version"
+//        classpath "com.effective.plugins:component-support:$component_version"
+        //调试需要
+        classpath "com.effective.plugins:component-plugin"
+        classpath "com.effective.plugins:component-support-plugin"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.quinn.hunter:hunter-transform:0.9.0'
-        classpath 'com.novoda:bintray-release:0.9'
+//        classpath 'com.novoda:bintray-release:0.9'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -25,10 +27,10 @@ buildscript {
 
 allprojects {
     repositories {
-        maven {
-            url uri('./repo')
-        }
-        maven {url 'https://bintray.com/yummylau/maven'}
+//        maven {
+//            url uri('./repo')
+//        }
+//        maven {url 'https://bintray.com/yummylau/maven'}
         google()
         jcenter()
     }
@@ -47,7 +49,7 @@ component {
 
     mainModuleName 'app'
 
-    exclude ':librarywithoutplugin'
+    include ':app,library,libraryKotlin,libraryKotlin2'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -62,13 +64,3 @@ componentSupport {
 
     methodCostEnable true
 }
-
-
-
-
-
-
-
-
-
-

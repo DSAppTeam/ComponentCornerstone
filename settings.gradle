@@ -1,13 +1,14 @@
-include ':app', ':library', ':librarykotlin', ':librarywithoutplugin'
+include ':app'
+include ':library', ':libraryKotlin', ':libraryWithoutPlugin', ':libraryWithoutSdk', ':libraryKotlin2'
 
 //发布调试 core
-//include ':component-core'
-//include ':component-support-core'
+include ':component-core'
+include ':component-support-core'
 
 //发布插件
-include ':component-plugin'
-include ':component-support-plugin'
+//include ':component-plugin'
+//include ':component-support-plugin'
 
 //调试插件
-//includeBuild './component-plugin'
-//includeBuild './component-support-plugin'
+includeBuild './component-plugin'
+includeBuild './component-support-plugin'
