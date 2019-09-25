@@ -23,6 +23,7 @@ class Runtimes {
     //基本公用配信息
     public static String sAndroidJarPath
     public static String sMainModuleName
+    public static String sCompileModuleName
     public static int sCompileSdkVersion
     public static CompileOption sCompileOption
 

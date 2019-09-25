@@ -5,10 +5,8 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.plugin.component.ComponentManager;
 import com.plugin.component.SdkManager;
-import com.plugin.librarykotlin.IKotlinSdk;
 
 public class LibraryMainActivity extends AppCompatActivity {
 
@@ -17,6 +15,6 @@ public class LibraryMainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_layout);
         ComponentManager.init(getApplication());
-        ((TextView) findViewById(R.id.text)).setText(SdkManager.getSdk(IKotlinSdk.class).getKotlinSdkName());
+        ((TextView) findViewById(R.id.text)).setText(SdkManager.getSdk(IProvideFromLibrary.class).provideString());
     }
 }

@@ -67,7 +67,7 @@ class ComponentSupportPlugin implements Plugin<Project> {
     void addPluginToProject(Project project) {
         project.apply plugin: Constants.SUPPORT_PLUGIN
         project.dependencies {
-            implementation Constants.SUPPORT_DEPENDENCY
+//            implementation Constants.SUPPORT_DEPENDENCY
         }
         Logger.buildOutput("project[" + project.name + "]implementation " + Constants.SUPPORT_DEPENDENCY)
         Logger.buildOutput("project[" + project.name + "]apply plugin: " + Constants.SUPPORT_PLUGIN)

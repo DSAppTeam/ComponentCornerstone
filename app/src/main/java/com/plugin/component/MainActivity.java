@@ -5,8 +5,8 @@ import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.plugin.component.support.anno.MethodCost;
+import com.plugin.library.IProvideFromLibrary;
 import com.plugin.library.ISdk2;
-import com.plugin.librarykotlin.IKotlinSdk;
 import com.plugin.module.R;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(SdkManager.getSdk(ISdk2.class).getSdk2Name());
         stringBuilder.append("\n");
-        stringBuilder.append(SdkManager.getSdk(IKotlinSdk.class).getKotlinSdkName());
+        stringBuilder.append(SdkManager.getSdk(IProvideFromLibrary.class).provideString());
         ((TextView) findViewById(R.id.text)).setText(stringBuilder);
     }
 

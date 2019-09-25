@@ -2,6 +2,7 @@ package com.plugin.component.utils
 
 import com.plugin.component.Constants
 import com.plugin.component.Runtimes
+import com.plugin.component.extension.module.BuildGradleInfo
 import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.module.SourceFile
 import com.plugin.component.extension.module.SourceSet
@@ -16,7 +17,7 @@ class PublicationUtil {
         return publication.groupId + '-' + publication.artifactId
     }
 
-    static getPublicationId(String groupId,String artifactId) {
+    static getPublicationId(String groupId, String artifactId) {
         return groupId + '-' + artifactId
     }
 
@@ -32,6 +33,7 @@ class PublicationUtil {
         return ':' + publication.groupId + '-' + publication.artifactId + ':'
     }
 
+
     /**
      * 解析 component 依赖
      * @param projectInfo
@@ -42,14 +44,12 @@ class PublicationUtil {
         String key = ProjectUtil.getComponentValue(value)
         PublicationOption publication = Runtimes.getSdkPublication(key)
         if (publication != null) {
-            if (projectInfo.aloneEnableAndNoSync()) {
-                //解决多渠道依赖时缺失依赖project渠道信息的问题，0.1.1 版本
-//                Map<String,Object> map = new HashMap<>()
-//                map.put("path",value)
-//                map.put("configuration",'default')
-//                return projectInfo.project.getDependencies().project(map)
-                //gradle版本升级解决
-                return projectInfo.project.project(':' + value)
+            if (projectInfo.isAssemble) {
+                projectInfo.dependenceComponents.add(key)
+                projectInfo.project.dependencies {
+                    api getPublication(publication)
+                }
+                return "com.netease.freecard:freeflow:1.1.1"
             } else {
                 return getPublication(publication)
             }

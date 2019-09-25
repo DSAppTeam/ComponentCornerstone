@@ -19,6 +19,8 @@ import com.plugin.component.utils.ProjectUtil
 import com.plugin.component.utils.PublicationUtil
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.internal.impldep.aQute.bnd.build.Run
+import sun.rmi.runtime.Log
 
 /**
  *   ./gradlew --no-daemon ComponentPlugin  -Dorg.gradle.debug=true
@@ -48,10 +50,11 @@ class ComponentPlugin implements Plugin<Project> {
 
         //解析 component
         //比如 A 声明  component(':library') 且 A是可运行的
-        //则A需要导入 library 中 sdk 和 impl 模块，其中 sdk 为模块内可见 implementation，impl 为纯 impl，其依赖的 sdk 需要模块哇可见 api
+        //则A需要导入 library 中 sdk 和 impl 模块，其中 sdk 为模块内可见 implementation，impl 为纯 impl，其依赖的 sdk 需要模块外见 api
         project.dependencies.metaClass.component { String value ->
             return PublicationUtil.parseComponent(projectInfo, value)
         }
+
 
         //独立模块内 依赖sdk为api，由于该模块可能被依赖，所以sdk需要模块外暴露
         List<PublicationOption> publications = PublicationManager.getInstance().getPublicationByProject(project)
@@ -238,7 +241,7 @@ class ComponentPlugin implements Plugin<Project> {
                         if (it instanceof AppPlugin || it instanceof LibraryPlugin) {
                             childProject.pluginManager.apply(Constants.PLUGIN_COMPONENT)
                             childProject.dependencies {
-                                implementation Constants.CORE_DEPENDENCY
+//                                implementation Constants.CORE_DEPENDENCY
                             }
                             if (projectInfo.aloneEnable) {
                                 childProject.extensions.findByType(BaseExtension.class).registerTransform(new ScanCodeTransform(childProject))
@@ -260,6 +263,35 @@ class ComponentPlugin implements Plugin<Project> {
                     }
                 } else {
                     Logger.buildOutput("project[" + childProject.name + "]" + "can't apply component plugin")
+                }
+            }
+        }
+
+        project.getGradle().projectsEvaluated {
+            if (Runtimes.sCompileModuleName != null) {
+                //获取编译入口模块
+                ProjectInfo projectInfo = Runtimes.getProjectInfo(Runtimes.sCompileModuleName)
+                List<String> dependenceComponents = projectInfo.dependenceComponents
+                Set<String> hasAdded = new HashSet()
+                hasAdded.add(Runtimes.sCompileModuleName)
+                Project currentProject = projectInfo.project
+                while (!dependenceComponents.isEmpty()) {
+                    String component = dependenceComponents.get(0)
+                    if (!hasAdded.contains(component)) {
+                        hasAdded.add(component)
+                        currentProject.dependencies {
+                            implementation projectInfo.project.project(':' + component)
+                        }
+                        ProjectInfo componentInfo = Runtimes.getProjectInfo(component)
+                        List<String> componentDependenceComponents = componentInfo.dependenceComponents
+                        for (String string : componentDependenceComponents) {
+                            if (!hasAdded.contains(string)) {
+                                dependenceComponents.add(string)
+                            }
+                        }
+                        currentProject = componentInfo.project
+                    }
+                    dependenceComponents.remove(0)
                 }
             }
         }

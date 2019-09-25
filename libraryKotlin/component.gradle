@@ -1,0 +1,17 @@
+component {
+
+    debug {
+        applicationName 'com.plugin.libraryKolin.LibraryKotlinApplication'
+    }
+
+    sdk {
+        groupId 'com.effective.android'
+        artifactId 'libraryKotlinSdk'
+
+        dependencies {
+            // 只支持 compileOnly 和 implementation
+            implementation 'com.google.code.gson:gson:2.8.1'
+            implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+        }
+    }
+}
