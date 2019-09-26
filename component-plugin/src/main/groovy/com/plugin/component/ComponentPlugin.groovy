@@ -19,8 +19,7 @@ import com.plugin.component.utils.ProjectUtil
 import com.plugin.component.utils.PublicationUtil
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.internal.impldep.aQute.bnd.build.Run
-import sun.rmi.runtime.Log
+
 
 /**
  *   ./gradlew --no-daemon ComponentPlugin  -Dorg.gradle.debug=true
@@ -269,11 +268,19 @@ class ComponentPlugin implements Plugin<Project> {
 
         project.getGradle().projectsEvaluated {
             if (Runtimes.sCompileModuleName != null) {
+                Logger.buildOutput("")
+                Logger.buildOutput("======> resort component dependencies on gradle#projectsEvaluated <======")
+                Logger.buildOutput("compileModuleName", Runtimes.sCompileModuleName)
                 //获取编译入口模块
+                Set<String> hasAdded = new HashSet()
                 ProjectInfo projectInfo = Runtimes.getProjectInfo(Runtimes.sCompileModuleName)
                 List<String> dependenceComponents = projectInfo.dependenceComponents
-                Set<String> hasAdded = new HashSet()
                 hasAdded.add(Runtimes.sCompileModuleName)
+                StringBuffer stringBuffer = new StringBuffer("assemble[" + Runtimes.sCompileModuleName + "] => ")
+                for (String string : dependenceComponents) {
+                    stringBuffer.append("[" + string + "] pass ")
+                }
+                Logger.buildOutput(stringBuffer.toString())
                 Project currentProject = projectInfo.project
                 while (!dependenceComponents.isEmpty()) {
                     String component = dependenceComponents.get(0)
@@ -285,14 +292,42 @@ class ComponentPlugin implements Plugin<Project> {
                         ProjectInfo componentInfo = Runtimes.getProjectInfo(component)
                         List<String> componentDependenceComponents = componentInfo.dependenceComponents
                         for (String string : componentDependenceComponents) {
+                            stringBuffer = new StringBuffer("assemble[" + componentInfo.project.name + "] => ")
                             if (!hasAdded.contains(string)) {
                                 dependenceComponents.add(string)
+                                stringBuffer.append("[" + string + "] pass ")
+                            } else {
+                                stringBuffer.append("[" + string + "] filter ")
                             }
+                            Logger.buildOutput(stringBuffer.toString())
                         }
                         currentProject = componentInfo.project
                     }
                     dependenceComponents.remove(0)
                 }
+
+                //非编译入口索引
+                Set<String> allProjects = Runtimes.getProjectNames()
+                for (String projectName : allProjects) {
+                    if (!hasAdded.contains(projectName)) {
+                        ProjectInfo otherProject = Runtimes.getProjectInfo(projectName)
+                        List<String> components = otherProject.dependenceComponents
+                        stringBuffer = new StringBuffer("no assemble[" + otherProject.project.name + "] => ")
+                        if (components.isEmpty()) {
+                            stringBuffer.append("hasn't no any component dependencies")
+                        } else {
+                            for (String component : components) {
+                                otherProject.project.dependencies {
+                                    stringBuffer.append("[" + component + "] pass ")
+                                    implementation otherProject.project.project(':' + component)
+                                }
+                            }
+                        }
+
+                        Logger.buildOutput(stringBuffer.toString())
+                    }
+                }
+                Logger.buildOutput("")
             }
         }
     }

@@ -49,7 +49,7 @@ component {
 
     mainModuleName 'app'
 
-    include ':app,library,libraryKotlin,libraryKotlin2'
+    include ':app,library,libraryKotlin,libraryKotlin2,libraryWithoutSdk'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
