@@ -5,6 +5,7 @@ import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.option.CompileOption
 import com.plugin.component.extension.option.DebugOption
 import com.plugin.component.extension.option.PublicationOption
+import com.plugin.component.utils.PublicationUtil
 import org.gradle.api.Project
 
 class Runtimes {

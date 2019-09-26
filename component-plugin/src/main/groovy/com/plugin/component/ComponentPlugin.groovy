@@ -271,39 +271,45 @@ class ComponentPlugin implements Plugin<Project> {
                 Logger.buildOutput("")
                 Logger.buildOutput("======> resort component dependencies on gradle#projectsEvaluated <======")
                 Logger.buildOutput("compileModuleName", Runtimes.sCompileModuleName)
-                //获取编译入口模块
+
+                //尝试获取 assemble 入口
                 Set<String> hasAdded = new HashSet()
                 ProjectInfo projectInfo = Runtimes.getProjectInfo(Runtimes.sCompileModuleName)
-                List<String> dependenceComponents = projectInfo.dependenceComponents
-                hasAdded.add(Runtimes.sCompileModuleName)
-                StringBuffer stringBuffer = new StringBuffer("assemble[" + Runtimes.sCompileModuleName + "] => ")
-                for (String string : dependenceComponents) {
-                    stringBuffer.append("[" + string + "] pass ")
-                }
-                Logger.buildOutput(stringBuffer.toString())
-                Project currentProject = projectInfo.project
-                while (!dependenceComponents.isEmpty()) {
-                    String component = dependenceComponents.get(0)
-                    if (!hasAdded.contains(component)) {
-                        hasAdded.add(component)
-                        currentProject.dependencies {
-                            implementation projectInfo.project.project(':' + component)
-                        }
-                        ProjectInfo componentInfo = Runtimes.getProjectInfo(component)
-                        List<String> componentDependenceComponents = componentInfo.dependenceComponents
-                        for (String string : componentDependenceComponents) {
-                            stringBuffer = new StringBuffer("assemble[" + componentInfo.project.name + "] => ")
-                            if (!hasAdded.contains(string)) {
-                                dependenceComponents.add(string)
-                                stringBuffer.append("[" + string + "] pass ")
-                            } else {
-                                stringBuffer.append("[" + string + "] filter ")
-                            }
-                            Logger.buildOutput(stringBuffer.toString())
-                        }
-                        currentProject = componentInfo.project
+                Logger.buildOutput("isAssemble", projectInfo.isAssemble)
+                StringBuffer stringBuffer
+
+                if (projectInfo.isAssemble) {
+                    List<String> dependenceComponents = projectInfo.dependenceComponents
+                    hasAdded.add(Runtimes.sCompileModuleName)
+                    stringBuffer = new StringBuffer("assemble[" + Runtimes.sCompileModuleName + "] => ")
+                    for (String string : dependenceComponents) {
+                        stringBuffer.append("[" + string + "] pass ")
                     }
-                    dependenceComponents.remove(0)
+                    Logger.buildOutput(stringBuffer.toString())
+                    Project currentProject = projectInfo.project
+                    while (!dependenceComponents.isEmpty()) {
+                        String component = dependenceComponents.get(0)
+                        if (!hasAdded.contains(component)) {
+                            hasAdded.add(component)
+                            currentProject.dependencies {
+                                implementation projectInfo.project.project(':' + component)
+                            }
+                            ProjectInfo componentInfo = Runtimes.getProjectInfo(component)
+                            List<String> componentDependenceComponents = componentInfo.dependenceComponents
+                            for (String string : componentDependenceComponents) {
+                                stringBuffer = new StringBuffer("assemble[" + componentInfo.project.name + "] => ")
+                                if (!hasAdded.contains(string)) {
+                                    dependenceComponents.add(string)
+                                    stringBuffer.append("[" + string + "] pass ")
+                                } else {
+                                    stringBuffer.append("[" + string + "] filter ")
+                                }
+                                Logger.buildOutput(stringBuffer.toString())
+                            }
+                            currentProject = componentInfo.project
+                        }
+                        dependenceComponents.remove(0)
+                    }
                 }
 
                 //非编译入口索引

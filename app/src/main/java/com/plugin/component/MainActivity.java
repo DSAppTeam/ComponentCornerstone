@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
         stringBuilder.append("\n");
         stringBuilder.append(SdkManager.getSdk(IProvideFromLibrary.class).provideString());
         stringBuilder.append("\n");
-//        stringBuilder.append(LibraryWithoutSdkApi);
         ((TextView) findViewById(R.id.text)).setText(stringBuilder);
     }
 

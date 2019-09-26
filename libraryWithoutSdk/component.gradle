@@ -1,6 +1,6 @@
 component {
 
     debug {
-        applicationName 'com.plugin.libraryKolin.LibraryKotlinApplication'
+        applicationName 'com.plugin.librarywithoutsdk.LibraryApplication'
     }
 }

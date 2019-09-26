@@ -43,19 +43,8 @@ class PublicationUtil {
     static parseComponent(ProjectInfo projectInfo, String value) {
         String key = ProjectUtil.getComponentValue(value)
         PublicationOption publication = Runtimes.getSdkPublication(key)
-        if (publication != null) {
-            if (projectInfo.isAssemble) {
-                projectInfo.dependenceComponents.add(key)
-                projectInfo.project.dependencies {
-                    api getPublication(publication)
-                }
-                return []
-            } else {
-                return getPublication(publication)
-            }
-        } else {
-            projectInfo.project.project(":" + value)
-        }
+        projectInfo.dependenceComponents.add(key)
+        return getPublication(publication)
     }
 
     /**
