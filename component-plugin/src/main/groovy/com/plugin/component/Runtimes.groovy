@@ -109,6 +109,10 @@ class Runtimes {
         return sDebugMap.get(projectName)
     }
 
+    static Set<String> getProjectNames() {
+        return sProjectInfoMap.keySet()
+    }
+
     static void addProjectInfo(String projectName, ProjectInfo projectInfo) {
         sProjectInfoMap.put(projectName, projectInfo)
     }

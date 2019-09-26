@@ -49,12 +49,13 @@ class PublicationUtil {
                 projectInfo.project.dependencies {
                     api getPublication(publication)
                 }
-                return "com.netease.freecard:freeflow:1.1.1"
+                return []
             } else {
                 return getPublication(publication)
             }
+        } else {
+            projectInfo.project.project(":" + value)
         }
-        return []
     }
 
     /**

@@ -1,0 +1,6 @@
+component {
+
+    debug {
+        applicationName 'com.plugin.libraryKolin.LibraryKotlinApplication'
+    }
+}
