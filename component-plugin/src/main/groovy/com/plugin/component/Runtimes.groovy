@@ -5,7 +5,6 @@ import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.option.CompileOption
 import com.plugin.component.extension.option.DebugOption
 import com.plugin.component.extension.option.PublicationOption
-import com.plugin.component.utils.PublicationUtil
 import org.gradle.api.Project
 
 class Runtimes {
@@ -24,7 +23,6 @@ class Runtimes {
     //基本公用配信息
     public static String sAndroidJarPath
     public static String sMainModuleName
-    public static String sCompileModuleName
     public static int sCompileSdkVersion
     public static CompileOption sCompileOption
 
@@ -108,10 +106,6 @@ class Runtimes {
 
     static DebugOption getDebugInfo(String projectName) {
         return sDebugMap.get(projectName)
-    }
-
-    static Set<String> getProjectNames() {
-        return sProjectInfoMap.keySet()
     }
 
     static void addProjectInfo(String projectName, ProjectInfo projectInfo) {

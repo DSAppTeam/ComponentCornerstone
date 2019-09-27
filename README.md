@@ -62,6 +62,8 @@ android modular plugin.
 
  **模块绑定** -> **接口注入** -> **接口卸载** -> **模块卸载**
 
+
+
 而在实现完全被隔离的情况下，如何实现解决这个问题呢 ？ Transform + annotation + asm 技术。通过自定义插件注册自定义的 transform 完成 Class 文件中 annotation 的扫描可收集目的信息（注解内容，注解类等）， 用 asm 封装好的字节码指令完成对目标类字节内容的修改达到注入代码的目的。
 
 

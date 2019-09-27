@@ -1,9 +1,10 @@
-package com.plugin.library;
+package com.plugin.librarywithoutsdk;
 
 import android.os.Bundle;
-import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.plugin.librarywithoutsdk.R;
 
 public class LibraryMainActivity extends AppCompatActivity {
 

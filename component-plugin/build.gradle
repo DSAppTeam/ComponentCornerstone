@@ -47,7 +47,7 @@ repositories {
 //    userOrg = 'yummylau'
 //    groupId = 'com.effective.plugins'
 //    artifactId = 'component'
-//    publishVersion = '0.0.1'
+//    publishVersion = '1.0.0-beta'
 //    desc = 'Android component plugin'
 //    website = 'https://github.com/YummyLau/ComponentPlugin'
 //}

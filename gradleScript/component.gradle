@@ -1,0 +1,25 @@
+apply plugin: 'com.android.component'
+
+component {
+
+    compileSdkVersion 27
+
+    mainModuleName 'app'
+
+    include ':app,library,libraryKotlin,libraryKotlin2,libraryWithoutSdk'
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+
+//apply plugin: 'com.android.component.support'
+//
+//componentSupport {
+//
+//    methodCostEnable true
+//
+//    include 'libBase'
+//}

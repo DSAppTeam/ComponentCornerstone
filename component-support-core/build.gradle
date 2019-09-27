@@ -10,30 +10,26 @@ android {
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
     }
 
     buildTypes {
+        debug {
+        }
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.0.2'
 }
-//
+
 //publish {
 //    userOrg = 'yummylau'
 //    groupId = 'com.effective.android'
 //    artifactId = 'component-support-core'
-//    publishVersion = '1.0.0'
+//    publishVersion = '1.0.0-beta'
 //    desc = 'Android component core code'
 //    website = 'https://github.com/YummyLau/ComponentPlugin'
 //}

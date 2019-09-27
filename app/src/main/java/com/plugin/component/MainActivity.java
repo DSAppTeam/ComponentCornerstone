@@ -4,7 +4,6 @@ import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.plugin.component.support.anno.MethodCost;
 import com.plugin.library.IProvideFromLibrary;
 import com.plugin.library.ISdk2;
 import com.plugin.module.R;
@@ -19,7 +18,6 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
-    @MethodCost
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,12 +41,10 @@ public class MainActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.text)).setText(stringBuilder);
     }
 
-    @MethodCost
     public void a() {
 
     }
 
-    @MethodCost
     public void a(Integer integer) {
 
     }

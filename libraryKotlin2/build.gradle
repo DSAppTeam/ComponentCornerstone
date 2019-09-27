@@ -3,32 +3,25 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.1"
 
-    defaultConfig {
-        minSdkVersion 19
-        targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+    compileSdkVersion configs.android.compileSdkVersion
+    buildToolsVersion configs.android.buildToolsVersion
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
+    compileOptions {
+        sourceCompatibility configs.compile.sourceCompatibility
+        targetCompatibility configs.compile.targetCompatibility
     }
 
-    buildTypes {
-        debug {
-        }
-        release {
-        }
+    defaultConfig {
+        minSdkVersion configs.android.minSdkVersion
+        targetSdkVersion configs.android.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
     }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.appcompat:appcompat:1.0.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation project(":component-core")
-    implementation project(":component-support-core")
-    implementation component(':library')
 }

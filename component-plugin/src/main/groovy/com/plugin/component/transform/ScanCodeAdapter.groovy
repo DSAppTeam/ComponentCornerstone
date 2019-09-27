@@ -5,7 +5,10 @@ import com.plugin.component.anno.AutoInjectImpl
 import com.plugin.component.transform.info.ScanComponentInfo
 import com.plugin.component.transform.info.ScanRuntime
 import com.plugin.component.transform.info.ScanSdkInfo
-import org.objectweb.asm.*
+import org.objectweb.asm.AnnotationVisitor
+import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.Opcodes
+import org.objectweb.asm.Type
 
 class ScanCodeAdapter extends ClassVisitor {
 

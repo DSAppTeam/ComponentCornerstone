@@ -7,4 +7,6 @@ class ProvideFromKotlinImpl : IProvideFromKotlin {
 
     override fun provideString(): String = KotlinComponent.sdk.provideString() + "\n" + "[I'am libraryKotlin] add by libraryKotlin"
 
+//    override fun provideString(): String = KotlinComponent.sdk.provideString() + "\n" + "[I'am libraryKotlin] add by libraryKotlin
+
 }

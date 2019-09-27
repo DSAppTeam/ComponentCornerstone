@@ -1,7 +1,6 @@
 package com.plugin.component.transform.info
 
 import com.android.annotations.NonNull
-import com.android.annotations.Nullable
 import com.plugin.component.Logger
 
 class ScanRuntime {

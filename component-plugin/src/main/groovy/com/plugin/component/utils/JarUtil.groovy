@@ -1,8 +1,6 @@
 package com.plugin.component.utils
 
 import com.plugin.component.Constants
-import com.plugin.component.Logger
-import com.plugin.component.Runtimes
 import com.plugin.component.Runtimes
 import com.plugin.component.extension.PublicationManager
 import com.plugin.component.extension.option.CompileOption
@@ -60,7 +58,7 @@ class JarUtil {
             if (publication.dependencies.implementation != null) {
                 publication.dependencies.implementation.each {
                     if (it instanceof String && it.startsWith(Constants.COMPONENT_PRE)) {
-                        project.dependencies.add(name,PublicationUtil.parseComponent(it))
+                        project.dependencies.add(name, PublicationUtil.parseComponent(it))
                     }else{
                         project.dependencies.add(name, it)
                     }
@@ -70,7 +68,7 @@ class JarUtil {
             if (publication.dependencies.compileOnly != null) {
                 publication.dependencies.compileOnly.each {
                     if (it instanceof String && it.startsWith(Constants.COMPONENT_PRE)) {
-                        project.dependencies.add(name,PublicationUtil.parseComponent(it))
+                        project.dependencies.add(name, PublicationUtil.parseComponent(it))
                     }else{
                         project.dependencies.add(name, it)
                     }
