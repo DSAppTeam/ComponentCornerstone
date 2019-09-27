@@ -44,7 +44,7 @@ class Constants {
     public static String IMPL_PRE = 'impl-'
     public static String COMPONENT_PRE = 'component-'
     public static String COMPONENT_SCRIPT = 'component.gradle'
-    public static String CORE_DEPENDENCY = "com.effective.android:component-core:1.0.0"
+    public static String CORE_DEPENDENCY = "com.effective.android:component-core:1.0.0-beta"
 
     //sourceSet - debug
     public static String DEBUG_MANIFEST_PATH = "src/main/debug/AndroidManifest.xml"

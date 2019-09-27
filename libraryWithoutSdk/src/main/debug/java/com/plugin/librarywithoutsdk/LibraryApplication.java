@@ -1,4 +1,4 @@
-package com.plugin.library;
+package com.plugin.librarywithoutsdk;
 
 import android.app.Application;
 

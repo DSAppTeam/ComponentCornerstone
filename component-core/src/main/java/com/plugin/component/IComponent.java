@@ -1,6 +1,7 @@
 package com.plugin.component;
-
 import android.app.Application;
+
+import androidx.annotation.NonNull;
 
 /**
  * 基础组件实现接口
@@ -9,7 +10,7 @@ import android.app.Application;
  */
 public interface IComponent {
 
-    void attachComponent(Application application);
+    void attachComponent(@NonNull Application application);
 
     void detachComponent();
 }

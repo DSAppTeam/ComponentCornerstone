@@ -3,23 +3,20 @@ package com.plugin.component
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryPlugin
-import com.plugin.component.extension.option.DependenciesOption
+import com.plugin.component.extension.ComponentExtension
+import com.plugin.component.extension.PublicationManager
 import com.plugin.component.extension.module.ProjectInfo
-import com.plugin.component.extension.option.PublicationOption
 import com.plugin.component.extension.option.DebugOption
+import com.plugin.component.extension.option.DependenciesOption
+import com.plugin.component.extension.option.PublicationOption
 import com.plugin.component.listener.OnModuleExtensionListener
-
 import com.plugin.component.transform.InjectCodeTransform
 import com.plugin.component.transform.ScanCodeTransform
 import com.plugin.component.utils.JarUtil
-import com.plugin.component.extension.PublicationManager
-import com.plugin.component.extension.ComponentExtension
-
 import com.plugin.component.utils.ProjectUtil
 import com.plugin.component.utils.PublicationUtil
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-
 
 /**
  *   ./gradlew --no-daemon ComponentPlugin  -Dorg.gradle.debug=true
@@ -44,16 +41,14 @@ class ComponentPlugin implements Plugin<Project> {
     }
 
     private void handleProject(Project project) {
-
         ProjectInfo projectInfo = Runtimes.getProjectInfo(project.name)
 
         //解析 component
         //比如 A 声明  component(':library') 且 A是可运行的
-        //则A需要导入 library 中 sdk 和 impl 模块，其中 sdk 为模块内可见 implementation，impl 为纯 impl，其依赖的 sdk 需要模块外见 api
+        //则A需要导入 library 中 sdk 和 impl 模块，其中 sdk 为模块内可见 implementation，impl 为纯 impl，其依赖的 sdk 需要模块哇可见 api
         project.dependencies.metaClass.component { String value ->
             return PublicationUtil.parseComponent(projectInfo, value)
         }
-
 
         //独立模块内 依赖sdk为api，由于该模块可能被依赖，所以sdk需要模块外暴露
         List<PublicationOption> publications = PublicationManager.getInstance().getPublicationByProject(project)
@@ -220,7 +215,7 @@ class ComponentPlugin implements Plugin<Project> {
                 Logger.buildOutput("project[" + childProject.name + "] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                 ProjectInfo projectInfo = new ProjectInfo(childProject)
                 if (projectInfo.isVailModulePluginTarget) {
-                    Logger.buildOutput("project[" + childProject.name + "]" + "can apply component plugin")
+
                     childProject.repositories {
                         flatDir {
                             dirs Runtimes.sSdkDir.absolutePath
@@ -238,14 +233,19 @@ class ComponentPlugin implements Plugin<Project> {
 
                     childProject.plugins.whenObjectAdded {
                         if (it instanceof AppPlugin || it instanceof LibraryPlugin) {
+                            Logger.buildOutput("project[" + childProject.name + "]" + "apply plugin: com.android.component")
                             childProject.pluginManager.apply(Constants.PLUGIN_COMPONENT)
                             childProject.dependencies {
-//                                implementation Constants.CORE_DEPENDENCY
+                                implementation Constants.CORE_DEPENDENCY
+                                Logger.buildOutput("project[" + childProject.name + "] add dependency =>" + Constants.CORE_DEPENDENCY)
                             }
                             if (projectInfo.aloneEnable) {
+                                Logger.buildOutput("project[" + childProject.name + "] registerTransform => ScanCodeTransform")
+                                Logger.buildOutput("project[" + childProject.name + "] registerTransform => InjectCodeTransform")
                                 childProject.extensions.findByType(BaseExtension.class).registerTransform(new ScanCodeTransform(childProject))
                                 childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
                                 if (!projectInfo.isMainModule()) {
+                                    Logger.buildOutput("project[" + childProject.name + "] add sourceSets debug")
                                     childProject.android.sourceSets {
                                         main {
                                             manifest.srcFile Constants.DEBUG_MANIFEST_PATH
@@ -257,83 +257,11 @@ class ComponentPlugin implements Plugin<Project> {
                                     }
                                 }
                             }
-                            Logger.buildOutput("project[" + childProject.name + "]" + "apply plugin: com.android.component")
                         }
                     }
                 } else {
                     Logger.buildOutput("project[" + childProject.name + "]" + "can't apply component plugin")
                 }
-            }
-        }
-
-        project.getGradle().projectsEvaluated {
-            if (Runtimes.sCompileModuleName != null) {
-                Logger.buildOutput("")
-                Logger.buildOutput("======> resort component dependencies on gradle#projectsEvaluated <======")
-                Logger.buildOutput("compileModuleName", Runtimes.sCompileModuleName)
-
-                //尝试获取 assemble 入口
-                Set<String> hasAdded = new HashSet()
-                ProjectInfo projectInfo = Runtimes.getProjectInfo(Runtimes.sCompileModuleName)
-                Logger.buildOutput("isAssemble", projectInfo.isAssemble)
-                StringBuffer stringBuffer
-
-                if (projectInfo.isAssemble) {
-                    List<String> dependenceComponents = projectInfo.dependenceComponents
-                    hasAdded.add(Runtimes.sCompileModuleName)
-                    stringBuffer = new StringBuffer("assemble[" + Runtimes.sCompileModuleName + "] => ")
-                    for (String string : dependenceComponents) {
-                        stringBuffer.append("[" + string + "] pass ")
-                    }
-                    Logger.buildOutput(stringBuffer.toString())
-                    Project currentProject = projectInfo.project
-                    while (!dependenceComponents.isEmpty()) {
-                        String component = dependenceComponents.get(0)
-                        if (!hasAdded.contains(component)) {
-                            hasAdded.add(component)
-                            currentProject.dependencies {
-                                implementation projectInfo.project.project(':' + component)
-                            }
-                            ProjectInfo componentInfo = Runtimes.getProjectInfo(component)
-                            List<String> componentDependenceComponents = componentInfo.dependenceComponents
-                            for (String string : componentDependenceComponents) {
-                                stringBuffer = new StringBuffer("assemble[" + componentInfo.project.name + "] => ")
-                                if (!hasAdded.contains(string)) {
-                                    dependenceComponents.add(string)
-                                    stringBuffer.append("[" + string + "] pass ")
-                                } else {
-                                    stringBuffer.append("[" + string + "] filter ")
-                                }
-                                Logger.buildOutput(stringBuffer.toString())
-                            }
-                            currentProject = componentInfo.project
-                        }
-                        dependenceComponents.remove(0)
-                    }
-                }
-
-                //非编译入口索引
-                Set<String> allProjects = Runtimes.getProjectNames()
-                for (String projectName : allProjects) {
-                    if (!hasAdded.contains(projectName)) {
-                        ProjectInfo otherProject = Runtimes.getProjectInfo(projectName)
-                        List<String> components = otherProject.dependenceComponents
-                        stringBuffer = new StringBuffer("no assemble[" + otherProject.project.name + "] => ")
-                        if (components.isEmpty()) {
-                            stringBuffer.append("hasn't no any component dependencies")
-                        } else {
-                            for (String component : components) {
-                                otherProject.project.dependencies {
-                                    stringBuffer.append("[" + component + "] pass ")
-                                    implementation otherProject.project.project(':' + component)
-                                }
-                            }
-                        }
-
-                        Logger.buildOutput(stringBuffer.toString())
-                    }
-                }
-                Logger.buildOutput("")
             }
         }
     }

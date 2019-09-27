@@ -1,7 +1,7 @@
 package com.plugin.component.listener
 
-import com.plugin.component.extension.option.PublicationOption
 import com.plugin.component.extension.option.DebugOption
+import com.plugin.component.extension.option.PublicationOption
 import org.gradle.api.Project
 
 /**

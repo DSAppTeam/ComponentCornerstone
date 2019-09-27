@@ -2,7 +2,6 @@ package com.plugin.component.utils
 
 import com.plugin.component.Constants
 import com.plugin.component.Runtimes
-import com.plugin.component.extension.module.BuildGradleInfo
 import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.module.SourceFile
 import com.plugin.component.extension.module.SourceSet
@@ -33,7 +32,6 @@ class PublicationUtil {
         return ':' + publication.groupId + '-' + publication.artifactId + ':'
     }
 
-
     /**
      * 解析 component 依赖
      * @param projectInfo
@@ -43,8 +41,14 @@ class PublicationUtil {
     static parseComponent(ProjectInfo projectInfo, String value) {
         String key = ProjectUtil.getComponentValue(value)
         PublicationOption publication = Runtimes.getSdkPublication(key)
-        projectInfo.dependenceComponents.add(key)
-        return getPublication(publication)
+        if (publication != null) {
+            if (projectInfo.isAssemble) {
+                return projectInfo.project.project(':' + value)
+            } else {
+                return getPublication(publication)
+            }
+        }
+        return []
     }
 
     /**

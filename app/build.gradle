@@ -1,39 +1,42 @@
 apply plugin: 'com.android.application'
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.1"
+    compileSdkVersion configs.android.compileSdkVersion
+    buildToolsVersion configs.android.buildToolsVersion
+
+    compileOptions {
+        sourceCompatibility configs.compile.sourceCompatibility
+        targetCompatibility configs.compile.targetCompatibility
+    }
+
     defaultConfig {
-        minSdkVersion 19
-        targetSdkVersion 29
+        minSdkVersion configs.android.minSdkVersion
+        targetSdkVersion configs.android.targetSdkVersion
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
-        debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            matchingFallbacks = ['default']    // instead use this
-        }
         release {
             minifyEnabled true
             zipAlignEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             matchingFallbacks = ['default']    // instead use this
         }
+
+        debug {}
     }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.appcompat:appcompat:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'com.google.android.material:material:1.0.0'
-    implementation project(":component-core")
-    implementation project(":component-support-core")
-    implementation project(':libraryWithoutPlugin')
-    implementation component(':libraryWithoutSdk')
     implementation component(':library')
+    implementation component(':libraryWithoutSdk')
+}
+
+repositories {
+    mavenCentral()
 }
 
 

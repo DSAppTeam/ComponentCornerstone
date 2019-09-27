@@ -4,20 +4,20 @@ apply plugin: 'maven'
 
 group = 'com.effective.plugins'
 archivesBaseName = 'component-support'
-version = '1.0.0'
+version = '1.0.0-beta'
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: uri('../repo'))
-        }
-    }
-}
+//uploadArchives {
+//    repositories {
+//        mavenDeployer {
+//            repository(url: uri('../repo'))
+//        }
+//    }
+//}
 
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
-    implementation 'com.android.tools.build:gradle:3.5.0'
+    implementation 'com.android.tools.build:gradle:3.4.0'
     implementation 'org.ow2.asm:asm:7.1'
     implementation 'org.ow2.asm:asm-commons:7.1'
     implementation 'org.ow2.asm:asm-util:7.1'
@@ -43,7 +43,7 @@ repositories {
 //    userOrg = 'yummylau'
 //    groupId = 'com.effective.plugins'
 //    artifactId = 'component-support'
-//    publishVersion = '0.0.1'
+//    publishVersion = '1.0.0-beta'
 //    desc = 'Android component support plugin'
 //    website = 'https://github.com/YummyLau/ComponentPlugin'
 //}

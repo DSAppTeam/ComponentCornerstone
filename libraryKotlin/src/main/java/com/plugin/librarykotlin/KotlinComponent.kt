@@ -19,7 +19,6 @@ class KotlinComponent : IComponent {
 
     override fun attachComponent(application: Application) {
         Log.d("component-plugin", "KotlinComponent#attachComponent")
-        ComponentManager.init(application)
         sdk = SdkManager.getSdk(IProvideFromLibraryKotlin2::class.java)!!
     }
 

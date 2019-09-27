@@ -1,9 +1,9 @@
 package com.plugin.component.extension.module
 
-import com.plugin.component.utils.ProjectUtil
 import com.plugin.component.Constants
-import org.gradle.api.Project
 import com.plugin.component.Runtimes
+import com.plugin.component.utils.ProjectUtil
+import org.gradle.api.Project
 
 /**
  * 插件运行时收集的项目信息
@@ -28,7 +28,6 @@ class ProjectInfo {
     public boolean isAssemble = false                       //是否是asAssemble
     public boolean isDebug = false                          //是否是debug
     public String compileModuleName                         //入口模块名字
-    public List<String> dependenceComponents = new ArrayList<>()      //使用 component 配置导入的模块
 
     ProjectInfo(Project project) {
         this.project = project
@@ -76,7 +75,6 @@ class ProjectInfo {
                 compileModuleName = Constants.DEFAULT_MAIN_MODULE_NAME
             }
         }
-        Runtimes.sCompileModuleName = compileModuleName
     }
 
     /**

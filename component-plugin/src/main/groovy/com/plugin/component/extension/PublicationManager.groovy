@@ -1,5 +1,6 @@
 package com.plugin.component.extension
 
+import com.plugin.component.Constants
 import com.plugin.component.Logger
 import com.plugin.component.Runtimes
 import com.plugin.component.extension.module.Digraph
@@ -12,7 +13,6 @@ import org.gradle.api.Project
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
-import com.plugin.component.Constants
 
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys

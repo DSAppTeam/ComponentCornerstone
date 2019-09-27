@@ -1,11 +1,10 @@
 package com.plugin.component.extension
 
 import com.plugin.component.extension.option.CompileOption
-import com.plugin.component.extension.option.PublicationOption
 import com.plugin.component.extension.option.DebugOption
+import com.plugin.component.extension.option.PublicationOption
 import com.plugin.component.listener.OnModuleExtensionListener
 import org.gradle.api.Action
-
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.util.ConfigureUtil
