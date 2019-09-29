@@ -6,22 +6,15 @@ component {
 
     mainModuleName 'app'
 
+    include ':app,library,libraryKotlin,libraryKotlin2,libraryWithoutSdk,debugModule'
+
     debugModuleName 'debugModule'
 
-    include ':app,library,libraryKotlin,libraryKotlin2,libraryWithoutSdk,debugModule'
+    debugConponentName 'library'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    debug {
-
-        'library' {
-            enable true
-            applicationName 'com.plugin.library.LibraryApplication'
-        }
-
     }
 }
 
