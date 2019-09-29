@@ -6,7 +6,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.plugin.library.IProvideFromLibrary;
 import com.plugin.library.ISdk2;
-import com.plugin.librarywithoutplugin.LibraryWithoutPluginApi;
 import com.plugin.module.R;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -40,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         stringBuilder.append(SdkManager.getSdk(IProvideFromLibrary.class).provideString());
         stringBuilder.append("\n");
         ((TextView) findViewById(R.id.text)).setText(stringBuilder);
-        LibraryWithoutPluginApi.getString();
+//        LibraryWithoutPluginApi.getString();
 //        LibraryWithoutSdkApi.getString();
     }
 
