@@ -14,6 +14,13 @@ component {
     }
 }
 
+tasks.whenTaskAdded { task ->
+    if (task.name.contains('AndroidTest') || task.name.contains('Test')) {
+        task.enabled = false
+    }
+}
+
+
 
 //apply plugin: 'com.android.component.support'
 //

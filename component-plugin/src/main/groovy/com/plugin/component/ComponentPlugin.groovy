@@ -43,14 +43,16 @@ class ComponentPlugin implements Plugin<Project> {
     private void handleProject(Project project) {
         ProjectInfo projectInfo = Runtimes.getProjectInfo(project.name)
 
-        //解析 component
-        //比如 A 声明  component(':library') 且 A是可运行的
-        //则A需要导入 library 中 sdk 和 impl 模块，其中 sdk 为模块内可见 implementation，impl 为纯 impl，其依赖的 sdk 需要模块哇可见 api
+        //解析： component
+        //example ：component(':library')
+        //规则：
+        // 1.  component 对象必须为实现 component 插件的project
+        // 2.  component(<project>) project 逻辑上被划分为 impl / debug / sdk，其中 sdk 通过 api 暴露给上层，impl 直接打包
         project.dependencies.metaClass.component { String value ->
             return PublicationUtil.parseComponent(projectInfo, value)
         }
 
-        //独立模块内 依赖sdk为api，由于该模块可能被依赖，所以sdk需要模块外暴露
+        //project 需要使用 api 依赖并暴露 sdk，解决 project 被依赖的时候，依赖者可以引用到 project sdk
         List<PublicationOption> publications = PublicationManager.getInstance().getPublicationByProject(project)
         project.dependencies {
             publications.each {
@@ -58,12 +60,18 @@ class ComponentPlugin implements Plugin<Project> {
             }
         }
 
-        //sdk 模块，则当前project需要依赖当前声明
+        /**
+         * Syncing Gradle will evaluate the build files by comparing the current files to the project state that Gradle and Android Studio maintain.
+         * If it finds any changes it will execute just those specific tasks.
+         */
+        //project 需要依赖 sdk 中声明的依赖，意味着同步的时候，component.gradle 中 sdk { dependencies { <xxxxx> }} 内容需要同步迁移到 project
         if (projectInfo.isSync()) {
+            Logger.buildOutput("Syncing gradle...")
             publications.each {
                 PublicationUtil.addPublicationDependencies(projectInfo, it)
             }
         }
+
 
         project.afterEvaluate {
             ProjectUtil.modifySourceSets(projectInfo)
