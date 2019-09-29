@@ -1,9 +1,5 @@
 component {
 
-    debug {
-        applicationName 'com.plugin.library.LibraryApplication'
-    }
-
     sdk {
         groupId 'com.effective.android'
         artifactId 'librarySdk'

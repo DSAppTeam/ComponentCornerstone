@@ -14,7 +14,7 @@ class Runtimes {
     //impl 发布信息
     private static Map<String, PublicationOption> sImplPublicationMap = new HashMap<>()
     //模块独立debug 信息
-    private static Map<String, DebugOption> sDebugMap = new HashMap<>()
+    public static Map<String, DebugOption> sDebugMap = new HashMap<>()
     //模块信息
     private static Map<String, ProjectInfo> sProjectInfoMap = new HashMap<>()
     //模块 build.gradle 脚本信息
@@ -23,6 +23,7 @@ class Runtimes {
     //基本公用配信息
     public static String sAndroidJarPath
     public static String sMainModuleName
+    public static String sDebugModuleName
     public static int sCompileSdkVersion
     public static CompileOption sCompileOption
 
@@ -31,61 +32,67 @@ class Runtimes {
     public static File sImplDir
 
 
+    /**
+     * 废除 ddComponent 优化方案
+     * @param projectInfo
+     * @return
+     */
     static boolean addBuildGradleFile(ProjectInfo projectInfo) {
-        Project project = projectInfo.project
-        File file = new File(project.projectDir, Constants.BUILD_GRADLE)
-        if (file != null && file.exists()) {
-            List<String> lines = file.readLines()
-            StringBuilder stringBuilder = new StringBuilder()
-            Logger.buildOutput("project[" + project.name + "]" + "modify build.gradle start")
-            long currentTime = System.currentTimeMillis()
-            for (int i = 0; i < lines.size(); i++) {
-                String line = lines.get(i)
-                String content = line
-                if (!line.trim().startsWith("#") && line.contains("apply plugin: 'com.android.library'")) {
-                    if (projectInfo.aloneEnable) {
-                        content = line.replaceAll("apply plugin: 'com.android.library'", "apply plugin: 'com.android.application'")
-                        BuildGradleInfo buildGradleInfo = new BuildGradleInfo()
-                        buildGradleInfo.modifyLine = i
-                        buildGradleInfo.originLineContent = line
-                        buildGradleInfo.mofifyLineContent = content
-                        buildGradleInfo.file = file
-                        sBuildGradleFile.put(project.name, buildGradleInfo)
-                        Logger.buildOutput("project[" + project.name + "]" + "filePath", projectInfo.project.projectDir)
-                        Logger.buildOutput("project[" + project.name + "]" + "modifyLine", buildGradleInfo.modifyLine)
-                        Logger.buildOutput("project[" + project.name + "]" + "originLineContent", buildGradleInfo.originLineContent)
-                        Logger.buildOutput("project[" + project.name + "]" + "mofifyLineContent", buildGradleInfo.mofifyLineContent)
-                    }
-                }
-                stringBuilder.append(content + "\n")
-            }
-            file.text = stringBuilder.toString()
-            Logger.buildOutput("project[" + project.name + "]" + "modify build gradle cost " + (System.currentTimeMillis() - currentTime) + "ms")
-            Logger.buildOutput("project[" + project.name + "]" + "modify build gradle end")
-            return true
-        }
-        return false
+        return true
+//        Project project = projectInfo.project
+//        File file = new File(project.projectDir, Constants.BUILD_GRADLE)
+//        if (file != null && file.exists()) {
+//            List<String> lines = file.readLines()
+//            StringBuilder stringBuilder = new StringBuilder()
+//            Logger.buildOutput("project[" + project.name + "]" + "modify build.gradle start")
+//            long currentTime = System.currentTimeMillis()
+//            for (int i = 0; i < lines.size(); i++) {
+//                String line = lines.get(i)
+//                String content = line
+//                if (!line.trim().startsWith("#") && line.contains("apply plugin: 'com.android.library'")) {
+//                    if (projectInfo.aloneEnable) {
+//                        content = line.replaceAll("apply plugin: 'com.android.library'", "apply plugin: 'com.android.application'")
+//                        BuildGradleInfo buildGradleInfo = new BuildGradleInfo()
+//                        buildGradleInfo.modifyLine = i
+//                        buildGradleInfo.originLineContent = line
+//                        buildGradleInfo.mofifyLineContent = content
+//                        buildGradleInfo.file = file
+//                        sBuildGradleFile.put(project.name, buildGradleInfo)
+//                        Logger.buildOutput("project[" + project.name + "]" + "filePath", projectInfo.project.projectDir)
+//                        Logger.buildOutput("project[" + project.name + "]" + "modifyLine", buildGradleInfo.modifyLine)
+//                        Logger.buildOutput("project[" + project.name + "]" + "originLineContent", buildGradleInfo.originLineContent)
+//                        Logger.buildOutput("project[" + project.name + "]" + "mofifyLineContent", buildGradleInfo.mofifyLineContent)
+//                    }
+//                }
+//                stringBuilder.append(content + "\n")
+//            }
+//            file.text = stringBuilder.toString()
+//            Logger.buildOutput("project[" + project.name + "]" + "modify build gradle cost " + (System.currentTimeMillis() - currentTime) + "ms")
+//            Logger.buildOutput("project[" + project.name + "]" + "modify build gradle end")
+//            return true
+//        }
+//        return false
     }
 
     static void resetBuildGradleFile() {
-        Set<String> keys = sBuildGradleFile.keySet()
-        for (String key : keys) {
-            BuildGradleInfo buildGradleInfo = sBuildGradleFile.get(key)
-            if (buildGradleInfo.file != null && buildGradleInfo.file.exists()) {
-                List<String> lines = buildGradleInfo.file.readLines()
-                StringBuilder stringBuilder = new StringBuilder()
-                for (int i = 0; i < lines.size(); i++) {
-                    String line = lines.get(i)
-                    if (i == buildGradleInfo.modifyLine && buildGradleInfo.mofifyLineContent == line) {
-                        stringBuilder.append(buildGradleInfo.originLineContent + "\n")
-                    } else {
-                        stringBuilder.append(line + "\n")
-                    }
-                }
-                buildGradleInfo.file.text = stringBuilder.toString()
-                Logger.buildOutput("reset build.gradle[" + buildGradleInfo.file.path + "]")
-            }
-        }
+//        Set<String> keys = sBuildGradleFile.keySet()
+//        for (String key : keys) {
+//            BuildGradleInfo buildGradleInfo = sBuildGradleFile.get(key)
+//            if (buildGradleInfo.file != null && buildGradleInfo.file.exists()) {
+//                List<String> lines = buildGradleInfo.file.readLines()
+//                StringBuilder stringBuilder = new StringBuilder()
+//                for (int i = 0; i < lines.size(); i++) {
+//                    String line = lines.get(i)
+//                    if (i == buildGradleInfo.modifyLine && buildGradleInfo.mofifyLineContent == line) {
+//                        stringBuilder.append(buildGradleInfo.originLineContent + "\n")
+//                    } else {
+//                        stringBuilder.append(line + "\n")
+//                    }
+//                }
+//                buildGradleInfo.file.text = stringBuilder.toString()
+//                Logger.buildOutput("reset build.gradle[" + buildGradleInfo.file.path + "]")
+//            }
+//        }
     }
 
     static void addImplPublication(String projectName, PublicationOption publicationOption) {
@@ -103,6 +110,7 @@ class Runtimes {
     static void addDebugInfo(String projectName, DebugOption debugOption) {
         sDebugMap.put(projectName, debugOption)
     }
+
 
     static DebugOption getDebugInfo(String projectName) {
         return sDebugMap.get(projectName)

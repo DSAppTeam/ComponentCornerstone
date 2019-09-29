@@ -10,7 +10,9 @@ import org.gradle.api.Project
  */
 interface OnModuleExtensionListener {
 
-    void onPublicationOptionAdded(Project childProject, PublicationOption publication)
+    void onPublicationSdkOptionAdded(Project childProject, PublicationOption publication)
+
+    void onPublicationImplOptionAdded(Project childProject, PublicationOption publication)
     
     void onDebugOptionAdded(Project childProject, DebugOption aloneConfiguration)
 }

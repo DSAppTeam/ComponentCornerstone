@@ -95,6 +95,10 @@ class ProjectInfo {
         }
     }
 
+    public boolean isDebugModule() {
+        return project.name == Runtimes.sDebugModuleName
+    }
+
 
     boolean aloneEnableAndNoSync() {
         return aloneEnable && !isSync()

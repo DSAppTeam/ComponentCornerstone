@@ -40,12 +40,14 @@ class PublicationUtil {
      * @return
      */
     static parseComponent(ProjectInfo projectInfo, String value) {
+        def result = projectInfo.project.project(':' + value)
         if (projectInfo.isSync()) {
             String key = ProjectUtil.getComponentValue(value)
             PublicationOption publication = Runtimes.getSdkPublication(key)
-            return getPublication(publication)
+            result = getPublication(publication)
         }
-        return projectInfo.project.project(':' + value)
+        Logger.buildOutput("component(" + value + ") ==> " + result)
+        return result
     }
 
     /**

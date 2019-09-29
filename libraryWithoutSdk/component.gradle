@@ -1,6 +1,0 @@
-component {
-
-    debug {
-        applicationName 'com.plugin.librarywithoutsdk.LibraryApplication'
-    }
-}

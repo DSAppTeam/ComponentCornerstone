@@ -6,20 +6,31 @@ component {
 
     mainModuleName 'app'
 
-    include ':app,library,libraryKotlin,libraryKotlin2,libraryWithoutSdk'
+    debugModuleName 'debugModule'
+
+    include ':app,library,libraryKotlin,libraryKotlin2,libraryWithoutSdk,debugModule'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    debug {
+
+        'library' {
+            enable true
+            applicationName 'com.plugin.library.LibraryApplication'
+        }
+
+    }
 }
+
 
 tasks.whenTaskAdded { task ->
     if (task.name.contains('AndroidTest') || task.name.contains('Test')) {
         task.enabled = false
     }
 }
-
 
 
 //apply plugin: 'com.android.component.support'

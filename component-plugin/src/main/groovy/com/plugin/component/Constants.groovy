@@ -46,13 +46,6 @@ class Constants {
     public static String COMPONENT_SCRIPT = 'component.gradle'
     public static String CORE_DEPENDENCY = "com.effective.android:component-core:1.0.0-beta"
 
-    //sourceSet - debug
-    public static String DEBUG_MANIFEST_PATH = "src/main/debug/AndroidManifest.xml"
-    public static String DEBUG_JAVA_PATH = "src/main/debug/java"
-    public static String DEBUG_RES_PATH = "src/main/debug/res"
-    public static String DEBUG_ASSETS_PATH = "src/main/debug/assets"
-    public static String DEBUG_JNILIBS_PATH = "src/main/debug/jniLibs"
-
     //sourceSet - default
     public static String JAVA_PATH = "src/main/java"
     public static String RES_PATH = "src/main/res"

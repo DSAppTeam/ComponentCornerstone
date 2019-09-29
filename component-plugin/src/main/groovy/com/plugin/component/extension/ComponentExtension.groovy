@@ -5,6 +5,7 @@ import com.plugin.component.extension.option.DebugOption
 import com.plugin.component.extension.option.PublicationOption
 import com.plugin.component.listener.OnModuleExtensionListener
 import org.gradle.api.Action
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.util.ConfigureUtil
@@ -16,6 +17,7 @@ import org.gradle.util.ConfigureUtil
 class ComponentExtension {
 
     String mainModuleName
+    String debugModuleName
     int compileSdkVersion                           //编译版本
     CompileOption compileOptions                    //编译选项
     Action<? super RepositoryHandler> configure     //仓库配置
@@ -28,9 +30,11 @@ class ComponentExtension {
     public PublicationOption implPublicationOption
 
     Project currentChildProject                      //子项目
+    Project project                      //子项目
 
-    ComponentExtension(OnModuleExtensionListener listener) {
+    ComponentExtension(Project project,OnModuleExtensionListener listener) {
         this.listener = listener
+        this.project = project
         compileOptions = new CompileOption()
         debugOption = new DebugOption()
     }
@@ -55,7 +59,7 @@ class ComponentExtension {
      * 包含哪些模块，格式为 ':library' 或者 'library' ，多个使用 "," 隔开  比如 "library,:libraryKotlin"
      * @param modules
      */
-    void exclude(String modules){
+    void exclude(String modules) {
         this.excludes = modules
     }
 
@@ -73,6 +77,14 @@ class ComponentExtension {
      */
     void mainModuleName(String name) {
         mainModuleName = name
+    }
+
+    /**
+     * 调试项目名称
+     * @param name
+     */
+    void debugModuleName(String name) {
+        debugModuleName = name
     }
 
     /**
@@ -95,9 +107,12 @@ class ComponentExtension {
      * 独立运行配置
      * @param action
      */
-    void debug(Action<DebugOption> action) {
-        action.execute(this.debugOption)
-        listener.onDebugOptionAdded(currentChildProject, debugOption)
+    void debug(Closure closure) {
+        NamedDomainObjectContainer<DebugOption> debugOptions = project.container(DebugOption)
+        ConfigureUtil.configure(closure, debugOptions)
+        debugOptions.each {
+            listener.onDebugOptionAdded(project, it)
+        }
     }
 
     /**
@@ -108,7 +123,7 @@ class ComponentExtension {
         publicationOption = new PublicationOption()
         publicationOption.isSdk = true
         action.execute(publicationOption)
-        listener.onPublicationOptionAdded(currentChildProject, publicationOption)
+        listener.onPublicationSdkOptionAdded(currentChildProject, publicationOption)
     }
 
     /**
@@ -119,6 +134,6 @@ class ComponentExtension {
         implPublicationOption = new PublicationOption()
         implPublicationOption.isSdk = false
         action.execute(this.implPublicationOption)
-        listener.onPublicationOptionAdded(currentChildProject, implPublicationOption)
+        listener.onPublicationImplOptionAdded(currentChildProject, implPublicationOption)
     }
 }
