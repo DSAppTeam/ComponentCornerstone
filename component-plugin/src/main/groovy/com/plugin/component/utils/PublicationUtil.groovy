@@ -40,17 +40,24 @@ class PublicationUtil {
      * @return
      */
     static parseComponent(ProjectInfo projectInfo, String value) {
+        if (projectInfo.isSync()) {
+            String key = ProjectUtil.getComponentValue(value)
+            PublicationOption publication = Runtimes.getSdkPublication(key)
+            return getPublication(publication)
+        }
+        return projectInfo.project.project(':' + value)
+    }
+
+    /**
+     * 暂时不支持sdk中依赖其他sdk，预留该逻辑
+     * @param value
+     * @return
+     */
+    static parseComponent(String value) {
+        value = value.replace(Constants.COMPONENT, "")
         String key = ProjectUtil.getComponentValue(value)
         PublicationOption publication = Runtimes.getSdkPublication(key)
-        if (publication != null) {
-            if (projectInfo.isAssemble) {
-                return projectInfo.project.project(':' + value)
-            } else {
-                return getPublication(publication)
-            }
-        }
-//        return projectInfo.project.project(':' + value)
-        return []
+        return getPublication(publication)
     }
 
     /**
@@ -79,20 +86,20 @@ class PublicationUtil {
                 publication.dependencies.compileOnly.each {
                     def dependency = it
                     if (it instanceof String && it.startsWith(Constants.COMPONENT)) {
-                        dependency = parseComponent(projectInfo, it.replace(Constants.COMPONENT, ""))
+                        dependency = parseComponent(it)
                     }
                     Logger.buildOutput("compileOnly " + dependency)
-                    compileOnly parseComponent(projectInfo, dependency)
+                    compileOnly dependency
                 }
             }
             if (publication.dependencies.implementation != null) {
                 publication.dependencies.implementation.each {
                     def dependency = it
                     if (it instanceof String && it.startsWith(Constants.COMPONENT)) {
-                        dependency = parseComponent(projectInfo, it.replace(Constants.COMPONENT, ""))
+                        dependency = parseComponent(it)
                     }
                     Logger.buildOutput("implementation " + dependency)
-                    implementation parseComponent(projectInfo, dependency)
+                    implementation dependency
                 }
             }
         }

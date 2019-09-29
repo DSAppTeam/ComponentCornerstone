@@ -245,8 +245,11 @@ class ComponentPlugin implements Plugin<Project> {
                             childProject.pluginManager.apply(Constants.PLUGIN_COMPONENT)
                             childProject.dependencies {
                                 implementation Constants.CORE_DEPENDENCY
-                                Logger.buildOutput("project[" + childProject.name + "] add dependency =>" + Constants.CORE_DEPENDENCY)
+//                                Map<String, Object> data = new HashMap<>()
+//                                data.put("path", ":libraryWithoutPlugin")
+//                                implementation childProject.dependencies.project(data)
                             }
+
                             if (projectInfo.aloneEnable) {
                                 Logger.buildOutput("project[" + childProject.name + "] registerTransform => ScanCodeTransform")
                                 Logger.buildOutput("project[" + childProject.name + "] registerTransform => InjectCodeTransform")
