@@ -39,8 +39,6 @@ public class MainActivity extends AppCompatActivity {
         stringBuilder.append(SdkManager.getSdk(IProvideFromLibrary.class).provideString());
         stringBuilder.append("\n");
         ((TextView) findViewById(R.id.text)).setText(stringBuilder);
-//        LibraryWithoutPluginApi.getString();
-//        LibraryWithoutSdkApi.getString();
     }
 
     public void a() {

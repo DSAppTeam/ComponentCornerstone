@@ -6,11 +6,20 @@ package com.plugin.component.extension.option
  */
 class DebugOption {
 
+    String name
     String applicationName
 
-    boolean enable = true
+    boolean enable = false
+
+    DebugOption(String name) {
+        this.name = name
+    }
 
     void applicationName(String applicationName) {
         this.applicationName = applicationName
+    }
+
+    void enable(boolean enable) {
+        this.enable = enable
     }
 }

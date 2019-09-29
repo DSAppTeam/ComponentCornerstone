@@ -1,9 +1,5 @@
 component {
 
-    debug {
-        applicationName 'com.plugin.libraryKolin.LibraryKotlinApplication'
-    }
-
     sdk {
         groupId 'com.effective.android'
         artifactId 'libraryKotlinSdk'

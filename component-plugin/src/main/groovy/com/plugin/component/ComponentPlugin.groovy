@@ -18,6 +18,8 @@ import com.plugin.component.utils.PublicationUtil
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
+import javax.print.attribute.standard.PrinterURI
+
 /**
  *   ./gradlew --no-daemon ComponentPlugin  -Dorg.gradle.debug=true
  *   ./gradlew --no-daemon [clean, :app:generateDebugSources, :library:generateDebugSources, :module_lib:generateDebugSources]  -Dorg.gradle.debug=true
@@ -41,7 +43,9 @@ class ComponentPlugin implements Plugin<Project> {
     }
 
     private void handleProject(Project project) {
+
         ProjectInfo projectInfo = Runtimes.getProjectInfo(project.name)
+
 
         //解析： component
         //example ：component(':library')
@@ -142,10 +146,16 @@ class ComponentPlugin implements Plugin<Project> {
 
     private void handleRootProject(Project project) {
         PublicationManager.getInstance().loadManifest(project)
-        mComponentExtension = project.getExtensions().create(Constants.COMPONENT, ComponentExtension, new OnModuleExtensionListener() {
+        mComponentExtension = project.getExtensions().create(Constants.COMPONENT, ComponentExtension, project, new OnModuleExtensionListener() {
 
             @Override
-            void onPublicationOptionAdded(Project childProject, PublicationOption publication) {
+            void onPublicationImplOptionAdded(Project childProject, PublicationOption publicationOption) {
+                if (!publication.isSdk) {
+                    //预留后续逻辑
+                }
+            }
+
+            void onPublicationSdkOptionAdded(Project childProject, PublicationOption publication) {
                 if (publication.isSdk) {
                     PublicationUtil.initPublication(childProject, publication)
                     Runtimes.addSdkPublication(childProject.name, publication)
@@ -155,7 +165,7 @@ class ComponentPlugin implements Plugin<Project> {
 
             @Override
             void onDebugOptionAdded(Project childProject, DebugOption debugOption) {
-                Runtimes.addDebugInfo(childProject.name, debugOption)
+                Runtimes.addDebugInfo(debugOption.name, debugOption)
             }
         })
 
@@ -168,6 +178,7 @@ class ComponentPlugin implements Plugin<Project> {
             Logger.buildOutput("ComponentPlugin >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
             Runtimes.sAndroidJarPath = ProjectUtil.getAndroidJarPath(project, mComponentExtension.compileSdkVersion)
             Runtimes.sMainModuleName = mComponentExtension.mainModuleName
+            Runtimes.sDebugModuleName = mComponentExtension.debugModuleName
             Runtimes.sCompileSdkVersion = mComponentExtension.compileSdkVersion
             Runtimes.sCompileOption = mComponentExtension.compileOptions
 
@@ -241,37 +252,39 @@ class ComponentPlugin implements Plugin<Project> {
 
                     childProject.plugins.whenObjectAdded {
                         if (it instanceof AppPlugin || it instanceof LibraryPlugin) {
+                            Logger.buildOutput("project[" + childProject.name + "]" + "whenObjectAdded(" + it + ")")
                             Logger.buildOutput("project[" + childProject.name + "]" + "apply plugin: com.android.component")
                             childProject.pluginManager.apply(Constants.PLUGIN_COMPONENT)
                             childProject.dependencies {
                                 implementation Constants.CORE_DEPENDENCY
-//                                Map<String, Object> data = new HashMap<>()
-//                                data.put("path", ":libraryWithoutPlugin")
-//                                implementation childProject.dependencies.project(data)
                             }
 
-                            if (projectInfo.aloneEnable) {
-                                Logger.buildOutput("project[" + childProject.name + "] registerTransform => ScanCodeTransform")
-                                Logger.buildOutput("project[" + childProject.name + "] registerTransform => InjectCodeTransform")
-                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new ScanCodeTransform(childProject))
-                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
-                                if (!projectInfo.isMainModule()) {
-                                    Logger.buildOutput("project[" + childProject.name + "] add sourceSets debug")
-                                    childProject.android.sourceSets {
-                                        main {
-                                            manifest.srcFile Constants.DEBUG_MANIFEST_PATH
-                                            java.srcDirs = [Constants.JAVA_PATH, Constants.DEBUG_JAVA_PATH]
-                                            res.srcDirs = [Constants.RES_PATH, Constants.DEBUG_RES_PATH]
-                                            assets.srcDirs = [Constants.ASSETS_PATH, Constants.DEBUG_ASSETS_PATH]
-                                            jniLibs.srcDirs = [Constants.JNILIBS_PATH, Constants.DEBUG_JNILIBS_PATH]
-                                        }
-                                    }
+                            if (it instanceof AppPlugin) {
+                                if (projectInfo.isDebugModule() || projectInfo.isMainModule()) {
+                                    Logger.buildOutput("project[" + childProject.name + "] registerTransform => ScanCodeTransform")
+                                    Logger.buildOutput("project[" + childProject.name + "] registerTransform => InjectCodeTransform")
+                                    childProject.extensions.findByType(BaseExtension.class).registerTransform(new ScanCodeTransform(childProject))
+                                    childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
                                 }
+                            }
+
+                            if (projectInfo.isDebugModule()) {
+                                ProjectUtil.modifyDebugSets(projectInfo)
                             }
                         }
                     }
                 } else {
                     Logger.buildOutput("project[" + childProject.name + "]" + "can't apply component plugin")
+                }
+            }
+        }
+
+        project.getGradle().projectsEvaluated {
+            project.allprojects.each {
+                if (it == project) return
+                ProjectInfo projectInfo = Runtimes.getProjectInfo(Runtimes.sDebugModuleName)
+                if (projectInfo != null && projectInfo.isDebugModule()) {
+                    ProjectUtil.modifyDebugSets(projectInfo)
                 }
             }
         }

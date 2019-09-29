@@ -68,6 +68,6 @@ android modular plugin.
 
 
 
-
+为了最大化兼容调试,废除dd方案，完全往原生靠拢
 未来规划： 支持sdk及impl maven仓库存储
 
