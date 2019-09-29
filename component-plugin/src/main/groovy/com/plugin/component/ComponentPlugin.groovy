@@ -233,48 +233,43 @@ class ComponentPlugin implements Plugin<Project> {
                 Logger.buildOutput("")
                 Logger.buildOutput("project[" + childProject.name + "] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                 ProjectInfo projectInfo = new ProjectInfo(childProject)
-                if (projectInfo.isVailModulePluginTarget) {
-
-                    childProject.repositories {
-                        flatDir {
-                            dirs Runtimes.sSdkDir.absolutePath
-                            Logger.buildOutput("project[" + childProject.name + "]" + "-flatDir Dir[" + Runtimes.sSdkDir.absolutePath + "]")
-                            dirs Runtimes.sImplDir.absolutePath
-                            Logger.buildOutput("project[" + childProject.name + "]" + "-flatDir Dir[" + Runtimes.sImplDir.absolutePath + "]")
-                        }
+                childProject.repositories {
+                    flatDir {
+                        dirs Runtimes.sSdkDir.absolutePath
+                        Logger.buildOutput("project[" + childProject.name + "]" + "-flatDir Dir[" + Runtimes.sSdkDir.absolutePath + "]")
+                        dirs Runtimes.sImplDir.absolutePath
+                        Logger.buildOutput("project[" + childProject.name + "]" + "-flatDir Dir[" + Runtimes.sImplDir.absolutePath + "]")
                     }
-                    Runtimes.addProjectInfo(childProject.name, projectInfo)
-                    Logger.buildOutput("project[" + childProject.name + "]" + "compileModuleName", projectInfo.compileModuleName)
-                    Logger.buildOutput("project[" + childProject.name + "]" + "taskNames", projectInfo.taskNames)
-                    Logger.buildOutput("project[" + childProject.name + "]" + "moduleName", projectInfo.currentModuleName)
-                    Logger.buildOutput("project[" + childProject.name + "]" + "isSyncTask", projectInfo.isSync())
-                    Logger.buildOutput("project[" + childProject.name + "]" + "aloneEnable", projectInfo.aloneEnable)
+                }
+                Runtimes.addProjectInfo(childProject.name, projectInfo)
+                Logger.buildOutput("project[" + childProject.name + "]" + "compileModuleName", projectInfo.compileModuleName)
+                Logger.buildOutput("project[" + childProject.name + "]" + "taskNames", projectInfo.taskNames)
+                Logger.buildOutput("project[" + childProject.name + "]" + "moduleName", projectInfo.currentModuleName)
+                Logger.buildOutput("project[" + childProject.name + "]" + "isSyncTask", projectInfo.isSync())
+                Logger.buildOutput("project[" + childProject.name + "]" + "aloneEnable", projectInfo.aloneEnable)
 
-                    childProject.plugins.whenObjectAdded {
-                        if (it instanceof AppPlugin || it instanceof LibraryPlugin) {
-                            Logger.buildOutput("project[" + childProject.name + "]" + "whenObjectAdded(" + it + ")")
-                            Logger.buildOutput("project[" + childProject.name + "]" + "apply plugin: com.android.component")
-                            childProject.pluginManager.apply(Constants.PLUGIN_COMPONENT)
-                            childProject.dependencies {
-                                implementation Constants.CORE_DEPENDENCY
-                            }
+                childProject.plugins.whenObjectAdded {
+                    if (it instanceof AppPlugin || it instanceof LibraryPlugin) {
+                        Logger.buildOutput("project[" + childProject.name + "]" + "whenObjectAdded(" + it + ")")
+                        Logger.buildOutput("project[" + childProject.name + "]" + "apply plugin: com.android.component")
+                        childProject.pluginManager.apply(Constants.PLUGIN_COMPONENT)
+                        childProject.dependencies {
+                            implementation Constants.CORE_DEPENDENCY
+                        }
 
-                            if (it instanceof AppPlugin) {
-                                if (projectInfo.isDebugModule() || projectInfo.isMainModule()) {
-                                    Logger.buildOutput("project[" + childProject.name + "] registerTransform => ScanCodeTransform")
-                                    Logger.buildOutput("project[" + childProject.name + "] registerTransform => InjectCodeTransform")
-                                    childProject.extensions.findByType(BaseExtension.class).registerTransform(new ScanCodeTransform(childProject))
-                                    childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
-                                }
-                            }
-
-                            if (projectInfo.isDebugModule()) {
-                                ProjectUtil.modifyDebugSets(projectInfo)
+                        if (it instanceof AppPlugin) {
+                            if (projectInfo.isDebugModule() || projectInfo.isMainModule()) {
+                                Logger.buildOutput("project[" + childProject.name + "] registerTransform => ScanCodeTransform")
+                                Logger.buildOutput("project[" + childProject.name + "] registerTransform => InjectCodeTransform")
+                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new ScanCodeTransform(childProject))
+                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
                             }
                         }
+
+                        if (projectInfo.isDebugModule()) {
+                            ProjectUtil.modifyDebugSets(projectInfo)
+                        }
                     }
-                } else {
-                    Logger.buildOutput("project[" + childProject.name + "]" + "can't apply component plugin")
                 }
             }
         }
@@ -297,4 +292,5 @@ class ComponentPlugin implements Plugin<Project> {
             return !excludeModules.contains(project.name)
         }
     }
+
 }

@@ -145,47 +145,27 @@ class ProjectUtil {
         Logger.buildOutput("project[" + project.name + "] add sourceSets debug")
         BaseExtension baseExtension = project.extensions.getByName(Constants.ANDROID)
         def obj = baseExtension.sourceSets.getByName(Constants.MAIN)
+        def obj2 = baseExtension.sourceSets.getByName("androidTest")
         Set<String> projectsName = Runtimes.sDebugMap.keySet()
         def targetDebug = Constants.MANIFEST
         for (String projectName : projectsName) {
-//            project.android.sourceSets {
-//                main {
-//                    manifest.srcFile "src/main/${projectName}/AndroidManifest.xml"
-//                    java.srcDirs = [Constants.JAVA_PATH, "src/main/${projectName}/java"]
-//                    res.srcDirs = [Constants.RES_PATH, "src/main/${projectName}/res"]
-//                    assets.srcDirs = [Constants.ASSETS_PATH, "src/main/${projectName}/assets"]
-//                    jniLibs.srcDirs = [Constants.JNILIBS_PATH, "src/main/${projectName}/jniLibs"]
-//                }
-//            }
-
-            DebugOption debugOption = Runtimes.getDebugInfo(projectName)
-            List<String> javaPath = new ArrayList<>()
-            javaPath.add(Constants.JAVA_PATH)
-            javaPath.add("src/main/library/java")
-            obj.java.setSrcDirs(javaPath)
-
-            List<String> resPath = new ArrayList<>()
-            resPath.add(Constants.RES_PATH)
-            resPath.add("src/main/library/res")
-            obj.res.setSrcDirs(resPath)
-
-            List<String> assetsPath = new ArrayList<>()
-            assetsPath.add(Constants.ASSETS_PATH)
-            assetsPath.add("src/main/library/assets")
-            obj.assets.setSrcDirs(assetsPath)
-
-            List<String> jniPath = new ArrayList<>()
-            jniPath.add(Constants.JNILIBS_PATH)
-            jniPath.add("src/main/library/jniLibs")
-            obj.jniLibs.setSrcDirs(jniPath)
-
-
-//            if (debugOption.enable) {
-//                obj.manifest.srcFile("src/main/library/AndroidManifest.xml")
-////                targetDebug = "src/main/${projectName}/AndroidManifest.xml"
-//            }
+            def debugOption = Runtimes.getDebugInfo(projectName)
+            if (debugOption.enable) {
+                obj.java.srcDir("src/main/" + projectName + "/java")
+                obj.res.srcDir("src/main/" + projectName + "/res")
+                obj.assets.srcDir("src/main/" + projectName + "/assets")
+                obj.jniLibs.srcDir("src/main/" + projectName + "/jniLibs")
+                obj.manifest.srcFile("src/main/" + projectName + "/AndroidManifest.xml")
+            }else{
+                obj2.java.srcDir("src/main/" + projectName + "/java")
+                obj2.res.srcDir("src/main/" + projectName + "/res")
+                obj2.assets.srcDir("src/main/" + projectName + "/assets")
+                obj2.jniLibs.srcDir("src/main/" + projectName + "/jniLibs")
+                obj2.manifest.srcFile("src/main/" + projectName + "/AndroidManifest.xml")
+            }
         }
-//        obj.manifest.srcFile(targetDebug)
+
+
     }
 
     /**
