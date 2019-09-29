@@ -19,7 +19,7 @@ android {
             minifyEnabled true
             zipAlignEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            matchingFallbacks = ['default']    // instead use this
+            matchingFallbacks = ['debug']    // instead use this
         }
 
         debug {}
@@ -33,10 +33,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.0.0'
     implementation component(':library')
     implementation component(':libraryWithoutSdk')
-}
-
-repositories {
-    mavenCentral()
+    implementation project(':libraryWithoutPlugin')
 }
 
 

@@ -1,6 +1,7 @@
 package com.plugin.component.utils
 
 import com.plugin.component.Constants
+import com.plugin.component.Logger
 import com.plugin.component.Runtimes
 import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.module.SourceFile
@@ -48,6 +49,7 @@ class PublicationUtil {
                 return getPublication(publication)
             }
         }
+//        return projectInfo.project.project(':' + value)
         return []
     }
 
@@ -75,20 +77,22 @@ class PublicationUtil {
         projectInfo.project.dependencies {
             if (publication.dependencies.compileOnly != null) {
                 publication.dependencies.compileOnly.each {
+                    def dependency = it
                     if (it instanceof String && it.startsWith(Constants.COMPONENT)) {
-                        compileOnly parseComponent(projectInfo, it.replace(Constants.COMPONENT, ""))
-                    } else {
-                        compileOnly it
+                        dependency = parseComponent(projectInfo, it.replace(Constants.COMPONENT, ""))
                     }
+                    Logger.buildOutput("compileOnly " + dependency)
+                    compileOnly parseComponent(projectInfo, dependency)
                 }
             }
             if (publication.dependencies.implementation != null) {
                 publication.dependencies.implementation.each {
+                    def dependency = it
                     if (it instanceof String && it.startsWith(Constants.COMPONENT)) {
-                        implementation parseComponent(projectInfo, it.replace(Constants.COMPONENT, ""))
-                    } else {
-                        implementation it
+                        dependency = parseComponent(projectInfo, it.replace(Constants.COMPONENT, ""))
                     }
+                    Logger.buildOutput("implementation " + dependency)
+                    implementation parseComponent(projectInfo, dependency)
                 }
             }
         }

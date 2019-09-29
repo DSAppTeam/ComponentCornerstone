@@ -10,7 +10,6 @@ import com.plugin.component.IComponent;
 @AutoInjectComponent(impl = {SdkShareImpl.class, ProvideFromLibraryImpl.class})
 public class Component implements IComponent {
 
-
     @Override
     public void attachComponent(Application application) {
         Log.d("component-plugin", "Component#attachComponent");
