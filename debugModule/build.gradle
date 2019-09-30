@@ -14,6 +14,7 @@ android {
 
 
     defaultConfig {
+        applicationId "com.component.debug"
         minSdkVersion configs.android.minSdkVersion
         targetSdkVersion configs.android.targetSdkVersion
         versionCode 1
@@ -38,4 +39,9 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    implementation component(':library')
+    implementation component(':libraryKotlin')
+    implementation component(':libraryKotlin2')
+    implementation component(':libraryWithoutPlugin')
 }

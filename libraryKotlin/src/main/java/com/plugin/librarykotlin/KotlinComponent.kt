@@ -13,13 +13,8 @@ import com.plugin.librarykotlin2.IProvideFromLibraryKotlin2
 @AutoInjectComponent(impl = [ProvideFromKotlinImpl::class])
 class KotlinComponent : IComponent {
 
-    companion object {
-        lateinit var sdk : IProvideFromLibraryKotlin2
-    }
-
     override fun attachComponent(application: Application) {
         Log.d("component-plugin", "KotlinComponent#attachComponent")
-        sdk = SdkManager.getSdk(IProvideFromLibraryKotlin2::class.java)!!
     }
 
     override fun detachComponent() {
