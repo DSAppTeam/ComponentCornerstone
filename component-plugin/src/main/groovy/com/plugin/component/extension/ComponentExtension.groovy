@@ -1,9 +1,9 @@
 package com.plugin.component.extension
 
 import com.plugin.component.extension.option.CompileOption
-import com.plugin.component.extension.option.DebugOption
 import com.plugin.component.extension.option.PublicationOption
 import com.plugin.component.listener.OnModuleExtensionListener
+import com.plugin.component.utils.ProjectUtil
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
@@ -18,25 +18,19 @@ class ComponentExtension {
 
     String mainModuleName
     String debugModuleName
+    String debugComponentName
     int compileSdkVersion                           //编译版本
     CompileOption compileOptions                    //编译选项
     Action<? super RepositoryHandler> configure     //仓库配置
     OnModuleExtensionListener listener              //发布监听器
     String includes = ""
     String excludes = ""
+    Project project
 
-    public DebugOption debugOption
-    public PublicationOption publicationOption
-    public PublicationOption implPublicationOption
-
-    Project currentChildProject                      //子项目
-    Project project                      //子项目
-
-    ComponentExtension(Project project,OnModuleExtensionListener listener) {
+    ComponentExtension(Project project, OnModuleExtensionListener listener) {
         this.listener = listener
         this.project = project
         compileOptions = new CompileOption()
-        debugOption = new DebugOption()
     }
 
     /**
@@ -88,6 +82,14 @@ class ComponentExtension {
     }
 
     /**
+     * 调试组件名称
+     * @param name
+     */
+    void debugComponentName(String name) {
+        debugComponentName = name
+    }
+
+    /**
      * 配置选项
      * @param closure
      */
@@ -104,36 +106,30 @@ class ComponentExtension {
     }
 
     /**
-     * 独立运行配置
-     * @param action
+     * 申明组件sdk
+     * @param closure
      */
-    void debug(Closure closure) {
-        NamedDomainObjectContainer<DebugOption> debugOptions = project.container(DebugOption)
-        ConfigureUtil.configure(closure, debugOptions)
-        debugOptions.each {
-            listener.onDebugOptionAdded(project, it)
+    void componentSdks(Closure closure) {
+        NamedDomainObjectContainer<PublicationOption> publications = project.container(PublicationOption)
+        ConfigureUtil.configure(closure, publications)
+        publications.each {
+            it.isSdk = true
+            it.name = ProjectUtil.getProjectName(it.name)
+            listener.onPublicationOptionAdd(it)
         }
     }
 
     /**
-     * sdk配置
-     * @param action
+     * 未开放
+     * @param closure
      */
-    void sdk(Action<PublicationOption> action) {
-        publicationOption = new PublicationOption()
-        publicationOption.isSdk = true
-        action.execute(publicationOption)
-        listener.onPublicationSdkOptionAdded(currentChildProject, publicationOption)
-    }
-
-    /**
-     * impl配置
-     * @param action
-     */
-    void impl(Action<PublicationOption> action) {
-        implPublicationOption = new PublicationOption()
-        implPublicationOption.isSdk = false
-        action.execute(this.implPublicationOption)
-        listener.onPublicationImplOptionAdded(currentChildProject, implPublicationOption)
+    void componentImpls(Closure closure) {
+        NamedDomainObjectContainer<PublicationOption> publications = project.container(PublicationOption)
+        ConfigureUtil.configure(closure, publications)
+        publications.each {
+            it.isSdk = false
+            it.name = ProjectUtil.getProjectName(it.name)
+            listener.onPublicationOptionAdd(it)
+        }
     }
 }

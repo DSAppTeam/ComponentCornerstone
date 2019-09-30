@@ -14,13 +14,7 @@ class ProjectInfo {
 
 
     public Project project
-
-    public boolean isVailModulePluginTarget = false
-    public File buildGradleOriginFile
-    public String buildGradleOriginContent = ""
-
-    public String currentModuleName
-    public boolean aloneEnable
+    public String name
 
     //入口任务信息
     public String taskNames
@@ -31,10 +25,8 @@ class ProjectInfo {
 
     ProjectInfo(Project project) {
         this.project = project
-        this.currentModuleName = ProjectUtil.getModuleName(project)
+        this.name = ProjectUtil.getProjectName(project)
         parseEnterTaskInfo()
-        initRunAlone()
-        isVailModulePluginTarget = Runtimes.addBuildGradleFile(this)
     }
 
     /**
@@ -77,39 +69,14 @@ class ProjectInfo {
         }
     }
 
-    /**
-     * 决定是否打开单独运行
-     */
-    void initRunAlone() {
-        this.aloneEnable = ProjectUtil.isRunAlone(project)
-        if (aloneEnable && !isSync()) {
-            //当前编译的模块才需要设置为true
-            if (currentModuleName == compileModuleName) {
-                aloneEnable = true
-            } else {
-                //如果当前模块不是编译模块且不是main模块，需要更改为false
-                if (!isMainModule()) {
-                    aloneEnable = false
-                }
-            }
-        }
+
+    boolean isDebugModule() {
+        return ProjectUtil.isProjectSame(project.name, Runtimes.sDebugModuleName)
     }
 
-    public boolean isDebugModule() {
-        return project.name == Runtimes.sDebugModuleName
-    }
-
-
-    boolean aloneEnableAndNoSync() {
-        return aloneEnable && !isSync()
-    }
 
     boolean isMainModule() {
-        return currentModuleName == ProjectUtil.getMainModuleName()
-    }
-
-    boolean shouldMofifyAloneSourceSet() {
-        return ProjectUtil.isRunAlone(project) && !isMainModule()
+        return ProjectUtil.isProjectSame(project.name, Runtimes.getMainModuleName())
     }
 
     boolean isSync() {

@@ -1,14 +1,10 @@
 package com.plugin.debug.library;
 
 import android.os.Bundle;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.plugin.component.ComponentManager;
-import com.plugin.component.SdkManager;
 import com.plugin.debug.R;
 
 public class LibraryMainActivity extends AppCompatActivity {

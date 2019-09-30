@@ -5,18 +5,19 @@ import com.plugin.component.extension.module.SourceSet
 import org.gradle.util.ConfigureUtil
 
 /**
- * sdk信息
+ * jar 信息，兼容 sdk / impl
  * created by yummylau 2019/08/09
  */
 class PublicationOption {
 
-    String name = "main"
-    String sourceSetName
-    File buildDir
+    String name                         //模块名
+    String scrName = "main"             //资源目录名
+    String sourceSetName                //sourceSet名
+    File buildDir                       //构建目录
     String project                      //模块project路径
     SourceSet misSourceSet              //资源集，如果当前maven不可用，则需要记录源码及最后修改时间信息
-    String versionNew
-    boolean isSdk
+    String versionNew                   //新版本
+    boolean isSdk                       //是否时sdk
     boolean invalid                     //是否非法
     boolean hit                         //是否隐藏
     boolean useLocal                    //是否使用本地jar
@@ -31,6 +32,10 @@ class PublicationOption {
     Closure sourceFilter                //资源过滤
     DependenciesOption dependencies     //所持有的依赖信息
 
+
+    PublicationOption(String name) {
+        this.name = name
+    }
 
     void groupId(String groupId) {
         this.groupId = groupId

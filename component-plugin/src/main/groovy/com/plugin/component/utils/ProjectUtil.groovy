@@ -7,12 +7,37 @@ import com.plugin.component.Constants
 import com.plugin.component.Logger
 import com.plugin.component.Runtimes
 import com.plugin.component.extension.module.ProjectInfo
-import com.plugin.component.extension.option.DebugOption
-import com.plugin.component.transform.InjectCodeTransform
-import com.plugin.component.transform.ScanCodeTransform
 import org.gradle.api.Project
 
 class ProjectUtil {
+
+    static Project getProject(Project root, String childName) {
+        def result = null
+        root.allprojects.each {
+            if (it.name == getComponentValue(childName)) {
+                result = it
+            }
+        }
+        return result
+    }
+
+    static String getProjectName(String projectName) {
+        if (projectName == null || projectName.isEmpty()) {
+            return String
+        }
+        return projectName.replace(":", "")
+    }
+
+    static String getProjectName(Project project) {
+        if (project == null) {
+            return null
+        }
+        return project.name.replace(":", "")
+    }
+
+    static boolean isProjectSame(String name1, String name2) {
+        return name1 == name2
+    }
 
     /**
      * 解析include exclude
@@ -25,11 +50,7 @@ class ProjectUtil {
             String[] strings = modules.split(",")
             if (strings != null && strings.length > 0) {
                 for (String string : strings) {
-                    if (string.startsWith(":")) {
-                        result.add(string.substring(1, string.length()))
-                    } else {
-                        result.add(string)
-                    }
+                    result.add(getProjectName(string))
                 }
             }
         }
@@ -51,34 +72,6 @@ class ProjectUtil {
         return componentValue
     }
 
-    /**
-     * 获取项目工程的主模块名，默认 'app'
-     * @return
-     */
-    static String getMainModuleName() {
-        String name = Runtimes.sMainModuleName
-        if (name == null || name.isEmpty()) {
-            return Constants.DEFAULT_MAIN_MODULE_NAME
-        }
-        return name
-    }
-
-    /**
-     * 如果当前就是工程主模块，则默认 ture
-     * 否则则判断是否有配置脚本
-     * @param project
-     * @return
-     */
-    static boolean isRunAlone(Project project) {
-        if ((getModuleName(project)) == getMainModuleName()) {
-            return true
-        }
-        if (Runtimes.getDebugInfo(project.name) == null) {
-            return false
-        }
-        return Runtimes.getDebugInfo(project.name).enable
-    }
-
     static List<String> getTasks(Project project) {
         return project.gradle.getStartParameter().taskNames
     }
@@ -87,14 +80,6 @@ class ProjectUtil {
         return project.gradle.startParameter.taskNames.toString()
     }
 
-    static String getModuleName(Project project) {
-        return project.path.replace(":", "")
-    }
-
-    static boolean containValidPluginDefine(String string) {
-        return string.contains("apply") &&
-                string.contains("plugin") && (string.contains("com.android.library") || string.contains("com.android.application"))
-    }
 
     static modifySourceSets(ProjectInfo projectInfo) {
         Project project = projectInfo.project
@@ -138,34 +123,54 @@ class ProjectUtil {
         }
     }
 
-    static modifyDebugSets(ProjectInfo projectInfo) {
+    static modifyDebugSets(Project root, ProjectInfo projectInfo) {
+        if (root == null || projectInfo == null) {
+            return
+        }
         Project project = projectInfo.project
-        Logger.buildOutput("project[" + project.name + "] registerTransform => ScanCodeTransform")
-        Logger.buildOutput("project[" + project.name + "] registerTransform => InjectCodeTransform")
-        Logger.buildOutput("project[" + project.name + "] add sourceSets debug")
         BaseExtension baseExtension = project.extensions.getByName(Constants.ANDROID)
-        def obj = baseExtension.sourceSets.getByName(Constants.MAIN)
-        def obj2 = baseExtension.sourceSets.getByName("androidTest")
-        Set<String> projectsName = Runtimes.sDebugMap.keySet()
-        def targetDebug = Constants.MANIFEST
-        for (String projectName : projectsName) {
-            def debugOption = Runtimes.getDebugInfo(projectName)
-            if (debugOption.enable) {
-                obj.java.srcDir("src/main/" + projectName + "/java")
-                obj.res.srcDir("src/main/" + projectName + "/res")
-                obj.assets.srcDir("src/main/" + projectName + "/assets")
-                obj.jniLibs.srcDir("src/main/" + projectName + "/jniLibs")
-                obj.manifest.srcFile("src/main/" + projectName + "/AndroidManifest.xml")
-            }else{
-                obj2.java.srcDir("src/main/" + projectName + "/java")
-                obj2.res.srcDir("src/main/" + projectName + "/res")
-                obj2.assets.srcDir("src/main/" + projectName + "/assets")
-                obj2.jniLibs.srcDir("src/main/" + projectName + "/jniLibs")
-                obj2.manifest.srcFile("src/main/" + projectName + "/AndroidManifest.xml")
+        def objMain = baseExtension.sourceSets.getByName(Constants.MAIN)
+        def objAndroidTest = baseExtension.sourceSets.getByName("androidTest")
+        for (String componentName : Runtimes.sValidComponents) {
+            if (componentName == ProjectUtil.getProjectName(root)
+                    || ProjectUtil.isProjectSame(componentName, Runtimes.sMainModuleName)
+                    || ProjectUtil.isProjectSame(componentName, Runtimes.sDebugModuleName)) {
+                Logger.buildOutput("skip component[" + componentName + "]")
+                continue
+            }
+            def file = new File(project.projectDir, "src/main/" + componentName + "/")
+            if (file == null || !file.exists()) {
+                Logger.buildOutput("skip component[" + componentName + "] directory does not exist!")
+                continue
+            }
+            if (ProjectUtil.isProjectSame(componentName, Runtimes.sDebugComponentName)) {
+                Logger.buildOutput("add component[" + componentName + "] sourceSets to Main")
+                objMain.java.srcDir("src/main/" + componentName + "/java")
+                objMain.res.srcDir("src/main/" + componentName + "/res")
+                objMain.assets.srcDir("src/main/" + componentName + "/assets")
+                objMain.jniLibs.srcDir("src/main/" + componentName + "/jniLibs")
+                objMain.manifest.srcFile("src/main/" + componentName + "/AndroidManifest.xml")
+            } else {
+                Logger.buildOutput("add component[" + componentName + "] sourceSets to AndroidTest")
+                objAndroidTest.java.srcDir("src/main/" + componentName + "/java")
+                objAndroidTest.res.srcDir("src/main/" + componentName + "/res")
+                objAndroidTest.assets.srcDir("src/main/" + componentName + "/assets")
+                objAndroidTest.jniLibs.srcDir("src/main/" + componentName + "/jniLibs")
+                objAndroidTest.manifest.srcFile("src/main/" + componentName + "/AndroidManifest.xml")
             }
         }
-
-
+        Logger.buildOutput("Main sourceSets ==> ")
+        Logger.buildOutput("java", objMain.java.srcDirs.toString())
+        Logger.buildOutput("res", objMain.res.srcDirs.toString())
+        Logger.buildOutput("assets", objMain.assets.srcDirs.toString())
+        Logger.buildOutput("jniLibs", objMain.jniLibs.srcDirs.toString())
+        Logger.buildOutput("manifest", objAndroidTest.manifest.srcFile.path)
+        Logger.buildOutput("AndroidTest sourceSets ==> ")
+        Logger.buildOutput("java", objAndroidTest.java.srcDirs.toString())
+        Logger.buildOutput("res", objAndroidTest.res.srcDirs.toString())
+        Logger.buildOutput("assets", objAndroidTest.assets.srcDirs.toString())
+        Logger.buildOutput("jniLibs", objAndroidTest.jniLibs.srcDirs.toString())
+        Logger.buildOutput("manifest", objAndroidTest.manifest.srcFile.path)
     }
 
     /**

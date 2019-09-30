@@ -1,8 +1,6 @@
 package com.plugin.component.listener
 
-import com.plugin.component.extension.option.DebugOption
 import com.plugin.component.extension.option.PublicationOption
-import org.gradle.api.Project
 
 /**
  * 监听配置读取
@@ -10,9 +8,6 @@ import org.gradle.api.Project
  */
 interface OnModuleExtensionListener {
 
-    void onPublicationSdkOptionAdded(Project childProject, PublicationOption publication)
+    void onPublicationOptionAdd(PublicationOption publication)
 
-    void onPublicationImplOptionAdded(Project childProject, PublicationOption publication)
-    
-    void onDebugOptionAdded(Project childProject, DebugOption aloneConfiguration)
 }
