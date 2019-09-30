@@ -2,12 +2,12 @@
     package="com.component.debug">
 
     <application
-        android:name=".librarykotlin.LibraryKotlinApplication"
+        android:name=".librarykotlin2.LibraryKotlin2Application"
         android:allowBackup="true"
-        android:label="@string/kotlin_app_name"
+        android:label="@string/kotlin2_app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light">
-        <activity android:name=".librarykotlin.LibraryKotlinMainActivity">
+        <activity android:name=".librarykotlin2.LibraryKotlin2MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />

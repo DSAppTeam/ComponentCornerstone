@@ -1,6 +1,5 @@
 package com.plugin.library;
 
-import com.plugin.component.ComponentManager;
 import com.plugin.component.SdkManager;
 import com.plugin.component.anno.AutoInjectImpl;
 import com.plugin.librarykotlin.IProvideFromKotlin;
