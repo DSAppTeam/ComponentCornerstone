@@ -117,8 +117,8 @@ class PublicationUtil {
         publication.project = displayName.substring(displayName.indexOf("'") + 1, displayName.lastIndexOf("'"))
         def buildSdk = new File(project.projectDir, publication.isSdk ? Constants.BUILD_SDK_DIR : Constants.BUILD_IMPL_DIR)
 
-        publication.sourceSetName = publication.name
-        publication.buildDir = new File(buildSdk, publication.name)
+        publication.sourceSetName = publication.scrName
+        publication.buildDir = new File(buildSdk, publication.scrName)
 
         SourceSet misSourceSet = new SourceSet()
         def misDir

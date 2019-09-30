@@ -2,7 +2,7 @@
     package="com.plugin.debug">
 
     <application
-        android:name=".librarykotlin.LibraryApplication"
+        android:name=".librarykotlin.LibraryKotlinApplication"
         android:allowBackup="true"
         android:label="@string/app_name"
         android:supportsRtl="true"

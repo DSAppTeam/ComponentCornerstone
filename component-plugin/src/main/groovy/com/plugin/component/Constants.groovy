@@ -24,7 +24,6 @@ class Constants {
     public static String PUBLISHING = 'publishing'
     public static String LOCAL_PROPERTIES = "local.properties"
     public static String CLEAN = 'clean'
-    public static String BUILD_GRADLE = "build.gradle"
 
     //file
     public static String DEFAULT_MAIN_MODULE_NAME = "app"
@@ -43,7 +42,6 @@ class Constants {
     public static String SDK_PRE = 'sdk-'
     public static String IMPL_PRE = 'impl-'
     public static String COMPONENT_PRE = 'component-'
-    public static String COMPONENT_SCRIPT = 'component.gradle'
     public static String CORE_DEPENDENCY = "com.effective.android:component-core:1.0.0-beta"
 
     //sourceSet - default

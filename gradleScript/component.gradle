@@ -2,19 +2,62 @@ apply plugin: 'com.android.component'
 
 component {
 
+    //注意：下面使用到的模块命等同于 setting 中申明的模块名，严格遵守规范
+
+    //编译版本
     compileSdkVersion 27
 
-    mainModuleName 'app'
-
-    include ':app,library,libraryKotlin,libraryKotlin2,libraryWithoutSdk,debugModule'
-
-    debugModuleName 'debugModule'
-
-    debugConponentName 'library'
-
+    //java编译版本
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    //主端模块
+    mainModuleName 'app'
+
+    //调试模块，随意在当前项目新建一个module用于调试即可
+    debugModuleName 'debugModule'
+
+    //申明调试模块运行时链接组件的资源，library表明运行 debugModule 时使用library目录资源运行
+    debugComponentName 'libraryKotlin'
+
+    //申明插件的作用域，用于有 include 和 exclude
+    //生效的模块会自动添加组件依赖 core，可使用 component(:{projectName}) 使用其他组件提供的sdk，同时可在 componentSdks 中配置自己模块暴露的sdk
+    exclude 'libraryWithoutPlugin'
+
+//  上述 语句等价于下面语句
+//  include ':app,library,libraryKotlin,libraryKotlin2,libraryWithoutSdk,debugModule'
+
+    //组件sdk声明，从生效的模块中命中以下配置之后，会自动为模块生成sdk
+    componentSdks {
+
+        'library' {
+            groupId 'com.effective.android'
+            artifactId 'librarySdk'
+            dependencies {
+                // 只支持 compileOnly 和 implementation
+                implementation 'com.google.code.gson:gson:2.8.1'
+            }
+        }
+
+        'libraryKotlin' {
+            groupId 'com.effective.android'
+            artifactId 'libraryKotlinSdk'
+            dependencies {
+                implementation 'com.google.code.gson:gson:2.8.1'
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+            }
+        }
+
+        'libraryKotlin2' {
+            groupId 'com.effective.android'
+            artifactId 'libraryKotlinSdk2'
+            dependencies {
+                implementation 'com.google.code.gson:gson:2.8.1'
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+            }
+        }
     }
 }
 
