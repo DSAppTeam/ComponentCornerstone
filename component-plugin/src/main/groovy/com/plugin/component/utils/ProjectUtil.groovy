@@ -146,7 +146,8 @@ class ProjectUtil {
             if (ProjectUtil.isProjectSame(componentName, Runtimes.sDebugComponentName)) {
                 Logger.buildOutput("add component[" + componentName + "] sourceSets to Main")
                 def applicationId = "com.component.debug." + componentName
-                Logger.buildOutput("debug apk applicationId", applicationId)
+                Logger.buildOutput("修改前 debug apk applicationId", baseExtension.defaultConfig.applicationId)
+                Logger.buildOutput("修改后 debug apk applicationId", applicationId)
                 baseExtension.defaultConfig.setApplicationId(applicationId)
                 objMain.java.srcDir("src/main/" + componentName + "/java")
                 objMain.res.srcDir("src/main/" + componentName + "/res")

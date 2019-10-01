@@ -20,7 +20,7 @@ component {
     debugModuleName 'debugModule'
 
     //申明调试模块运行时链接组件的资源，library表明运行 debugModule 时使用library目录资源运行
-    debugComponentName 'libraryKotlin'
+    debugComponentName 'library'
 
     //申明插件的作用域，用于有 include 和 exclude
     //生效的模块会自动添加组件依赖 core，可使用 component(:{projectName}) 使用其他组件提供的sdk，同时可在 componentSdks 中配置自己模块暴露的sdk

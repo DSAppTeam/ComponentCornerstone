@@ -185,6 +185,7 @@ class ComponentPlugin implements Plugin<Project> {
             Runtimes.sCompileSdkVersion = mComponentExtension.compileSdkVersion
             Runtimes.sCompileOption = mComponentExtension.compileOptions
             Runtimes.sDebugComponentName = mComponentExtension.debugComponentName
+            project.extensions.add("debugComponentName",Runtimes.sDebugComponentName)
 
             Logger.buildOutput("component.gradle 配置信息 -->")
             Logger.buildOutput("AndroidJarPath", Runtimes.sAndroidJarPath)
@@ -275,9 +276,6 @@ class ComponentPlugin implements Plugin<Project> {
                     }
                 }
             }
-        }
-        project.gradle.projectsEvaluated {
-
         }
     }
 
