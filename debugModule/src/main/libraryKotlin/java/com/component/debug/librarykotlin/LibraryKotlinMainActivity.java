@@ -13,7 +13,7 @@ public class LibraryKotlinMainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_debug_layout);
-        Toast.makeText(this,"LibraryKotlin2MainActivity",Toast.LENGTH_SHORT).show();
+        Toast.makeText(this,this.getApplication().getPackageName(),Toast.LENGTH_SHORT).show();
 //        setContentView(R.layout.main_activity_layout);
 //        ComponentManager.init(getApplication());
 //        ((TextView) findViewById(R.id.text)).setText(SdkManager.getSdk(IProvideFromLibrary.class).provideString());

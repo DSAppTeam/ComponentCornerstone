@@ -11,10 +11,9 @@ android {
         sourceCompatibility configs.compile.sourceCompatibility
         targetCompatibility configs.compile.targetCompatibility
     }
-
-
+    
     defaultConfig {
-        applicationId "com.component.debug"
+        applicationId "com.component.debug.$debugComponentName"
         minSdkVersion configs.android.minSdkVersion
         targetSdkVersion configs.android.targetSdkVersion
         versionCode 1
