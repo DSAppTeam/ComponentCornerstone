@@ -5,6 +5,7 @@
         android:name=".library.LibraryApplication"
         android:allowBackup="true"
         android:label="@string/library_app_name"
+        android:icon="@drawable/library_ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light">
         <activity android:name=".library.LibraryMainActivity">

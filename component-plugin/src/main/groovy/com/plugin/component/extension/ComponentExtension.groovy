@@ -1,6 +1,7 @@
 package com.plugin.component.extension
 
 import com.plugin.component.extension.option.CompileOption
+import com.plugin.component.extension.option.DebugOption
 import com.plugin.component.extension.option.PublicationOption
 import com.plugin.component.listener.OnModuleExtensionListener
 import com.plugin.component.utils.ProjectUtil
@@ -130,6 +131,19 @@ class ComponentExtension {
             it.isSdk = false
             it.name = ProjectUtil.getProjectName(it.name)
             listener.onPublicationOptionAdd(it)
+        }
+    }
+
+
+    /**
+     * 申明调试组件
+     * @param closure
+     */
+    void debugComponents(Closure closure) {
+        NamedDomainObjectContainer<DebugOption> debugOptions = project.container(DebugOption)
+        ConfigureUtil.configure(closure, debugOptions)
+        debugOptions.each {
+            listener.onDebugOptionAdd(it)
         }
     }
 }

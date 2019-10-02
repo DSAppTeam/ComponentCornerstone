@@ -7,7 +7,10 @@ import com.plugin.component.Constants
 import com.plugin.component.Logger
 import com.plugin.component.Runtimes
 import com.plugin.component.extension.module.ProjectInfo
+import com.plugin.component.extension.option.DebugOption
+import com.plugin.component.extension.option.PublicationOption
 import org.gradle.api.Project
+import org.gradle.internal.impldep.aQute.bnd.build.Run
 
 class ProjectUtil {
 
@@ -131,45 +134,60 @@ class ProjectUtil {
         BaseExtension baseExtension = project.extensions.getByName(Constants.ANDROID)
         def objMain = baseExtension.sourceSets.getByName(Constants.MAIN)
         def objAndroidTest = baseExtension.sourceSets.getByName("androidTest")
-        for (String componentName : Runtimes.sValidComponents) {
-            if (componentName == ProjectUtil.getProjectName(root)
-                    || ProjectUtil.isProjectSame(componentName, Runtimes.sMainModuleName)
-                    || ProjectUtil.isProjectSame(componentName, Runtimes.sDebugModuleName)) {
-                Logger.buildOutput("skip component[" + componentName + "]")
-                continue
+
+        if (Runtimes.hasDebugOptions()) {
+            Logger.buildOutput("hasDebugOptions", true)
+            for (DebugOption debugOption : Runtimes.getDebugOptions()) {
+                def componentName = debugOption.name
+                def file = new File(project.projectDir, "src/main/" + componentName + "/")
+                if (file == null || !file.exists()) {
+                    Logger.buildOutput("skip component[" + componentName + "] directory does not exist!")
+                    continue
+                }
+                if (isProjectSame(componentName, Runtimes.sDebugComponentName)) {
+                    Logger.buildOutput("add dir[" + componentName + "] sourceSets to Main")
+                    def applicationId = "com.component.debug." + componentName
+                    Logger.buildOutput("修改前 debug apk applicationId", baseExtension.defaultConfig.applicationId)
+                    Logger.buildOutput("修改后 debug apk applicationId", applicationId)
+                    baseExtension.defaultConfig.setApplicationId(applicationId)
+                    objMain.java.srcDir("src/main/" + componentName + "/java")
+                    objMain.res.srcDir("src/main/" + componentName + "/res")
+                    objMain.assets.srcDir("src/main/" + componentName + "/assets")
+                    objMain.jniLibs.srcDir("src/main/" + componentName + "/jniLibs")
+                    objMain.manifest.srcFile("src/main/" + componentName + "/AndroidManifest.xml")
+                    if (debugOption.dependencies.implementation != null) {
+                        Logger.buildOutput("add dependencies ==> ")
+                        projectInfo.project.dependencies {
+                            debugOption.dependencies.implementation.each {
+                                def dependency = it
+                                if (it instanceof String && it.startsWith(Constants.DEBUG_COMPONENT_PRE)) {
+                                    dependency = PublicationUtil.parseComponent(projectInfo, it.replace(Constants.DEBUG_COMPONENT_PRE, ""))
+                                }
+                                Logger.buildOutput("implementation " + dependency)
+                                implementation dependency
+                            }
+                        }
+                    }
+
+                } else {
+                    Logger.buildOutput("add component[" + componentName + "] sourceSets to AndroidTest")
+                    objAndroidTest.java.srcDir("src/main/" + componentName + "/java")
+                    objAndroidTest.res.srcDir("src/main/" + componentName + "/res")
+                    objAndroidTest.assets.srcDir("src/main/" + componentName + "/assets")
+                    objAndroidTest.jniLibs.srcDir("src/main/" + componentName + "/jniLibs")
+                    objAndroidTest.manifest.srcFile("src/main/" + componentName + "/AndroidManifest.xml")
+                }
             }
-            def file = new File(project.projectDir, "src/main/" + componentName + "/")
-            if (file == null || !file.exists()) {
-                Logger.buildOutput("skip component[" + componentName + "] directory does not exist!")
-                continue
-            }
-            if (ProjectUtil.isProjectSame(componentName, Runtimes.sDebugComponentName)) {
-                Logger.buildOutput("add component[" + componentName + "] sourceSets to Main")
-                def applicationId = "com.component.debug." + componentName
-                Logger.buildOutput("修改前 debug apk applicationId", baseExtension.defaultConfig.applicationId)
-                Logger.buildOutput("修改后 debug apk applicationId", applicationId)
-                baseExtension.defaultConfig.setApplicationId(applicationId)
-                objMain.java.srcDir("src/main/" + componentName + "/java")
-                objMain.res.srcDir("src/main/" + componentName + "/res")
-                objMain.assets.srcDir("src/main/" + componentName + "/assets")
-                objMain.jniLibs.srcDir("src/main/" + componentName + "/jniLibs")
-                objMain.manifest.srcFile("src/main/" + componentName + "/AndroidManifest.xml")
-            } else {
-                Logger.buildOutput("add component[" + componentName + "] sourceSets to AndroidTest")
-                objAndroidTest.java.srcDir("src/main/" + componentName + "/java")
-                objAndroidTest.res.srcDir("src/main/" + componentName + "/res")
-                objAndroidTest.assets.srcDir("src/main/" + componentName + "/assets")
-                objAndroidTest.jniLibs.srcDir("src/main/" + componentName + "/jniLibs")
-                objAndroidTest.manifest.srcFile("src/main/" + componentName + "/AndroidManifest.xml")
-            }
+        } else {
+            Logger.buildOutput("hasDebugOptions", false)
         }
-        Logger.buildOutput("Main sourceSets ==> ")
+        Logger.buildOutput("DebugModule[" + project.name + "]" + "Main sourceSets ==> ")
         Logger.buildOutput("java", objMain.java.srcDirs.toString())
         Logger.buildOutput("res", objMain.res.srcDirs.toString())
         Logger.buildOutput("assets", objMain.assets.srcDirs.toString())
         Logger.buildOutput("jniLibs", objMain.jniLibs.srcDirs.toString())
         Logger.buildOutput("manifest", objAndroidTest.manifest.srcFile.path)
-        Logger.buildOutput("AndroidTest sourceSets ==> ")
+        Logger.buildOutput("DebugModule[" + project.name + "]" + "AndroidTest sourceSets ==> ")
         Logger.buildOutput("java", objAndroidTest.java.srcDirs.toString())
         Logger.buildOutput("res", objAndroidTest.res.srcDirs.toString())
         Logger.buildOutput("assets", objAndroidTest.assets.srcDirs.toString())

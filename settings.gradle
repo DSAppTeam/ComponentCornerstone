@@ -1,7 +1,6 @@
 include ':app'
 include ':debugModule'
-include ':library', ':libraryKotlin'
-include ':libraryWithoutPlugin', ':libraryKotlin2'
+include ':library', ':libraryKotlin', ':libraryKotlin2'
 
 //发布调试 core
 //include ':component-core'
