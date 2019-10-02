@@ -1,7 +1,7 @@
 package com.plugin.component.extension.option
 
 /**
- * 依赖记录
+ * sdk 依赖记录
  * created by yummylau 2019/08/09
  */
 class DependenciesOption {

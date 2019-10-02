@@ -2,10 +2,13 @@ package com.plugin.component
 
 import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.option.CompileOption
+import com.plugin.component.extension.option.DebugOption
 import com.plugin.component.extension.option.PublicationOption
 
 class Runtimes {
 
+    //调试信息
+    private static Set<DebugOption> sDebugOptions = new HashSet<>()
     //sdk 发布信息
     private static Map<String, PublicationOption> sSdkPublicationMap = new HashMap<>()
     //impl 发布信息
@@ -17,7 +20,7 @@ class Runtimes {
     public static String sAndroidJarPath
     public static String sMainModuleName
     public static String sDebugModuleName
-    public static String sDebugComponentName
+    public static String sDebugComponentName = "debug"
     public static int sCompileSdkVersion
     public static CompileOption sCompileOption
     public static Set<String> sValidComponents
@@ -26,6 +29,11 @@ class Runtimes {
     public static File sSdkDir
     public static File sImplDir
 
+
+    static void setMainModuleName(String sMainModuleName) {
+        Runtimes.sMainModuleName = sMainModuleName
+    }
+
     static String getMainModuleName() {
         if (sMainModuleName == null || sMainModuleName.isEmpty()) {
             sMainModuleName = Constants.DEFAULT_MAIN_MODULE_NAME
@@ -33,8 +41,18 @@ class Runtimes {
         return sMainModuleName
     }
 
-    static void setMainModuleName(String sMainModuleName) {
-        Runtimes.sMainModuleName = sMainModuleName
+    static void addDebugOptions(DebugOption debugOption){
+        if(debugOption != null){
+            sDebugOptions.add(debugOption)
+        }
+    }
+
+    static boolean hasDebugOptions(){
+        return !sDebugOptions.isEmpty()
+    }
+
+    static Set<DebugOption> getDebugOptions(){
+        return sDebugOptions
     }
 
     static void addImplPublication(String projectName, PublicationOption publicationOption) {

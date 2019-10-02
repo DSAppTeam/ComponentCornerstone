@@ -1,5 +1,6 @@
 package com.plugin.component.listener
 
+import com.plugin.component.extension.option.DebugOption
 import com.plugin.component.extension.option.PublicationOption
 
 /**
@@ -8,6 +9,7 @@ import com.plugin.component.extension.option.PublicationOption
  */
 interface OnModuleExtensionListener {
 
-    void onPublicationOptionAdd(PublicationOption publication)
+    void onPublicationOptionAdd(PublicationOption publicationOption)
 
+    void onDebugOptionAdd(DebugOption debugOption)
 }

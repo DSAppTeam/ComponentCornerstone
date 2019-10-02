@@ -6,6 +6,7 @@
         android:allowBackup="true"
         android:label="@string/kotlin2_app_name"
         android:supportsRtl="true"
+        android:icon="@drawable/librarykotlin2_ic_launcher"
         android:theme="@style/Theme.AppCompat.Light">
         <activity android:name=".librarykotlin2.LibraryKotlin2MainActivity">
             <intent-filter>

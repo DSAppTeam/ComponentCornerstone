@@ -6,6 +6,8 @@ import com.android.build.gradle.LibraryPlugin
 import com.plugin.component.extension.ComponentExtension
 import com.plugin.component.extension.PublicationManager
 import com.plugin.component.extension.module.ProjectInfo
+import com.plugin.component.extension.option.DebugDependenciesOption
+import com.plugin.component.extension.option.DebugOption
 import com.plugin.component.extension.option.DependenciesOption
 import com.plugin.component.extension.option.PublicationOption
 import com.plugin.component.listener.OnModuleExtensionListener
@@ -77,6 +79,8 @@ class ComponentPlugin implements Plugin<Project> {
         project.afterEvaluate {
             Logger.buildOutput("project[" + projectInfo.name + "] is modifying sdk SourceSet.")
             ProjectUtil.modifySourceSets(projectInfo)
+
+            //调整debugModule结构
             if (ProjectUtil.isProjectSame(projectInfo.name, Runtimes.sDebugModuleName)) {
                 Logger.buildOutput("project[" + projectInfo.name + "] is debugModel,modifying DebugSets...")
                 ProjectUtil.modifyDebugSets(projectInfo.project.rootProject, projectInfo)
@@ -152,18 +156,23 @@ class ComponentPlugin implements Plugin<Project> {
         mComponentExtension = project.getExtensions().create(Constants.COMPONENT, ComponentExtension, project, new OnModuleExtensionListener() {
 
             @Override
-            void onPublicationOptionAdd(PublicationOption publication) {
-                Project childProject = ProjectUtil.getProject(project, publication.name)
+            void onDebugOptionAdd(DebugOption debugOption) {
+                Runtimes.addDebugOptions(debugOption)
+            }
+
+            @Override
+            void onPublicationOptionAdd(PublicationOption publicationOption) {
+                Project childProject = ProjectUtil.getProject(project, publicationOption.name)
                 if (childProject == null) {
-                    Logger.buildOutput("publication's target[" + publication.name + "] does not exist!")
+                    Logger.buildOutput("publication's target[" + publicationOption.name + "] does not exist!")
                 } else {
-                    if (publication.isSdk) {
-                        Logger.buildOutput("publication's sdk[" + publication.name + "] is " + publication.groupId + ":" + publication.artifactId)
-                        PublicationUtil.initPublication(childProject, publication)
-                        PublicationManager.getInstance().addDependencyGraph(childProject.name, publication)
-                        Runtimes.addSdkPublication(childProject.name, publication)
+                    if (publicationOption.isSdk) {
+                        Logger.buildOutput("publication's sdk[" + publicationOption.name + "] is " + publicationOption.groupId + ":" + publicationOption.artifactId)
+                        PublicationUtil.initPublication(childProject, publicationOption)
+                        PublicationManager.getInstance().addDependencyGraph(childProject.name, publicationOption)
+                        Runtimes.addSdkPublication(childProject.name, publicationOption)
                     } else {
-                        Logger.buildOutput("publication's impl[" + publication.name + "] is " + publication.groupId + ":" + publication.artifactId)
+                        Logger.buildOutput("publication's impl[" + publicationOption.name + "] is " + publicationOption.groupId + ":" + publicationOption.artifactId)
                         //todo 预留后续逻辑
                     }
                 }
@@ -175,6 +184,10 @@ class ComponentPlugin implements Plugin<Project> {
             return Constants.COMPONENT_PRE + value
         }
 
+        DebugDependenciesOption.metaClass.component { String value ->
+            return Constants.DEBUG_COMPONENT_PRE + value
+        }
+
         project.afterEvaluate {
 
             Logger.buildOutput("")
@@ -184,7 +197,9 @@ class ComponentPlugin implements Plugin<Project> {
             Runtimes.sDebugModuleName = mComponentExtension.debugModuleName
             Runtimes.sCompileSdkVersion = mComponentExtension.compileSdkVersion
             Runtimes.sCompileOption = mComponentExtension.compileOptions
-            Runtimes.sDebugComponentName = mComponentExtension.debugComponentName
+            if(mComponentExtension.debugComponentName != null && !mComponentExtension.debugComponentName.isEmpty()){
+                Runtimes.sDebugComponentName = mComponentExtension.debugComponentName
+            }
             project.extensions.add("debugComponentName",Runtimes.sDebugComponentName)
 
             Logger.buildOutput("component.gradle 配置信息 -->")
