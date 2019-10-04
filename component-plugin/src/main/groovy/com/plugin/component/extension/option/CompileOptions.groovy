@@ -6,7 +6,7 @@ import org.gradle.api.JavaVersion
  * 编译选项
  * created by yummylau 2019/08/09
  */
-class CompileOption {
+class CompileOptions {
 
     JavaVersion sourceCompatibility = JavaVersion.current().isJava8Compatible()
             ? JavaVersion.VERSION_1_8 : JavaVersion.VERSION_1_6

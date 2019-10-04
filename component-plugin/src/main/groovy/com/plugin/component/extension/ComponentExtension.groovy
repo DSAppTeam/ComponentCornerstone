@@ -1,8 +1,9 @@
 package com.plugin.component.extension
 
-import com.plugin.component.extension.option.CompileOption
-import com.plugin.component.extension.option.DebugOption
-import com.plugin.component.extension.option.PublicationOption
+
+import com.plugin.component.extension.option.CompileOptions
+import com.plugin.component.extension.option.publication.PublicationOption
+import com.plugin.component.extension.option.debug.DebugOption
 import com.plugin.component.listener.OnModuleExtensionListener
 import com.plugin.component.utils.ProjectUtil
 import org.gradle.api.Action
@@ -18,10 +19,9 @@ import org.gradle.util.ConfigureUtil
 class ComponentExtension {
 
     String mainModuleName
-    String debugModuleName
-    String debugComponentName
     int compileSdkVersion                           //编译版本
-    CompileOption compileOptions                    //编译选项
+    CompileOptions compileOption                    //编译选项
+    DebugOption debugOption                         //调试选项
     Action<? super RepositoryHandler> configure     //仓库配置
     OnModuleExtensionListener listener              //发布监听器
     String includes = ""
@@ -31,7 +31,8 @@ class ComponentExtension {
     ComponentExtension(Project project, OnModuleExtensionListener listener) {
         this.listener = listener
         this.project = project
-        compileOptions = new CompileOption()
+        compileOption = new CompileOptions()
+        debugOption = new DebugOption(project)
     }
 
     /**
@@ -74,28 +75,13 @@ class ComponentExtension {
         mainModuleName = name
     }
 
-    /**
-     * 调试项目名称
-     * @param name
-     */
-    void debugModuleName(String name) {
-        debugModuleName = name
-    }
-
-    /**
-     * 调试组件名称
-     * @param name
-     */
-    void debugComponentName(String name) {
-        debugComponentName = name
-    }
 
     /**
      * 配置选项
      * @param closure
      */
     void compileOptions(Closure closure) {
-        ConfigureUtil.configure(closure, compileOptions)
+        ConfigureUtil.configure(closure, compileOption)
     }
 
     /**
@@ -136,14 +122,12 @@ class ComponentExtension {
 
 
     /**
-     * 申明调试组件
+     * 调试模块
      * @param closure
      */
-    void debugComponents(Closure closure) {
-        NamedDomainObjectContainer<DebugOption> debugOptions = project.container(DebugOption)
-        ConfigureUtil.configure(closure, debugOptions)
-        debugOptions.each {
-            listener.onDebugOptionAdd(it)
-        }
+    void debug(Closure closure) {
+        ConfigureUtil.configure(closure, debugOption)
+        listener.onDebugOptionAdd(debugOption)
     }
+
 }

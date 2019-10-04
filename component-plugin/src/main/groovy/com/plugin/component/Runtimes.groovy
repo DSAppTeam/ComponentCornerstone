@@ -1,14 +1,14 @@
 package com.plugin.component
 
 import com.plugin.component.extension.module.ProjectInfo
-import com.plugin.component.extension.option.CompileOption
-import com.plugin.component.extension.option.DebugOption
-import com.plugin.component.extension.option.PublicationOption
+import com.plugin.component.extension.option.CompileOptions
+import com.plugin.component.extension.option.publication.PublicationOption
+import com.plugin.component.extension.option.debug.DebugOption
 
 class Runtimes {
 
     //调试信息
-    private static Set<DebugOption> sDebugOptions = new HashSet<>()
+    public static DebugOption sDebugOption
     //sdk 发布信息
     private static Map<String, PublicationOption> sSdkPublicationMap = new HashMap<>()
     //impl 发布信息
@@ -22,7 +22,7 @@ class Runtimes {
     public static String sDebugModuleName
     public static String sDebugComponentName = "debug"
     public static int sCompileSdkVersion
-    public static CompileOption sCompileOption
+    public static CompileOptions sCompileOption
     public static Set<String> sValidComponents
 
     //本地 android jar 路径
@@ -39,20 +39,6 @@ class Runtimes {
             sMainModuleName = Constants.DEFAULT_MAIN_MODULE_NAME
         }
         return sMainModuleName
-    }
-
-    static void addDebugOptions(DebugOption debugOption){
-        if(debugOption != null){
-            sDebugOptions.add(debugOption)
-        }
-    }
-
-    static boolean hasDebugOptions(){
-        return !sDebugOptions.isEmpty()
-    }
-
-    static Set<DebugOption> getDebugOptions(){
-        return sDebugOptions
     }
 
     static void addImplPublication(String projectName, PublicationOption publicationOption) {

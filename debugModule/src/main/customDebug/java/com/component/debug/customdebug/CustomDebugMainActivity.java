@@ -1,4 +1,4 @@
-package com.component.debug.library;
+package com.component.debug.customdebug;
 
 import android.os.Bundle;
 import android.widget.TextView;
@@ -10,7 +10,7 @@ import com.plugin.component.ComponentManager;
 import com.plugin.component.SdkManager;
 import com.plugin.library.IProvideFromLibrary;
 
-public class LibraryMainActivity extends AppCompatActivity {
+public class CustomDebugMainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

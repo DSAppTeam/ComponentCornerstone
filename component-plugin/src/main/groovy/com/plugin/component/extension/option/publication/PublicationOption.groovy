@@ -1,4 +1,4 @@
-package com.plugin.component.extension.option
+package com.plugin.component.extension.option.publication
 
 
 import com.plugin.component.extension.module.SourceSet
@@ -30,7 +30,7 @@ class PublicationOption {
     String version                      //依赖版本
     String localProject                 //依赖版本
     Closure sourceFilter                //资源过滤
-    DependenciesOption dependencies     //所持有的依赖信息
+    PublicationDependenciesOption dependencies     //所持有的依赖信息
 
 
     PublicationOption(String name) {
@@ -54,7 +54,7 @@ class PublicationOption {
     }
 
     void dependencies(Closure closure) {
-        dependencies = new DependenciesOption()
+        dependencies = new PublicationDependenciesOption()
         ConfigureUtil.configure(closure, dependencies)
     }
 

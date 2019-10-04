@@ -7,10 +7,8 @@ import com.plugin.component.Constants
 import com.plugin.component.Logger
 import com.plugin.component.Runtimes
 import com.plugin.component.extension.module.ProjectInfo
-import com.plugin.component.extension.option.DebugOption
-import com.plugin.component.extension.option.PublicationOption
+import com.plugin.component.extension.option.debug.DebugConfiguration
 import org.gradle.api.Project
-import org.gradle.internal.impldep.aQute.bnd.build.Run
 
 class ProjectUtil {
 
@@ -135,10 +133,10 @@ class ProjectUtil {
         def objMain = baseExtension.sourceSets.getByName(Constants.MAIN)
         def objAndroidTest = baseExtension.sourceSets.getByName("androidTest")
 
-        if (Runtimes.hasDebugOptions()) {
+        if (Runtimes.sDebugOption.hasConfigurations()) {
             Logger.buildOutput("hasDebugOptions", true)
-            for (DebugOption debugOption : Runtimes.getDebugOptions()) {
-                def componentName = debugOption.name
+            for (DebugConfiguration configuration : Runtimes.sDebugOption.configurationList) {
+                def componentName = configuration.name
                 def file = new File(project.projectDir, "src/main/" + componentName + "/")
                 if (file == null || !file.exists()) {
                     Logger.buildOutput("skip component[" + componentName + "] directory does not exist!")
@@ -155,10 +153,10 @@ class ProjectUtil {
                     objMain.assets.srcDir("src/main/" + componentName + "/assets")
                     objMain.jniLibs.srcDir("src/main/" + componentName + "/jniLibs")
                     objMain.manifest.srcFile("src/main/" + componentName + "/AndroidManifest.xml")
-                    if (debugOption.dependencies.implementation != null) {
+                    if (configuration.dependencies.implementation != null) {
                         Logger.buildOutput("add dependencies ==> ")
                         projectInfo.project.dependencies {
-                            debugOption.dependencies.implementation.each {
+                            configuration.dependencies.implementation.each {
                                 def dependency = it
                                 if (it instanceof String && it.startsWith(Constants.DEBUG_COMPONENT_PRE)) {
                                     dependency = PublicationUtil.parseComponent(projectInfo, it.replace(Constants.DEBUG_COMPONENT_PRE, ""))
