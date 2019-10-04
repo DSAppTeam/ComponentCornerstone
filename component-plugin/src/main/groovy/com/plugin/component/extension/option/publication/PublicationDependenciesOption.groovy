@@ -1,10 +1,10 @@
-package com.plugin.component.extension.option
+package com.plugin.component.extension.option.publication
 
 /**
  * sdk 依赖记录
  * created by yummylau 2019/08/09
  */
-class DependenciesOption {
+class PublicationDependenciesOption {
 
     List<Object> implementation
     List<Object> compileOnly

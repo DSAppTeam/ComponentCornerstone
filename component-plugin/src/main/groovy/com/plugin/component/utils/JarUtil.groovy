@@ -3,8 +3,8 @@ package com.plugin.component.utils
 import com.plugin.component.Constants
 import com.plugin.component.Runtimes
 import com.plugin.component.extension.PublicationManager
-import com.plugin.component.extension.option.CompileOption
-import com.plugin.component.extension.option.PublicationOption
+import com.plugin.component.extension.option.CompileOptions
+import com.plugin.component.extension.option.publication.PublicationOption
 import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
@@ -31,7 +31,7 @@ class JarUtil {
      * @return
      */
     static File packJavaSourceJar(Project project, PublicationOption publication, String androidJarPath,
-                                  CompileOption compileOptions, boolean vars) {
+                                  CompileOptions compileOptions, boolean vars) {
 
         publication.buildDir.deleteDir()
         publication.buildDir.mkdirs()
@@ -102,7 +102,7 @@ class JarUtil {
     private static File generateJavaSourceJar(File classesDir,
                                               List<String> argFiles,
                                               List<String> classPath,
-                                              CompileOption compileOptions,
+                                              CompileOptions compileOptions,
                                               boolean vars) {
 
         //window classpath 路径分割符号与 mac/linux需要做区分
@@ -142,7 +142,7 @@ class JarUtil {
                 throw new GradleException("Failure to compile component kotlin source to bytecode: unknown JVM target version: $target, supported versions: 1.6, 1.8\nTry:\n " +
                         "   module {\n" +
                         "       ...\n" +
-                        "       compileOptions {\n" +
+                        "       compileOption {\n" +
                         "           sourceCompatibility JavaVersion.VERSION_1_8\n" +
                         "           targetCompatibility JavaVersion.VERSION_1_8\n" +
                         "       }\n" +

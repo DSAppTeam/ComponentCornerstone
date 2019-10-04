@@ -6,10 +6,11 @@ import com.android.build.gradle.LibraryPlugin
 import com.plugin.component.extension.ComponentExtension
 import com.plugin.component.extension.PublicationManager
 import com.plugin.component.extension.module.ProjectInfo
-import com.plugin.component.extension.option.DebugDependenciesOption
-import com.plugin.component.extension.option.DebugOption
-import com.plugin.component.extension.option.DependenciesOption
-import com.plugin.component.extension.option.PublicationOption
+import com.plugin.component.extension.option.debug.DebugDependenciesOption
+
+import com.plugin.component.extension.option.publication.PublicationDependenciesOption
+import com.plugin.component.extension.option.publication.PublicationOption
+import com.plugin.component.extension.option.debug.DebugOption
 import com.plugin.component.listener.OnModuleExtensionListener
 import com.plugin.component.transform.InjectCodeTransform
 import com.plugin.component.transform.ScanCodeTransform
@@ -157,7 +158,7 @@ class ComponentPlugin implements Plugin<Project> {
 
             @Override
             void onDebugOptionAdd(DebugOption debugOption) {
-                Runtimes.addDebugOptions(debugOption)
+                Runtimes.sDebugOption = debugOption
             }
 
             @Override
@@ -180,7 +181,7 @@ class ComponentPlugin implements Plugin<Project> {
         })
 
         //todo sdk中依赖sdk，需要特别区分，预留后续逻辑
-        DependenciesOption.metaClass.component { String value ->
+        PublicationDependenciesOption.metaClass.component { String value ->
             return Constants.COMPONENT_PRE + value
         }
 
@@ -194,21 +195,19 @@ class ComponentPlugin implements Plugin<Project> {
             Logger.buildOutput("ComponentPlugin >>>>>>>>>> root#afterEvaluate")
             Runtimes.sAndroidJarPath = ProjectUtil.getAndroidJarPath(project, mComponentExtension.compileSdkVersion)
             Runtimes.setMainModuleName(mComponentExtension.mainModuleName)
-            Runtimes.sDebugModuleName = mComponentExtension.debugModuleName
             Runtimes.sCompileSdkVersion = mComponentExtension.compileSdkVersion
-            Runtimes.sCompileOption = mComponentExtension.compileOptions
-            if(mComponentExtension.debugComponentName != null && !mComponentExtension.debugComponentName.isEmpty()){
-                Runtimes.sDebugComponentName = mComponentExtension.debugComponentName
-            }
-            project.extensions.add("debugComponentName",Runtimes.sDebugComponentName)
+            Runtimes.sCompileOption = mComponentExtension.compileOption
+            Runtimes.sDebugModuleName = mComponentExtension.debugOption.targetModuleName
+            Runtimes.sDebugComponentName = mComponentExtension.debugOption.targetDebugName
 
+            project.extensions.add("debugComponentName", Runtimes.sDebugComponentName)
             Logger.buildOutput("component.gradle 配置信息 -->")
             Logger.buildOutput("AndroidJarPath", Runtimes.sAndroidJarPath)
             Logger.buildOutput("mainModuleName", Runtimes.getMainModuleName())
             Logger.buildOutput("debugModuleName", Runtimes.sDebugModuleName)
             Logger.buildOutput("debugComponentName", Runtimes.sDebugComponentName)
             Logger.buildOutput("compileSdkVersion", Runtimes.sCompileSdkVersion)
-            Logger.buildOutput("CompileOption", "sourceCompatibility[" + Runtimes.sCompileOption.sourceCompatibility
+            Logger.buildOutput("CompileOptions", "sourceCompatibility[" + Runtimes.sCompileOption.sourceCompatibility
                     + "] targetCompatibility[" + Runtimes.sCompileOption.targetCompatibility + "]")
             Logger.buildOutput("includes", mComponentExtension.includes)
             Logger.buildOutput("excludes", mComponentExtension.excludes)

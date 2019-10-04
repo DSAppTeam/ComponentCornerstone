@@ -1,4 +1,4 @@
-package com.plugin.component.extension.option
+package com.plugin.component.extension.option.debug
 
 /**
  * debug 组件的以来

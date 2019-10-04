@@ -6,7 +6,7 @@ import com.plugin.component.Runtimes
 import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.module.SourceFile
 import com.plugin.component.extension.module.SourceSet
-import com.plugin.component.extension.option.PublicationOption
+import com.plugin.component.extension.option.publication.PublicationOption
 import com.plugin.component.task.CompileSdkTask
 import org.gradle.api.Project
 import org.gradle.api.publish.maven.MavenPublication
@@ -40,9 +40,9 @@ class PublicationUtil {
      * @return
      */
     static parseComponent(ProjectInfo projectInfo, String value) {
-        def result = projectInfo.project.project(':' + value)
+        String key = ProjectUtil.getComponentValue(value)
+        def result = projectInfo.project.project(':' + key)
         if (projectInfo.isSync()) {
-            String key = ProjectUtil.getComponentValue(value)
             PublicationOption publication = Runtimes.getSdkPublication(key)
             result = getPublication(publication)
         }

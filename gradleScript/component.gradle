@@ -55,43 +55,47 @@ component {
     }
 
 
-
-    //调试模块，随意在当前项目新建一个module用于调试即可
-    debugModuleName 'debugModule'
-
-    //申明调试模块运行时链接组件的资源，library表明运行 debugModule 时使用library目录资源运行
-    debugComponentName 'library'
-
     //组件调试声明
-    debugComponents {
+    debug {
 
-        'library' {
-            dependencies {
-                //只支持 implementation，足够了
-                implementation component(':library')
-            }
-        }
+        //调试模块，随意在当前项目新建一个module用于调试即可
+        targetModuleName 'debugModule'
 
-        'libraryKotlin' {
-            dependencies {
-                implementation component(':libraryKotloin')
-            }
-        }
+        //申明调试模块运行时链接组件的资源，表明运行 debugModule 时使用目录资源
+        targetDebugName 'customDebug'
 
-        'libraryKotlin2' {
-            dependencies {
-                implementation component(':libraryKotlin2')
-            }
-        }
+        configuration {
 
-        'customDebug' {
-            dependencies {
-                implementation component(':library')
-                implementation component(':library')
-                implementation component(':libraryKotlin2')
+            'library' {
+                dependencies {
+                    //只支持 implementation，足够了
+                    implementation component(':library')
+                }
             }
+
+            'libraryKotlin' {
+                dependencies {
+                    implementation component(':libraryKotlin')
+                }
+            }
+
+            'libraryKotlin2' {
+                dependencies {
+                    implementation component(':libraryKotlin2')
+                }
+            }
+
+            'customDebug' {
+                dependencies {
+                    implementation component(':library')
+                    implementation component(':libraryKotlin')
+                    implementation component(':libraryKotlin2')
+                }
+            }
+
         }
     }
+
 }
 
 
