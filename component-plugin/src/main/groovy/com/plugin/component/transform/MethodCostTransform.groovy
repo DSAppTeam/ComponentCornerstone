@@ -1,10 +1,10 @@
-package com.plugin.component.support.transform
+package com.plugin.component.transform
 
 import com.android.build.api.transform.Context
 import com.android.build.api.transform.TransformException
 import com.android.build.api.transform.TransformInput
 import com.android.build.api.transform.TransformOutputProvider
-import com.plugin.component.support.Logger
+import com.plugin.component.Logger
 import com.quinn.hunter.transform.HunterTransform
 import com.quinn.hunter.transform.RunVariant
 import org.gradle.api.Project

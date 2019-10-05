@@ -1,14 +1,16 @@
 package com.plugin.component
 
+import com.plugin.component.extension.ComponentExtension
 import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.option.CompileOptions
+import com.plugin.component.extension.option.addition.AdditionOption
 import com.plugin.component.extension.option.publication.PublicationOption
 import com.plugin.component.extension.option.debug.DebugOption
+import com.plugin.component.utils.ProjectUtil
+import org.gradle.api.Project
 
 class Runtimes {
 
-    //调试信息
-    public static DebugOption sDebugOption
     //sdk 发布信息
     private static Map<String, PublicationOption> sSdkPublicationMap = new HashMap<>()
     //impl 发布信息
@@ -16,22 +18,50 @@ class Runtimes {
     //模块信息
     private static Map<String, ProjectInfo> sProjectInfoMap = new HashMap<>()
 
-    //基本公用配信息
-    public static String sAndroidJarPath
-    public static String sMainModuleName
-    public static String sDebugModuleName
-    public static String sDebugComponentName = "debug"
-    public static int sCompileSdkVersion
-    public static CompileOptions sCompileOption
-    public static Set<String> sValidComponents
-
     //本地 android jar 路径
     public static File sSdkDir
     public static File sImplDir
 
+    public static String sAndroidJarPath
+    public static String sMainModuleName
+    public static CompileOptions sCompileOption
+    private static AdditionOption sAdditionOption
+    public static DebugOption sDebugOption
+    public static int sCompileSdkVersion
+    public static Set<String> sValidComponents
 
-    static void setMainModuleName(String sMainModuleName) {
-        Runtimes.sMainModuleName = sMainModuleName
+    static initRuntimeConfiguration(Project root,ComponentExtension componentExtension){
+        
+        sAndroidJarPath = ProjectUtil.getAndroidJarPath(root, componentExtension.compileSdkVersion)
+        sMainModuleName = componentExtension.mainModuleName
+        sCompileSdkVersion = componentExtension.compileSdkVersion
+        sAdditionOption = componentExtension.additionOption
+        sCompileOption = componentExtension.compileOption
+        sDebugOption = componentExtension.debugOption
+        Set<String> includeModules = ProjectUtil.getModuleName(componentExtension.includes)
+        Set<String> excludeModules = ProjectUtil.getModuleName(componentExtension.excludes)
+        boolean includeModel = !includeModules.isEmpty()
+        sValidComponents = getValidComponents(root, includeModules, excludeModules, includeModel)
+
+
+        root.extensions.add("targetDebugName", sDebugOption.targetDebugName)
+        Logger.buildOutput("component.gradle 配置信息 ----->")
+        Logger.buildOutput("AndroidJarPath", sAndroidJarPath)
+        Logger.buildOutput("mainModuleName", getMainModuleName())
+//        Logger.buildOutput("debugModuleName", sDebugModuleName)
+//        Logger.buildOutput("debugComponentName", sDebugComponentName)
+        Logger.buildOutput("compileSdkVersion", sCompileSdkVersion)
+        Logger.buildOutput("CompileOptions", "sourceCompatibility[" + sCompileOption.sourceCompatibility
+                + "] targetCompatibility[" + sCompileOption.targetCompatibility + "]")
+        Logger.buildOutput("includes", componentExtension.includes)
+        Logger.buildOutput("excludes", componentExtension.excludes)
+
+        Logger.buildOutput("Select module by " + (includeModel ? "include" : "exclude"))
+        Logger.buildOutput("生效模块", sValidComponents.toList().toString())
+    }
+
+    static boolean shouldApplyComponentPlugin(Project project){
+        return sValidComponents.contains(ProjectUtil.getProjectName(project))
     }
 
     static String getMainModuleName() {
@@ -39,6 +69,22 @@ class Runtimes {
             sMainModuleName = Constants.DEFAULT_MAIN_MODULE_NAME
         }
         return sMainModuleName
+    }
+
+    static String getDebugModuleName(){
+        return sDebugOption != null && sDebugOption.targetModuleName
+    }
+
+    static String getDebugTargetName(){
+        return sDebugOption != null && sDebugOption.targetDebugName
+    }
+
+    static String getDebugConfigurations(){
+        return sDebugOption != null && sDebugOption.configurationList
+    }
+
+    static boolean enbaleMethodCost(){
+        return sAdditionOption != null && sAdditionOption.methodCostOption.enable
     }
 
     static void addImplPublication(String projectName, PublicationOption publicationOption) {
@@ -63,5 +109,21 @@ class Runtimes {
 
     static ProjectInfo getProjectInfo(String projectName) {
         return sProjectInfoMap.get(projectName)
+    }
+
+    private static Set<String> getValidComponents(Project root, Set<String> includeModules, Set<String> excludeModules, boolean includeModel) {
+        Set<String> result = new HashSet<>()
+        root.allprojects.each {
+            if (includeModel) {
+                if (includeModules.contains(ProjectUtil.getProjectName(it))) {
+                    result.add(it.name)
+                }
+            } else {
+                if (!excludeModules.contains(ProjectUtil.getProjectName(it))) {
+                    result.add(it.name)
+                }
+            }
+        }
+        return result
     }
 }

@@ -71,7 +71,7 @@ class ProjectInfo {
 
 
     boolean isDebugModule() {
-        return ProjectUtil.isProjectSame(project.name, Runtimes.sDebugModuleName)
+        return ProjectUtil.isProjectSame(project.name, Runtimes.getDebugModuleName())
     }
 
 

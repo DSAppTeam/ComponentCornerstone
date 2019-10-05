@@ -13,7 +13,7 @@ android {
     }
     
     defaultConfig {
-        applicationId "com.component.debug.$debugComponentName"
+        applicationId "com.component.debug.$targetDebugName"
         minSdkVersion configs.android.minSdkVersion
         targetSdkVersion configs.android.targetSdkVersion
         versionCode 1
@@ -35,4 +35,5 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation project(':component-core')
 }

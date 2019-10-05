@@ -1,13 +1,13 @@
-package com.plugin.component.support.transform
+package com.plugin.component.transform
 
-import com.plugin.component.support.Logger
-import com.plugin.component.support.anno.MethodCost
+import com.plugin.component.Logger
+import com.plugin.component.anno.MethodCost
 import org.objectweb.asm.*
 import org.objectweb.asm.commons.AdviceAdapter
 
 class MethodCostAdapter extends ClassVisitor {
 
-    private static final String sCostCachePath = "com/plugin/component/support/MethodCostHelper"
+    private static final String sCostCachePath = "com/plugin/component/MethodCostHelper"
     private String className
 
     MethodCostAdapter(ClassVisitor classVisitor) {

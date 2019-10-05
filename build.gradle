@@ -12,11 +12,10 @@ buildscript {
     }
     dependencies {
 //        classpath "com.effective.plugins:component:$component_version"
-//        classpath "com.effective.plugins:component-support:$component_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         //调试需要
         classpath "com.effective.plugins:component-plugin"
-        classpath "com.effective.plugins:component-support-plugin"
+
         //发布需要
 //        classpath 'com.novoda:bintray-release:0.9.1'
         // NOTE: Do not place your application dependencies here; they belong

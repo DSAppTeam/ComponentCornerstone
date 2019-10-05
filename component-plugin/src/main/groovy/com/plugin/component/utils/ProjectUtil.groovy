@@ -132,17 +132,17 @@ class ProjectUtil {
         BaseExtension baseExtension = project.extensions.getByName(Constants.ANDROID)
         def objMain = baseExtension.sourceSets.getByName(Constants.MAIN)
         def objAndroidTest = baseExtension.sourceSets.getByName("androidTest")
-
-        if (Runtimes.sDebugOption.hasConfigurations()) {
+        def configurations = Runtimes.getDebugConfigurations()
+        if (!configurations.isEmpty()) {
             Logger.buildOutput("hasDebugOptions", true)
-            for (DebugConfiguration configuration : Runtimes.sDebugOption.configurationList) {
+            for (DebugConfiguration configuration : configurations) {
                 def componentName = configuration.name
                 def file = new File(project.projectDir, "src/main/" + componentName + "/")
                 if (file == null || !file.exists()) {
                     Logger.buildOutput("skip component[" + componentName + "] directory does not exist!")
                     continue
                 }
-                if (isProjectSame(componentName, Runtimes.sDebugComponentName)) {
+                if (isProjectSame(componentName, Runtimes.getDebugTargetName())) {
                     Logger.buildOutput("add dir[" + componentName + "] sourceSets to Main")
                     def applicationId = "com.component.debug." + componentName
                     Logger.buildOutput("修改前 debug apk applicationId", baseExtension.defaultConfig.applicationId)
