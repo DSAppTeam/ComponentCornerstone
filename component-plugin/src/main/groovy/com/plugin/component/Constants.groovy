@@ -51,4 +51,11 @@ class Constants {
     public static String ASSETS_PATH = "src/main/assets"
     public static String JNILIBS_PATH = "src/main/jniLibs"
     public static String MANIFEST = "src/main/AndroidManifest.xml"
+
+
+
+
+    public static String COMPONENT_SUPPORT = "componentSupport"
+    public static String SUPPORT_PLUGIN = "com.android.component.support"
+    public static String SUPPORT_DEPENDENCY = "com.effective.android:component-support-core:1.0.0-beta"
 }

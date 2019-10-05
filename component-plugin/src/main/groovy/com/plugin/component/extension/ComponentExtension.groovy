@@ -1,11 +1,13 @@
 package com.plugin.component.extension
 
-
+import com.plugin.component.Logger
+import com.plugin.component.Runtimes
 import com.plugin.component.extension.option.CompileOptions
+import com.plugin.component.extension.option.addition.AdditionOption
 import com.plugin.component.extension.option.publication.PublicationOption
 import com.plugin.component.extension.option.debug.DebugOption
-import com.plugin.component.listener.OnModuleExtensionListener
 import com.plugin.component.utils.ProjectUtil
+import com.plugin.component.utils.PublicationUtil
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
@@ -22,17 +24,17 @@ class ComponentExtension {
     int compileSdkVersion                           //编译版本
     CompileOptions compileOption                    //编译选项
     DebugOption debugOption                         //调试选项
+    AdditionOption additionOption                   //扩展选项
     Action<? super RepositoryHandler> configure     //仓库配置
-    OnModuleExtensionListener listener              //发布监听器
     String includes = ""
     String excludes = ""
     Project project
 
-    ComponentExtension(Project project, OnModuleExtensionListener listener) {
-        this.listener = listener
+    ComponentExtension(Project project) {
         this.project = project
         compileOption = new CompileOptions()
         debugOption = new DebugOption(project)
+        additionOption = new AdditionOption()
     }
 
     /**
@@ -102,7 +104,15 @@ class ComponentExtension {
         publications.each {
             it.isSdk = true
             it.name = ProjectUtil.getProjectName(it.name)
-            listener.onPublicationOptionAdd(it)
+            Project childProject = ProjectUtil.getProject(project, it.name)
+            if (childProject == null) {
+                Logger.buildOutput("publication's target[" + it.name + "] does not exist!")
+            } else {
+                Logger.buildOutput("publication's sdk[" + it.name + "] is " + it.groupId + ":" + it.artifactId)
+                PublicationUtil.initPublication(childProject, it)
+                PublicationManager.getInstance().addDependencyGraph(it.name, it)
+                Runtimes.addSdkPublication(childProject.name, it)
+            }
         }
     }
 
@@ -116,10 +126,15 @@ class ComponentExtension {
         publications.each {
             it.isSdk = false
             it.name = ProjectUtil.getProjectName(it.name)
-            listener.onPublicationOptionAdd(it)
+            Project childProject = ProjectUtil.getProject(project, it.name)
+            if (childProject == null) {
+                Logger.buildOutput("publication's target[" + it.name + "] does not exist!")
+            } else {
+                Logger.buildOutput("publication's impl[" + it.name + "] is " + it.groupId + ":" + it.artifactId)
+                //todo 预留后续逻辑
+            }
         }
     }
-
 
     /**
      * 调试模块
@@ -127,7 +142,14 @@ class ComponentExtension {
      */
     void debug(Closure closure) {
         ConfigureUtil.configure(closure, debugOption)
-        listener.onDebugOptionAdd(debugOption)
+    }
+
+    /**
+     * 调试模块
+     * @param closure
+     */
+    void addition(Closure closure) {
+        ConfigureUtil.configure(closure, additionOption)
     }
 
 }

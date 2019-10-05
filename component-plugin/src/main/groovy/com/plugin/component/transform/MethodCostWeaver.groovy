@@ -1,4 +1,4 @@
-package com.plugin.component.support.transform
+package com.plugin.component.transform
 
 import com.quinn.hunter.transform.asm.BaseWeaver
 import org.objectweb.asm.ClassVisitor

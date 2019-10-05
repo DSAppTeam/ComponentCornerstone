@@ -96,6 +96,15 @@ component {
         }
     }
 
+
+    addition {
+
+        methodCost {
+            enable false
+        }
+
+    }
+
 }
 
 
@@ -104,13 +113,3 @@ tasks.whenTaskAdded { task ->
         task.enabled = false
     }
 }
-
-
-//apply plugin: 'com.android.component.support'
-//
-//componentSupport {
-//
-//    methodCostEnable true
-//
-//    include 'libBase'
-//}
