@@ -22,4 +22,13 @@ class CompileOptions {
     void targetCompatibility(Object value) {
         targetCompatibility = value
     }
+
+
+    @Override
+    public String toString() {
+        return "CompileOptions{" +
+                "sourceCompatibility=" + sourceCompatibility +
+                ", targetCompatibility=" + targetCompatibility +
+                '}'
+    }
 }

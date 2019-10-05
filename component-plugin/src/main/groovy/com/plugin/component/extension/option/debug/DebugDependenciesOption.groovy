@@ -5,12 +5,9 @@ package com.plugin.component.extension.option.debug
  */
 class DebugDependenciesOption {
 
-    List<Object> implementation
+    List<Object> implementation = new ArrayList<>()
 
     void implementation(Object value) {
-        if (implementation == null) {
-            implementation = new ArrayList<>()
-        }
         implementation.add(value)
     }
 

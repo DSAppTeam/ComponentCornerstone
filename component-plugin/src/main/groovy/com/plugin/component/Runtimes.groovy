@@ -45,19 +45,16 @@ class Runtimes {
 
 
         root.extensions.add("targetDebugName", sDebugOption.targetDebugName)
-        Logger.buildOutput("component.gradle 配置信息 ----->")
         Logger.buildOutput("AndroidJarPath", sAndroidJarPath)
         Logger.buildOutput("mainModuleName", getMainModuleName())
-//        Logger.buildOutput("debugModuleName", sDebugModuleName)
-//        Logger.buildOutput("debugComponentName", sDebugComponentName)
         Logger.buildOutput("compileSdkVersion", sCompileSdkVersion)
-        Logger.buildOutput("CompileOptions", "sourceCompatibility[" + sCompileOption.sourceCompatibility
-                + "] targetCompatibility[" + sCompileOption.targetCompatibility + "]")
+        Logger.buildOutput("CompileOptions", sCompileOption.toString())
         Logger.buildOutput("includes", componentExtension.includes)
         Logger.buildOutput("excludes", componentExtension.excludes)
-
         Logger.buildOutput("Select module by " + (includeModel ? "include" : "exclude"))
         Logger.buildOutput("生效模块", sValidComponents.toList().toString())
+        Logger.buildOutput("调试信息", sDebugOption.toString())
+        Logger.buildOutput("扩展信息", sAdditionOption.toString())
     }
 
     static boolean shouldApplyComponentPlugin(Project project){

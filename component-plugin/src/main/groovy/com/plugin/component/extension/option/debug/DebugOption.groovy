@@ -43,10 +43,27 @@ class DebugOption {
 
     @Override
     public String toString() {
-        return "DebugOption{" +
-                "targetModuleName='" + targetModuleName + '\'' +
-                ", targetDebugName='" + targetDebugName + '\'' +
-                ", configurationList=" + configurationList +
-                '}';
+        return "DebugOption{" + '\n' +
+                "       targetModuleName = '" + targetModuleName + "," + "\n" +
+                "       targetDebugNam = '" + targetDebugName + "," + "\n" +
+                "       configurationLis = [" + configurationListToString() + '\n' +
+                "       ]} "
+    }
+
+    String configurationListToString() {
+        StringBuffer stringBuffer = new StringBuffer("\n")
+        for (DebugConfiguration debugConfiguration : configurationList) {
+            stringBuffer.append("               { name=")
+            stringBuffer.append(debugConfiguration.name)
+            if (debugConfiguration.dependencies != null && !debugConfiguration.dependencies.implementation.isEmpty()) {
+                stringBuffer.append(" dependencies=[" + "\n")
+                for (Object obj : debugConfiguration.dependencies.implementation) {
+                    stringBuffer.append("                       " + obj.toString() + "\n")
+                }
+                stringBuffer.append("               ]")
+            }
+            stringBuffer.append("\n")
+        }
+        return stringBuffer.toString()
     }
 }
