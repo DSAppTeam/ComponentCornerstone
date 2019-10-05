@@ -6,9 +6,7 @@ import com.android.build.gradle.LibraryPlugin
 import com.plugin.component.extension.ComponentExtension
 import com.plugin.component.extension.PublicationManager
 import com.plugin.component.extension.module.ProjectInfo
-import com.plugin.component.extension.option.addition.AdditionOption
 import com.plugin.component.extension.option.debug.DebugDependenciesOption
-import com.plugin.component.extension.option.debug.DebugOption
 import com.plugin.component.extension.option.publication.PublicationDependenciesOption
 import com.plugin.component.extension.option.publication.PublicationOption
 import com.plugin.component.transform.InjectCodeTransform
@@ -111,8 +109,12 @@ class ComponentPlugin implements Plugin<Project>{
 
     private void initPlugin(Project project) {
 
+        Logger.buildOutput("初始化 component 插件 ======> ")
+
         Runtimes.sSdkDir = new File(project.projectDir, Constants.SDK_DIR)
         Runtimes.sImplDir = new File(project.projectDir, Constants.IMPL_DIR)
+        Logger.buildOutput("sdk目录 File[" + Runtimes.sSdkDir.name + "]")
+        Logger.buildOutput("impl目录 File[" + Runtimes.sSdkDir.name + "]")
 
         if (!Runtimes.sSdkDir.exists()) {
             Runtimes.sSdkDir.mkdirs()
@@ -148,7 +150,11 @@ class ComponentPlugin implements Plugin<Project>{
                 Logger.buildOutput("flatDir Dir[" + Runtimes.sImplDir.absolutePath + "]")
             }
         }
+
+        Logger.buildOutput("读取 sdk/impl manifest 配置文件...")
         PublicationManager.getInstance().loadManifest(project)
+
+        Logger.buildOutput("读取 component.gradle 信息...")
         mComponentExtension = project.getExtensions().create(Constants.COMPONENT, ComponentExtension, project)
 
         //todo sdk中依赖sdk，需要特别区分，预留后续逻辑
@@ -163,12 +169,12 @@ class ComponentPlugin implements Plugin<Project>{
         project.afterEvaluate {
 
             Logger.buildOutput("")
-            Logger.buildOutput("ComponentPlugin >>>>>>>>>> root#afterEvaluate")
-
+            Logger.buildOutput("component.gradle 配置信息：")
             Runtimes.initRuntimeConfiguration(project,mComponentExtension)
+
+            Logger.buildOutput("处理 sdk/impl jar...")
             List<String> topSort = PublicationManager.getInstance().dependencyGraph.topSort()
             Collections.reverse(topSort)
-            Logger.buildOutput("开始处理 jar...")
             topSort.each {
                 PublicationOption publication = PublicationManager.getInstance().publicationDependencies.get(it)
                 if (publication == null) {
@@ -232,6 +238,7 @@ class ComponentPlugin implements Plugin<Project>{
                                 childProject.extensions.findByType(BaseExtension.class).registerTransform(new ScanCodeTransform(childProject))
                                 childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
                                 if(Runtimes.enbaleMethodCost()){
+                                    Logger.buildOutput("registerTransform", "MethodCostTransform")
                                     childProject.extensions.findByType(BaseExtension.class).registerTransform(new MethodCostTransform(project))
                                 }
                             }

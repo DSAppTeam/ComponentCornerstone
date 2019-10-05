@@ -12,4 +12,11 @@ class MethodCostOption {
         this.enable = open
     }
 
+
+    @Override
+    public String toString() {
+        return "MethodCostOption{" +
+                "enable=" + enable +
+                '}';
+    }
 }
