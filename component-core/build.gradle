@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+
 //apply plugin: 'com.novoda.bintray-release'
 android {
     compileSdkVersion 29
@@ -29,7 +30,7 @@ dependencies {
 //    userOrg = 'yummylau'
 //    groupId = 'com.effective.android'
 //    artifactId = 'component-core'
-//    publishVersion = '1.0.0-beta'
+//    publishVersion = '1.0.1-beta'
 //    desc = 'Android component core code'
 //    website = 'https://github.com/YummyLau/ComponentPlugin'
 //}
