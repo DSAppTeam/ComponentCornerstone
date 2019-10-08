@@ -7,19 +7,19 @@ import android.util.ArrayMap;
  */
 public class ComponentInfo {
 
-    public ComponentInfo(Class componentClass) {
-        this.componentClass = componentClass;
-    }
-
-    public ComponentInfo(IComponent componentImpl) {
-        this.componentClass = componentImpl.getClass();
-        this.componentImpl = componentImpl;
-    }
-
     public Class componentClass;
     public IComponent componentImpl;
 
     private ArrayMap<Class, Object> sdkMap = new ArrayMap<>();
+
+    public ComponentInfo(Class componentClass) {
+        this.componentClass = componentClass;
+    }
+
+    public ComponentInfo(IComponent impl) {
+        componentClass = componentImpl.getClass();
+        componentImpl = impl;
+    }
 
 
     public void registerSdk(Class sdkClass, Object sdkImpl) {
