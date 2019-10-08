@@ -41,13 +41,9 @@ class PublicationUtil {
      */
     static parseComponent(ProjectInfo projectInfo, String value) {
         String key = ProjectUtil.getComponentValue(value)
-        def result = projectInfo.project.project(':' + key)
-        if (projectInfo.isSync()) {
-            PublicationOption publication = Runtimes.getSdkPublication(key)
-            result = getPublication(publication)
-        }
-        Logger.buildOutput("component(" + value + ") ==> " + result)
-        return result
+        projectInfo.componentDependencies.add(key)
+        PublicationOption publication = Runtimes.getSdkPublication(key)
+        return getPublication(publication)
     }
 
     /**

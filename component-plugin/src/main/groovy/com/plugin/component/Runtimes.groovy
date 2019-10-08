@@ -4,6 +4,7 @@ import com.plugin.component.extension.ComponentExtension
 import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.option.CompileOptions
 import com.plugin.component.extension.option.addition.AdditionOption
+import com.plugin.component.extension.option.debug.DebugConfiguration
 import com.plugin.component.extension.option.publication.PublicationOption
 import com.plugin.component.extension.option.debug.DebugOption
 import com.plugin.component.utils.ProjectUtil
@@ -30,8 +31,8 @@ class Runtimes {
     public static int sCompileSdkVersion
     public static Set<String> sValidComponents
 
-    static initRuntimeConfiguration(Project root,ComponentExtension componentExtension){
-        
+    static initRuntimeConfiguration(Project root, ComponentExtension componentExtension) {
+
         sAndroidJarPath = ProjectUtil.getAndroidJarPath(root, componentExtension.compileSdkVersion)
         sMainModuleName = componentExtension.mainModuleName
         sCompileSdkVersion = componentExtension.compileSdkVersion
@@ -57,7 +58,7 @@ class Runtimes {
         Logger.buildOutput("扩展信息", sAdditionOption.toString())
     }
 
-    static boolean shouldApplyComponentPlugin(Project project){
+    static boolean shouldApplyComponentPlugin(Project project) {
         return sValidComponents.contains(ProjectUtil.getProjectName(project))
     }
 
@@ -68,19 +69,19 @@ class Runtimes {
         return sMainModuleName
     }
 
-    static String getDebugModuleName(){
-        return sDebugOption != null && sDebugOption.targetModuleName
+    static String getDebugModuleName() {
+        return sDebugOption.targetModuleName
     }
 
-    static String getDebugTargetName(){
-        return sDebugOption != null && sDebugOption.targetDebugName
+    static String getDebugTargetName() {
+        return sDebugOption.targetDebugName
     }
 
-    static String getDebugConfigurations(){
-        return sDebugOption != null && sDebugOption.configurationList
+    static List<DebugConfiguration> getDebugConfigurations() {
+        return sDebugOption.configurationList
     }
 
-    static boolean enbaleMethodCost(){
+    static boolean enbaleMethodCost() {
         return sAdditionOption != null && sAdditionOption.methodCostOption.enable
     }
 
@@ -106,6 +107,17 @@ class Runtimes {
 
     static ProjectInfo getProjectInfo(String projectName) {
         return sProjectInfoMap.get(projectName)
+    }
+
+    static ProjectInfo getCompileProjectWhenAssemble() {
+        Set<String> keys = sProjectInfoMap.keySet()
+        for(String key : keys){
+            ProjectInfo projectInfo = sProjectInfoMap.get(key)
+            if(projectInfo.isCompileModuleAndAssemble()){
+                return projectInfo
+            }
+        }
+        return null
     }
 
     private static Set<String> getValidComponents(Project root, Set<String> includeModules, Set<String> excludeModules, boolean includeModel) {
