@@ -266,9 +266,8 @@ class ComponentPlugin implements Plugin<Project> {
                         String name = projectInfo.name
                         if (!hasResolve.contains(name)) {
                             hasResolve.add(name)
-                        }else{
-                            Logger.buildOutput("project[" + projectInfo.name + "] component 依赖", projectInfo.getComponentDependenciesString())
                             nextDependencies.addAll(projectInfo.componentDependencies)
+                            Logger.buildOutput("project[" + projectInfo.name + "] component 依赖", projectInfo.getComponentDependenciesString())
                         }
                     }
                     currentDependencies.clear()

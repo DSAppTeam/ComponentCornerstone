@@ -13,8 +13,6 @@ class Kotlin2Component : IComponent {
 
     override fun attachComponent(application: Application) {
         Log.d("component-plugin", "KotlinComponent#attachComponent")
-        ComponentManager.init(application)
-//        sdk = SdkManager.getSdk(ISdk::class.java)!!
     }
 
     override fun detachComponent() {
