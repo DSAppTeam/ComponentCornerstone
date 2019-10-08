@@ -25,7 +25,7 @@ import org.gradle.api.Project
  *  组件插件入口
  *  created by yummylau 2019/08/09
  */
-class ComponentPlugin implements Plugin<Project>{
+class ComponentPlugin implements Plugin<Project> {
 
     private ComponentExtension mComponentExtension
 
@@ -170,7 +170,7 @@ class ComponentPlugin implements Plugin<Project>{
 
             Logger.buildOutput("")
             Logger.buildOutput("component.gradle 配置信息：")
-            Runtimes.initRuntimeConfiguration(project,mComponentExtension)
+            Runtimes.initRuntimeConfiguration(project, mComponentExtension)
 
             Logger.buildOutput("处理 sdk/impl jar...")
             List<String> topSort = PublicationManager.getInstance().dependencyGraph.topSort()
@@ -237,7 +237,7 @@ class ComponentPlugin implements Plugin<Project>{
                                 Logger.buildOutput("registerTransform", "InjectCodeTransform")
                                 childProject.extensions.findByType(BaseExtension.class).registerTransform(new ScanCodeTransform(childProject))
                                 childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
-                                if(Runtimes.enbaleMethodCost()){
+                                if (Runtimes.enbaleMethodCost()) {
                                     Logger.buildOutput("registerTransform", "MethodCostTransform")
                                     childProject.extensions.findByType(BaseExtension.class).registerTransform(new MethodCostTransform(project))
                                 }
@@ -247,7 +247,48 @@ class ComponentPlugin implements Plugin<Project>{
                 }
             }
         }
+
+        //所有project都评估完成之后
+        project.gradle.projectsEvaluated {
+            ProjectInfo compileProject = Runtimes.getCompileProjectWhenAssemble()
+            if (compileProject != null) {
+                Logger.buildOutput("所有 project 配置完成 -->")
+                Logger.buildOutput("assemble project", compileProject.name)
+                Set<String> hasResolve = new HashSet<>()
+                Set<String> currentDependencies = new HashSet<>()
+                Set<String> nextDependencies = new HashSet<>()
+                currentDependencies.addAll(compileProject.componentDependencies)
+                Logger.buildOutput("project[" + compileProject.name + "] component 依赖", compileProject.getComponentDependenciesString())
+
+                while (!currentDependencies.isEmpty()) {
+                    for (String string : currentDependencies) {
+                        ProjectInfo projectInfo = Runtimes.getProjectInfo(string)
+                        String name = projectInfo.name
+                        if (!hasResolve.contains(name)) {
+                            hasResolve.add(name)
+                        }else{
+                            Logger.buildOutput("project[" + projectInfo.name + "] component 依赖", projectInfo.getComponentDependenciesString())
+                            nextDependencies.addAll(projectInfo.componentDependencies)
+                        }
+                    }
+                    currentDependencies.clear()
+                    currentDependencies.addAll(nextDependencies)
+                    nextDependencies.clear()
+                }
+
+                if (!hasResolve.isEmpty()) {
+                    StringBuilder stringBuilder = new StringBuilder()
+                    for (String realDependency : hasResolve) {
+                        stringBuilder.append(" :project(")
+                        stringBuilder.append(realDependency)
+                        stringBuilder.append(")")
+                        compileProject.project.dependencies {
+                            implementation compileProject.project.project(":" + realDependency)
+                        }
+                    }
+                    Logger.buildOutput("application[" + compileProject.name + "] component 合并依赖", stringBuilder.toString())
+                }
+            }
+        }
     }
-
-
 }

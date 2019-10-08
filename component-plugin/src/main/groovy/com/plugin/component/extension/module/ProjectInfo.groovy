@@ -22,11 +22,22 @@ class ProjectInfo {
     public boolean isAssemble = false                       //是否是asAssemble
     public boolean isDebug = false                          //是否是debug
     public String compileModuleName                         //入口模块名字
+    public Set<String> componentDependencies = new HashSet<>()   //模块依赖的component
 
     ProjectInfo(Project project) {
         this.project = project
         this.name = ProjectUtil.getProjectName(project)
         parseEnterTaskInfo()
+    }
+
+    String getComponentDependenciesString() {
+        StringBuilder stringBuilder = new StringBuilder()
+        for (String string : componentDependencies) {
+            stringBuilder.append(" :project(")
+            stringBuilder.append(string)
+            stringBuilder.append(")")
+        }
+        return stringBuilder.toString()
     }
 
     /**
@@ -69,6 +80,9 @@ class ProjectInfo {
         }
     }
 
+    boolean isCompileModuleAndAssemble() {
+        return ProjectUtil.isProjectSame(project.name, compileModuleName) && isAssemble
+    }
 
     boolean isDebugModule() {
         return ProjectUtil.isProjectSame(project.name, Runtimes.getDebugModuleName())

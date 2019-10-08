@@ -62,7 +62,7 @@ component {
         targetModuleName 'debugModule'
 
         //申明调试模块运行时链接组件的资源，表明运行 debugModule 时使用目录资源
-        targetDebugName 'customDebug'
+        targetDebugName 'libraryKotlin2'
 
         configuration {
 

@@ -7,7 +7,7 @@ package com.plugin.component
 class Constants {
 
     //业务无关
-    public static String TAG = ">ComponentPlugin :"
+    public static String TAG = "> ComponentPlugin :"
     public static String ANDROID = 'android'
     public static String ANDROID_HOME = 'ANDROID_HOME'
     public static String SDK = "sdk"
