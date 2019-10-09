@@ -1,14 +1,64 @@
-# ModulePlugin
-android modular plugin.
+### 插件初衷
 
-> 初衷，android 9.0之后插件基本已经告别。随着android版本越来稳定封闭，开发逐步偏向模块化开发。
-> 并有没有一个支持代码隔离，支持独立调试，且不对任何现有代码进行改动的插件。
+> 随着android 9.0及新版本的问世，系统越来稳定封闭，插件化的道路也越发艰难，开发逐步偏向模块化开发。之所以回归组件化是因为任何模块功能稳定拆分或组合成组件，在 android 工程中组件的概念并不明显。尝试过尝试过业界很多方案，各有千秋，但并没有一个支持代码隔离，支持独立调试，且不对任何现有代码进行改动的插件。
+
+从一开始了解到 《微信的模块化架构重构实践》 开始关注组件化，到接触得到/美团外卖/51信用卡/猫眼等方案，从中获益良多。我理解的组件化同，工程上要满足 “不同功能粒度的模块独立”，业务要满足 “功能独立”，开发上更要满足 “依赖隔离，面向接口编程”。这便是为何我方案放弃使用路由方案来转发 api 的原因。该轮子更偏向于解决 “便捷调试/完全代码隔离” ，同样便捷支持模块 api 的绑定解绑。
+
+### 为什么要使用
+
+#### 插件对比其他组件化的优势
+
+* **完全代码隔离**
+
+	采用 “面向接口” 编程，废除硬编码编程暴露api（比如路由），在build/sync流程依赖 sdk，在assemable流程注入 impl。
+* **便捷集成调试**
+
+	基于原生 Module 依赖进行调试，不修改动态修改库的原生插件。（比如调试模块依赖 组件A 来进行组件 A 功能测试），支持多目录调试多组件/android库/自定义配置等。
+* **接入成本极低**
+
+	在根 project 申明插件并添加配置脚本，插件会根据配置自动注入到各子 Project 并完成 sdk 打包。
+
+#### 对 Android 工程结构的建议
+
+<img src="./doc/component_build_0.png"  alt="component_all" align=center />
+
+* **library层** 
+
+	基础类库,存放精简的代码，高复用性，一般其他模块直接引用即可，比如Utils，BaseActivity 等
+* **service层** 
+
+	支持某类基础业务功能的独立模块，比如登陆服务，换肤服务，介于 library 层和 component 层中间，也可以直接被 app 层调用
+	
+* **component层** 
+
+	聚合多中基础业务功能的复杂业务模块，比如朋友圈，附近的人，一般可能使用多个 service 服务，也可以直接使用 library
+	
+* **app层**
+ 	应用入口，聚合多个业务模块，比如主端或者调试程序
+
+### 如何使用
+
+
 
 本工程主要解决以下 4 个问题：
 1. 如何解决接口api和实现impl代码隔？
 2. 如何解决工程模块独立调试？
 3. 如何解决动态依赖接口api和impl实现，在Sync场景下依赖接口api而在其他场景下动态添加impl实现？
 4. 如何解决模块的绑定和卸载，接口api的暴露和回收？
+
+
+
+
+
+<img src="./doc/component_build_1.jpg"  alt="component_all" align=center />
+
+<img src="./doc/component_build_2.jpg"  alt="component_all" align=center />
+
+<img src="./doc/component_build_3.jpg"  alt="component_all" align=center />
+
+
+
+
 
 现实场景中，有很多优秀的开源库如 [DDComponentForAndroid](https://github.com/luojilab/DDComponentForAndroid) 提供了独立的调试思路但其配置繁琐，不利于开发。[Mis](https://github.com/EastWoodYang/Mis) 提供了如何实现工程上代码隔离但是无法针对单一模块进行调试等等。
 在希望解决上述 4 个核心问题的前提下，只需要在项目添加一份独立的gradle脚本且不需要修改任何已有的代码工程结构实现 "代码隔离，独立调试，api注入"。
