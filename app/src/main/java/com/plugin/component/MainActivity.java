@@ -5,7 +5,10 @@ import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.plugin.library.IProvideFromLibrary;
+import com.plugin.library.ISdk;
 import com.plugin.library.ISdk2;
+import com.plugin.librarykotlin.IGetFromLibrary;
+import com.plugin.librarykotlin.IProvideFromKotlin;
 import com.plugin.module.R;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,20 +37,16 @@ public class MainActivity extends AppCompatActivity {
         });
         ComponentManager.init(getApplication());
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(SdkManager.getSdk(ISdk2.class).getSdk2Name());
-        stringBuilder.append("\n");
-        stringBuilder.append(SdkManager.getSdk(IProvideFromLibrary.class).provideString());
-        stringBuilder.append("\n");
+        stringBuilder.append("library 提供 sdk：" + "\n");
+        stringBuilder.append("IProvideFromLibrary ->" + SdkManager.getSdk(IProvideFromLibrary.class).provideString() + "\n");
+        stringBuilder.append("ISdk ->" + SdkManager.getSdk(ISdk.class).getSdkName() + "\n");
+        stringBuilder.append("ISdk2 ->" + SdkManager.getSdk(ISdk2.class).getSdk2Name() + "\n");
+        stringBuilder.append("libraryKotlin 提供 sdk:" + "\n");
+        stringBuilder.append("IProvideFromKotlin ->" +  SdkManager.getSdk(IProvideFromKotlin.class).provideString() + "\n");
+        stringBuilder.append("IGetFromLibrary ->" +  SdkManager.getSdk(IGetFromLibrary.class).provideString() + "\n");
         ((TextView) findViewById(R.id.text)).setText(stringBuilder);
     }
 
-    public void a() {
-
-    }
-
-    public void a(Integer integer) {
-
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

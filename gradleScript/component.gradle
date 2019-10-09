@@ -21,7 +21,7 @@ component {
     exclude 'libraryWithoutPlugin'
 
 //  上述 语句等价于下面语句
-//  include ':app,library,libraryKotlin,libraryKotlin2,libraryWithoutSdk,debugModule'
+//  include ':app,library,libraryKotlin,debugModule'
 
     //组件sdk声明，从生效的模块中命中以下配置之后，会自动为模块生成sdk
     componentSdks {
@@ -62,7 +62,7 @@ component {
         targetModuleName 'debugModule'
 
         //申明调试模块运行时链接组件的资源，表明运行 debugModule 时使用目录资源
-        targetDebugName 'libraryKotlin2'
+//        targetDebugName 'libraryWithoutPlugin'
 
         configuration {
 
@@ -79,9 +79,9 @@ component {
                 }
             }
 
-            'libraryKotlin2' {
+            'libraryWithoutPlugin' {
                 dependencies {
-                    implementation component(':libraryKotlin2')
+                    implementation project(':libraryWithoutPlugin')
                 }
             }
 
@@ -89,7 +89,6 @@ component {
                 dependencies {
                     implementation component(':library')
                     implementation component(':libraryKotlin')
-                    implementation component(':libraryKotlin2')
                 }
             }
 

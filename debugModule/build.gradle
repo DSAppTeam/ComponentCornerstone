@@ -13,7 +13,7 @@ android {
     }
     
     defaultConfig {
-        applicationId "com.component.debug.$targetDebugName"
+        applicationId "com.debug.$targetDebugName"
         minSdkVersion configs.android.minSdkVersion
         targetSdkVersion configs.android.targetSdkVersion
         versionCode 1

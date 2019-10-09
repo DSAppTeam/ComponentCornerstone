@@ -1,6 +1,7 @@
 package com.plugin.component.utils
 
 import com.plugin.component.Constants
+import com.plugin.component.Logger
 import com.plugin.component.Runtimes
 import com.plugin.component.extension.PublicationManager
 import com.plugin.component.extension.option.CompileOptions
@@ -410,6 +411,7 @@ class JarUtil {
     }
 
     static void handleLocalJar(Project project, PublicationOption publication) {
+        long startTime = System.currentTimeMillis()
         File target = new File(Runtimes.sSdkDir, PublicationUtil.getJarName(publication))
 
         if (publication.invalid) {
@@ -417,6 +419,7 @@ class JarUtil {
             if (target.exists()) {
                 target.delete()
             }
+            Logger.buildOutput("Handle Local jar " + PublicationUtil.getJarName(publication) + " cost " + (System.currentTimeMillis() - startTime) + "ms")
             return
         }
 
@@ -426,6 +429,7 @@ class JarUtil {
                 publication.invalid = false
                 publication.useLocal = true
                 PublicationManager.getInstance().addPublication(publication)
+                Logger.buildOutput("Handle Local jar " + PublicationUtil.getJarName(publication) + " cost " + (System.currentTimeMillis() - startTime) + "ms")
                 return
             }
         }
@@ -437,6 +441,7 @@ class JarUtil {
             if (target.exists()) {
                 target.delete()
             }
+            Logger.buildOutput("Handle Local jar " + PublicationUtil.getJarName(publication) + " cost " + (System.currentTimeMillis() - startTime) + "ms")
             return
         }
 
@@ -444,5 +449,6 @@ class JarUtil {
         publication.invalid = false
         publication.useLocal = true
         PublicationManager.getInstance().addPublication(publication)
+        Logger.buildOutput("Handle Local jar " + PublicationUtil.getJarName(publication) + " cost " + (System.currentTimeMillis() - startTime) + "ms")
     }
 }

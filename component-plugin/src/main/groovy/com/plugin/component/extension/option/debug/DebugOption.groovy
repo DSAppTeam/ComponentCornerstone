@@ -1,5 +1,6 @@
 package com.plugin.component.extension.option.debug
 
+import com.plugin.component.Constants
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.util.ConfigureUtil
@@ -18,6 +19,8 @@ class DebugOption {
 
     DebugOption(Project project) {
         this.project = project
+        this.targetModuleName = ""
+        this.targetDebugName = "defaultDebugName"
     }
 
     void targetModuleName(String name) {
@@ -56,13 +59,15 @@ class DebugOption {
             stringBuffer.append("               { name=")
             stringBuffer.append(debugConfiguration.name)
             if (debugConfiguration.dependencies != null && !debugConfiguration.dependencies.implementation.isEmpty()) {
-                stringBuffer.append(" dependencies=[" + "\n")
+                stringBuffer.append(" dependencies=[")
                 for (Object obj : debugConfiguration.dependencies.implementation) {
-                    stringBuffer.append("                       " + obj.toString() + "\n")
+                    if (obj instanceof String) {
+                        stringBuffer.append(" " + obj.toString().replace(Constants.DEBUG_COMPONENT_PRE, ""))
+                    }
                 }
-                stringBuffer.append("               ]")
+                stringBuffer.append(" ]")
             }
-            stringBuffer.append("\n")
+            stringBuffer.append(" }\n")
         }
         return stringBuffer.toString()
     }

@@ -182,15 +182,10 @@ class ComponentPlugin implements Plugin<Project> {
                 }
                 Project childProject = project.findProject(publication.project)
                 PublicationUtil.filterPublicationDependencies(publication)
-                long startTime = System.nanoTime()
                 if (publication.version != null) {
                     JarUtil.handleMavenJar(childProject, publication)
-                    long currentTime = System.nanoTime()
-                    Logger.buildOutput("Handle Maven jar " + PublicationUtil.getJarName(publication) + " cost " + (currentTime - startTime) + "ns")
                 } else {
-                    long currentTime = System.nanoTime()
                     JarUtil.handleLocalJar(childProject, publication)
-                    Logger.buildOutput("Handle Local jar " + PublicationUtil.getJarName(publication) + " cost " + (currentTime - startTime) + "ns")
                 }
                 PublicationManager.getInstance().hitPublication(publication)
             }
