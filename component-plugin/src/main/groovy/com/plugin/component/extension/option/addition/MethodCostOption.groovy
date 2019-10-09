@@ -15,8 +15,8 @@ class MethodCostOption {
 
     @Override
     public String toString() {
-        return "MethodCostOption{" +
+        return "MethodCostOption{ " +
                 "enable=" + enable +
-                '}';
+                ' }';
     }
 }

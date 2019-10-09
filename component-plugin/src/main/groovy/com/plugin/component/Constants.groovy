@@ -43,7 +43,7 @@ class Constants {
     public static String IMPL_PRE = 'impl-'
     public static String COMPONENT_PRE = 'component-'
     public static String DEBUG_COMPONENT_PRE = 'debugDependency-'
-    public static String CORE_DEPENDENCY = "com.effective.android:component-core:1.0.1-beta"
+    public static String CORE_DEPENDENCY = "com.effective.android:component-core:1.0.3-beta"
 
     //sourceSet - default
     public static String JAVA_PATH = "src/main/java"
@@ -51,11 +51,4 @@ class Constants {
     public static String ASSETS_PATH = "src/main/assets"
     public static String JNILIBS_PATH = "src/main/jniLibs"
     public static String MANIFEST = "src/main/AndroidManifest.xml"
-
-
-
-
-    public static String COMPONENT_SUPPORT = "componentSupport"
-    public static String SUPPORT_PLUGIN = "com.android.component.support"
-    public static String SUPPORT_DEPENDENCY = "com.effective.android:component-support-core:1.0.0-beta"
 }
