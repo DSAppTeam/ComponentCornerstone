@@ -1,123 +1,112 @@
-### 插件初衷
+README: [English](https://github.com/YummyLau/ComponentPlugin/blob/master/README.md) | [中文](https://github.com/YummyLau/ComponentPlugin/blob/master/README-zh.md)
 
-> 随着android 9.0及新版本的问世，系统越来稳定封闭，插件化的道路也越发艰难，开发逐步偏向模块化开发。之所以回归组件化是因为任何模块功能稳定拆分或组合成组件，在 android 工程中组件的概念并不明显。尝试过尝试过业界很多方案，各有千秋，但并没有一个支持代码隔离，支持独立调试，且不对任何现有代码进行改动的插件。
+### Plugin original intention
 
-从一开始了解到 《微信的模块化架构重构实践》 开始关注组件化，到接触得到/美团外卖/51信用卡/猫眼等方案，从中获益良多。我理解的组件化同，工程上要满足 “不同功能粒度的模块独立”，业务要满足 “功能独立”，开发上更要满足 “依赖隔离，面向接口编程”。这便是为何我方案放弃使用路由方案来转发 api 的原因。该轮子更偏向于解决 “便捷调试/完全代码隔离” ，同样便捷支持模块 api 的绑定解绑。
+> With the advent of android 9.0 and new versions, the system has become more stable and closed, and the road to plug-in has become more difficult. Development has gradually shifted towards modular development. The reason for regression componentization is because any module function is stably split or combined into components. The concept of components in android engineering is not obvious. I have tried many solutions in the industry, and each has its own merits, but there is no plug-in that supports code isolation, supports independent debugging, and does not change any existing code.
 
-### 为什么要使用
+From the very beginning, I learned that "WeChat's Modular Architecture Reconstruction Practice" began to focus on componentization, and benefited from contact with the US-based take-out/51 credit card/cat eye. I understand the same componentization, the project must meet the "module independence of different functional granularity", the business must meet the "functional independence", and the development must meet the "dependency isolation, interface-oriented programming". This is why my solution abandoned the use of routing schemes to forward apis. The wheel is more inclined to solve the "convenient debugging / full code isolation", and it is also convenient to support the binding and unbinding of the module api.
 
-#### 插件对比其他组件化的优势
+### Why use it
 
-* **完全代码隔离**
+**tip：** *The word module below refers to the native module created by android Studio. The term component means the module module processed by the plugin.*
 
-	采用 “面向接口” 编程，废除硬编码编程暴露api（比如路由），在build/sync流程依赖 sdk，在assemable流程注入 impl。
-* **便捷集成调试**
+#### Compare the advantages of plugins
 
-	基于原生 Module 依赖进行调试，不修改动态修改库的原生插件。（比如调试模块依赖 组件A 来进行组件 A 功能测试），支持多目录调试多组件/android库/自定义配置等。
-* **接入成本极低**
+* **Complete code isolation (marking)**
 
-	在根 project 申明插件并添加配置脚本，插件会根据配置自动注入到各子 Project 并完成 sdk 打包。
+	Using "interface-oriented" programming, abolishing hard-coded programming exposes apis (such as routing), relies on the SDK in the build/sync process, and injects IMPL into the assemable process.
+* **Support circular dependencies（marking）**
 
-#### 对 Android 工程结构的建议
+	This is very important! For modules, because of the inability to circular dependencies, the respective exposed content needs to sink to the next module, and the component solves this problem by separating the SDK/IMPL.
+* **Convenient integrated debugging**
+
+	Debug based on module dependencies, without modifying the native plugin for dynamically modifying the library. (For example, the debug module relies on component A for component A functional testing), and supports multiple directory debugging for multiple components/android libraries/custom configurations.
+* **Very low access costs**
+
+	In the root project to declare the plugin and add configuration scripts, the plugin will be automatically injected into each subproject according to the configuration and complete sdk packaging.
+
+#### Suggestions for Android engineering structure
 
 <img src="./doc/component_build_0.png"  alt="component_all" align=center />
 
-* **library层** 
+* **Library layer** 
 
-	基础类库,存放精简的代码，高复用性，一般其他模块直接引用即可，比如Utils，BaseActivity 等
-* **service层** 
+	The basic class library, which stores the streamlined code, is highly reusable, and can be directly referenced by other modules, such as Utils, BaseActivity, etc.
+* **Service layer** 
 
-	支持某类基础业务功能的独立模块，比如登陆服务，换肤服务，介于 library 层和 component 层中间，也可以直接被 app 层调用
+	Independent modules that support a certain type of basic business functions, such as login services, skinning services, between the library layer and the component layer, can also be directly called by the app layer
 	
-* **component层** 
+* **Component layer** 
 
-	聚合多中基础业务功能的复杂业务模块，比如朋友圈，附近的人，一般可能使用多个 service 服务，也可以直接使用 library
+	Complex business modules that aggregate multiple basic business functions, such as friends, nearby people, may use multiple service services, or you can use library directly.
 	
-* **app层**
- 	应用入口，聚合多个业务模块，比如主端或者调试程序
+* **App layer**
+ 	Application portal to aggregate multiple business modules, such as the main terminal or debugger
 
-### 如何使用
+A good architecture needs to be highly available and easy to debug. The **plugin supports debugging of any layer, and the Module of the service/component layer is turned into a component to break the limitations of traditional componentization.**
 
-
-
-本工程主要解决以下 4 个问题：
-1. 如何解决接口api和实现impl代码隔？
-2. 如何解决工程模块独立调试？
-3. 如何解决动态依赖接口api和impl实现，在Sync场景下依赖接口api而在其他场景下动态添加impl实现？
-4. 如何解决模块的绑定和卸载，接口api的暴露和回收？
-
-
-
-
+The plugin divides the source code into SDK and IMPL by intervening in the module's build process, where the SDK is compiled into a jar and IMPL is all resources except the SDK.
 
 <img src="./doc/component_build_1.jpg"  alt="component_all" align=center />
 
+Therefore, the dependencies of the module or component are converted to
+
 <img src="./doc/component_build_2.jpg"  alt="component_all" align=center />
+
+In fact, dependent scenarios will change dynamically based on different build processes.
 
 <img src="./doc/component_build_3.jpg"  alt="component_all" align=center />
 
+### how to use
 
-
-
-
-现实场景中，有很多优秀的开源库如 [DDComponentForAndroid](https://github.com/luojilab/DDComponentForAndroid) 提供了独立的调试思路但其配置繁琐，不利于开发。[Mis](https://github.com/EastWoodYang/Mis) 提供了如何实现工程上代码隔离但是无法针对单一模块进行调试等等。
-在希望解决上述 4 个核心问题的前提下，只需要在项目添加一份独立的gradle脚本且不需要修改任何已有的代码工程结构实现 "代码隔离，独立调试，api注入"。
-
-> 如何解决接口api和实现impl代码隔
-
-早在 17 年微信发布过 [微信Android模块化架构重构实践](https://mp.weixin.qq.com/s?__biz=MzAwNDY1ODY2OQ==&mid=2649286672&idx=1&sn=4d9db00c496fcafd1d3e01d69af083f9&chksm=8334cc92b4434584e8bdb117274f41145fb49ba467ec0cd9ba5e3551a8abf92f1996bd6b147a&mpshare=1&scene=1&srcid=06309KcVegxww8kRannKXmkM&key=9965dca0b72a0a7428febd95a3bc61657924797129ae35d34f67f2cfc5c5ac09bec624714cd4662b978742d3424726f08b3ea1b9cb858cccf97dbb56bd5bfdd07a81917eedc452194d3c6b438d76dfac&ascene=0&uin=Mjg5NTY2MjM0MA==&devicetype=iMac%20MacBookPro11,4%20OSX%20OSX%2010.12.5%20build(16F73)&version=12020810&nettype=WIFI&fontScale=100&pass_ticket=X8yiKyEXbEsX7ouYBsjW0ddHl5Zc0CXaGzDaapnZidysc89C7Z257hmzlRaR3CQk) 一文中涉及到通过接口保护形式（.api化）拉实现分离模块的功能并生成对应的 'SDK' 工程，其他工程依赖编译的只是这个生成的工程。
-曾把模块提供的接口独立为一个工程并打包成sdk，但这样就会导致 sdk 和 impl 分为两个模块，不好维护和不雅观。业界优秀开源项目 Mis 提供了一种代码隔离的思路，大致为：
-
-* 通过修改 sourceSet 把接口文件放到 aidl 文件中，并接口打包成 sdk
-* 实现工程依赖打包的 sdk
-
-通过研究源码参考作者编写的思路，确实是一种好用的方法，细节逻辑见源码。值得一提的是，sdk 是一个 jar，不仅仅可以包含业务 api，也可以包含数据接口 bean等。
-
-> 如何解决工程模块独立调试
-
-不仅仅是 DDComponent 提供的方案，很多现有的文章推荐都方法都是通过修改 sourceSet 的内容，在已有工程下新增一个独立的调试资源目录，然后配置代码和资源，指定 AndroidManifest 来达到提供 App 入口的手段。也就说，在 Debug 模式下我们只需要把我们的调试目录编进去即可。但是如何在对应的插件 Project 被加载之前读取提前读取到配置信息呢 ？很多方案都使用了 gradle.properties 来配置，实际上没有必要，也可以在 gradle 脚本中配置，但是要改变配置读取的时间。我们可以在 root Project 提前读取子 Project 的手段来解决。这样更聚合配置信息。
-
-> 如何解决动态依赖接口api和impl实现，在Sync场景下依赖接口api而在其他场景下动态添加impl实现
-
-在解决第一个问题的前提下，我们已经把接口api打成 sdk ， 把实现打成 impl，一般我们在 Sync阶段只需要编译 sdk 即可，但我们总不能一直修改 gradle 脚本。可以通过修改 Dependence 的 Scope 来自定义获取依赖的值。比如
+* Add plugin dependencies and declare dependent libraries
 
 ```
-    //只需要这个
-    implementation component(':library')
-
-    //等价于
-    同步时
-    implementation ':library-sdk'
-    非同步时
-    implementation ':library-impl'
-    implementation ':library-sdk'
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "com.effective.plugins:component:1.0.3-beta
+    }
+}
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
 
 ```
-细节逻辑请参考源码
+* Write a plugin script (see component.gradle in the sample gradleScript directory) and use it in the root project
 
-> 如何解决模块的绑定和卸载，接口api的暴露和回收
+```
+apply from: "./gradleScript/component.gradle"
+```
 
-按照业务把工程划分为一下几层：
+* Add the sdk directory to the module that needs to be componentized to store the exposed source code (refer to sample library/src/sdk), it will be automatically compiled into jar
 
-* Base层 - 基础类库,存放精简的代码，高复用性，一般其他模块直接引用即可，比如一些utils，一些baseActivity等
-* Service层 - 支持某类基础业务功能的独立模块，比如登陆服务，换肤服务，一般介于基础类库Base层和业务组件Component层中间，也可以直接被App层调用
-* Component层 - 聚合多中基础业务功能的复杂业务模块，比如朋友圈，附近的人，一般可能使用多个Service服务；
-* App层 - App的入口，聚合多个业务模块；
-
-从功能上看，Service层和Component最大的区别是Service功能更纯粹而Component耦合多功能多场景逻辑，但是从工程上看，两者都可进行代码隔离。比如登陆Service需要登陆相关的接口，朋友圈需要提供入口等等。
-所以这两者都工程构建上，都需要支持代码隔离。
-
-在解决代码隔离场景下，需要解决一个问题 "Service层和Component如何在合适的时机注入impl模块，并维护impl的生命周期。"
-这里的接口指的是模块需要暴露出来的api，一般一个模块可对应多个api接口，所以接口注入，模块的绑定和卸载可以有一个清晰的生命周期：
-
- **模块绑定** -> **接口注入** -> **接口卸载** -> **模块卸载**
+```
++ library/src/sdk/<packagePath>/xxx.java or xxx.kt
+```
 
 
+### Sample or Practice of the AndroidModularArchiteture project
 
-而在实现完全被隔离的情况下，如何实现解决这个问题呢 ？ Transform + annotation + asm 技术。通过自定义插件注册自定义的 transform 完成 Class 文件中 annotation 的扫描可收集目的信息（注解内容，注解类等）， 用 asm 封装好的字节码指令完成对目标类字节内容的修改达到注入代码的目的。
+<img src="./doc/sample.png"  width = "270" height = "500" /> <img src="./doc/android_modular_architeture.png"  width = "270" height = "500"/>
+
+* Green is a stand-alone module
+* Blue is a stand-alone service (component)
+* Orange is a component that runs independently (component)
+* Black is the main end, the default debugging is the running result of not configuring the debugging component, and the custom debugging is to support the debugging result of any module (the above green/blue/orange can be regarded as the custom debugging, but the debugging function is for the corresponding module/ Components only)
+
+**link：**[AndroidModularArchiteture](https://github.com/YummyLau/AndroidModularArchiteture) 
 
 
+### Reference / Special Acknowledgments
+As early as 17 years, WeChat has been published [微信Android模块化架构重构实践](https://mp.weixin.qq.com/s?__biz=MzAwNDY1ODY2OQ==&mid=2649286672&idx=1&sn=4d9db00c496fcafd1d3e01d69af083f9&chksm=8334cc92b4434584e8bdb117274f41145fb49ba467ec0cd9ba5e3551a8abf92f1996bd6b147a&mpshare=1&scene=1&srcid=06309KcVegxww8kRannKXmkM&key=9965dca0b72a0a7428febd95a3bc61657924797129ae35d34f67f2cfc5c5ac09bec624714cd4662b978742d3424726f08b3ea1b9cb858cccf97dbb56bd5bfdd07a81917eedc452194d3c6b438d76dfac&ascene=0&uin=Mjg5NTY2MjM0MA==&devicetype=iMac%20MacBookPro11,4%20OSX%20OSX%2010.12.5%20build(16F73)&version=12020810&nettype=WIFI&fontScale=100&pass_ticket=X8yiKyEXbEsX7ouYBsjW0ddHl5Zc0CXaGzDaapnZidysc89C7Z257hmzlRaR3CQk) In the article, it is related to the function of separating the module through the interface protection form (.apiization) and generating the corresponding 'SDK' project. Other projects rely on the compilation of this generated project.
+I used to separate the interface provided by the module into a project and package it into sdk, but this will cause sdk and impl to be divided into two modules, which is not easy to maintain and unsightly.The industry's excellent open source project Mis provides a code isolation idea, roughly:
 
-为了最大化兼容调试,废除dd方案，完全往原生靠拢
-未来规划： 支持sdk及impl maven仓库存储
+* Put the interface file into the aidl file by modifying the sourceSet and packaging the interface into sdk
+* Implementing engineering depends on packaged sdk
 
+By studying the ideas written by the source code reference authors, it is indeed a good method, the details of the logic see the source code. It is worth mentioning that sdk is a jar, not only can contain business APIs, but also data interface beans. In the process of plugin development，Thanks to the Mis author [EastWoodYang] (https://github.com/EastWoodYang) for giving me a lot of help and guidance!
