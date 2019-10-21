@@ -24,6 +24,7 @@ class ScanCodeAdapter extends ClassVisitor {
         super.visit(version, access, name, signature, superName, interfaces)
     }
 
+
     @Override
     AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
         AnnotationVisitor annotationVisitor = super.visitAnnotation(descriptor, visible)

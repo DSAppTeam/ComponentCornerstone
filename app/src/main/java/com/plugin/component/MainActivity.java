@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.plugin.component.anno.AutoInject;
 import com.plugin.library.IProvideFromLibrary;
 import com.plugin.library.ISdk;
 import com.plugin.library.ISdk2;
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-        ComponentManager.init(getApplication());
+        initComponent();
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("library 提供 sdk：" + "\n");
         stringBuilder.append("IProvideFromLibrary ->" + SdkManager.getSdk(IProvideFromLibrary.class).provideString() + "\n");
@@ -45,6 +46,11 @@ public class MainActivity extends AppCompatActivity {
         stringBuilder.append("IProvideFromKotlin ->" +  SdkManager.getSdk(IProvideFromKotlin.class).provideString() + "\n");
         stringBuilder.append("IGetFromLibrary ->" +  SdkManager.getSdk(IGetFromLibrary.class).provideString() + "\n");
         ((TextView) findViewById(R.id.text)).setText(stringBuilder);
+    }
+
+    @AutoInject
+    public void initComponent(){
+        ComponentManager.init(getApplication());
     }
 
 

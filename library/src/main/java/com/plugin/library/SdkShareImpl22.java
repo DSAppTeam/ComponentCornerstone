@@ -5,7 +5,7 @@ import com.plugin.component.anno.AutoInjectImpl;
 import com.plugin.librarykotlin.IProvideFromKotlin;
 
 @AutoInjectImpl(sdk = {ISdk.class, ISdk2.class})
-public class SdkShareImpl implements ISdk, ISdk2 {
+public class SdkShareImpl22 implements ISdk, ISdk2 {
 
     @Override
     public String getSdkName() {
