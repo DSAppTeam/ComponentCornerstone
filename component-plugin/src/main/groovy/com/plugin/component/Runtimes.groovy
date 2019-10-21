@@ -3,7 +3,6 @@ package com.plugin.component
 import com.plugin.component.extension.ComponentExtension
 import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.option.CompileOptions
-import com.plugin.component.extension.option.addition.AdditionOption
 import com.plugin.component.extension.option.debug.DebugConfiguration
 import com.plugin.component.extension.option.publication.PublicationOption
 import com.plugin.component.extension.option.debug.DebugOption
@@ -26,7 +25,6 @@ class Runtimes {
     public static String sAndroidJarPath
     public static String sMainModuleName
     public static CompileOptions sCompileOption
-    private static AdditionOption sAdditionOption
     public static DebugOption sDebugOption
     public static int sCompileSdkVersion
     public static Set<String> sValidComponents
@@ -36,7 +34,6 @@ class Runtimes {
         sAndroidJarPath = ProjectUtil.getAndroidJarPath(root, componentExtension.compileSdkVersion)
         sMainModuleName = componentExtension.mainModuleName
         sCompileSdkVersion = componentExtension.compileSdkVersion
-        sAdditionOption = componentExtension.additionOption
         sCompileOption = componentExtension.compileOption
         sDebugOption = componentExtension.debugOption
         Set<String> includeModules = ProjectUtil.getModuleName(componentExtension.includes)
@@ -55,7 +52,6 @@ class Runtimes {
         Logger.buildOutput("Select module by " + (includeModel ? "include" : "exclude"))
         Logger.buildOutput("生效模块", sValidComponents.toList().toString())
         Logger.buildOutput("调试信息", sDebugOption.toString())
-        Logger.buildOutput("扩展信息", sAdditionOption.toString())
     }
 
     static boolean shouldApplyComponentPlugin(Project project) {
@@ -79,10 +75,6 @@ class Runtimes {
 
     static List<DebugConfiguration> getDebugConfigurations() {
         return sDebugOption.configurationList
-    }
-
-    static boolean enbaleMethodCost() {
-        return sAdditionOption != null && sAdditionOption.methodCostOption.enable
     }
 
     static void addImplPublication(String projectName, PublicationOption publicationOption) {

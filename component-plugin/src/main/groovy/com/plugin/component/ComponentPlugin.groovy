@@ -10,7 +10,7 @@ import com.plugin.component.extension.option.debug.DebugDependenciesOption
 import com.plugin.component.extension.option.publication.PublicationDependenciesOption
 import com.plugin.component.extension.option.publication.PublicationOption
 import com.plugin.component.transform.InjectCodeTransform
-import com.plugin.component.transform.MethodCostTransform
+
 import com.plugin.component.transform.ScanCodeTransform
 import com.plugin.component.utils.JarUtil
 import com.plugin.component.utils.ProjectUtil
@@ -232,10 +232,6 @@ class ComponentPlugin implements Plugin<Project> {
                                 Logger.buildOutput("registerTransform", "InjectCodeTransform")
                                 childProject.extensions.findByType(BaseExtension.class).registerTransform(new ScanCodeTransform(childProject))
                                 childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
-                                if (Runtimes.enbaleMethodCost()) {
-                                    Logger.buildOutput("registerTransform", "MethodCostTransform")
-                                    childProject.extensions.findByType(BaseExtension.class).registerTransform(new MethodCostTransform(project))
-                                }
                             }
                         }
                     }
