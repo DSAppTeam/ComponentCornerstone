@@ -11,7 +11,7 @@ import com.plugin.component.extension.option.publication.PublicationDependencies
 import com.plugin.component.extension.option.publication.PublicationOption
 import com.plugin.component.transform.InjectCodeTransform
 import com.plugin.component.transform.MethodCostTransform
-import com.plugin.component.transform.ScanCodeTransform
+import com.plugin.component.transform.ScanCodeTransform2
 import com.plugin.component.utils.JarUtil
 import com.plugin.component.utils.ProjectUtil
 import com.plugin.component.utils.PublicationUtil
@@ -228,10 +228,10 @@ class ComponentPlugin implements Plugin<Project> {
                         if (it instanceof AppPlugin) {
                             if (projectInfo.isDebugModule() || projectInfo.isMainModule()) {
                                 Logger.buildOutput("plugin is AppPlugin and isDebugModule or isMainModule")
-                                Logger.buildOutput("registerTransform", "ScanCodeTransform")
-                                Logger.buildOutput("registerTransform", "InjectCodeTransform")
-                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new ScanCodeTransform(childProject))
-                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
+                                Logger.buildOutput("registerTransform", "ScanCodeTransform2")
+//                                Logger.buildOutput("registerTransform", "InjectCodeTransform")
+                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new ScanCodeTransform2(childProject))
+//                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
                                 if (Runtimes.enbaleMethodCost()) {
                                     Logger.buildOutput("registerTransform", "MethodCostTransform")
                                     childProject.extensions.findByType(BaseExtension.class).registerTransform(new MethodCostTransform(project))
