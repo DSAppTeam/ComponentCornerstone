@@ -94,16 +94,6 @@ component {
 
         }
     }
-
-
-    addition {
-
-        methodCost {
-            enable false
-        }
-
-    }
-
 }
 
 
