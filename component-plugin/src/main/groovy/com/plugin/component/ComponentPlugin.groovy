@@ -223,7 +223,8 @@ class ComponentPlugin implements Plugin<Project> {
                         childProject.pluginManager.apply(Constants.PLUGIN_COMPONENT)
                         childProject.dependencies {
                             Logger.buildOutput("add dependency: " + Constants.CORE_DEPENDENCY)
-                            implementation Constants.CORE_DEPENDENCY
+//                            implementation Constants.CORE_DEPENDENCY
+                            implementation childProject.project(":component-core")
                         }
                         if (it instanceof AppPlugin) {
                             if (projectInfo.isDebugModule() || projectInfo.isMainModule()) {
