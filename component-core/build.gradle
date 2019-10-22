@@ -33,7 +33,7 @@ dependencies {
 //    userOrg = 'yummylau'
 //    groupId = 'com.effective.android'
 //    artifactId = 'component-core'
-//    publishVersion = '1.0.3-beta'
+//    publishVersion = '1.0.4'
 //    desc = 'Android component core code'
 //    website = 'https://github.com/YummyLau/ComponentPlugin'
 //}
