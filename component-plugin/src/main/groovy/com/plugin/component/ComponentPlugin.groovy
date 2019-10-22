@@ -9,9 +9,8 @@ import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.option.debug.DebugDependenciesOption
 import com.plugin.component.extension.option.publication.PublicationDependenciesOption
 import com.plugin.component.extension.option.publication.PublicationOption
-import com.plugin.component.transform.InjectCodeTransform
 import com.plugin.component.transform.MethodCostTransform
-import com.plugin.component.transform.ScanCodeTransform2
+import com.plugin.component.transform.ComponentTransform
 import com.plugin.component.utils.JarUtil
 import com.plugin.component.utils.ProjectUtil
 import com.plugin.component.utils.PublicationUtil
@@ -228,9 +227,9 @@ class ComponentPlugin implements Plugin<Project> {
                         if (it instanceof AppPlugin) {
                             if (projectInfo.isDebugModule() || projectInfo.isMainModule()) {
                                 Logger.buildOutput("plugin is AppPlugin and isDebugModule or isMainModule")
-                                Logger.buildOutput("registerTransform", "ScanCodeTransform2")
+                                Logger.buildOutput("registerTransform", "ComponentTransform")
 //                                Logger.buildOutput("registerTransform", "InjectCodeTransform")
-                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new ScanCodeTransform2(childProject))
+                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new ComponentTransform(childProject))
 //                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
                                 if (Runtimes.enbaleMethodCost()) {
                                     Logger.buildOutput("registerTransform", "MethodCostTransform")

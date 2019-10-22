@@ -29,7 +29,7 @@ import java.util.zip.ZipOutputStream;
  * desc   :
  * version: 1.0
  */
-public class ScanCodeWeaver2 implements IWeaver {
+public class ComponentWeaver implements IWeaver {
 
     private static final FileTime ZERO = FileTime.fromMillis(0);
     private static final String FILE_SEP = File.separator;
@@ -38,7 +38,7 @@ public class ScanCodeWeaver2 implements IWeaver {
 
     protected ClassLoader classLoader;
 
-    public ScanCodeWeaver2() {
+    public ComponentWeaver() {
     }
 
 
@@ -47,6 +47,7 @@ public class ScanCodeWeaver2 implements IWeaver {
     }
 
     public final void weaveJar(File inputJar, File outputJar) throws IOException {
+        String filePath = inputJar.getAbsolutePath();
         ZipFile inputZip = new ZipFile(inputJar);
         ZipOutputStream outputZip = new ZipOutputStream(new BufferedOutputStream(java.nio.file.Files.newOutputStream(outputJar.toPath())));
         Enumeration<? extends ZipEntry> inEntries = inputZip.entries();
@@ -64,7 +65,7 @@ public class ScanCodeWeaver2 implements IWeaver {
             if (!isWeavableClass(className)) {
                 newEntryContent = org.apache.commons.io.IOUtils.toByteArray(originalFile);
             } else {
-                newEntryContent = weaveSingleClassToByteArray(originalFile);
+                newEntryContent = weaveSingleClassToByteArray(filePath, originalFile);
             }
             CRC32 crc32 = new CRC32();
             crc32.update(newEntryContent);
@@ -87,12 +88,13 @@ public class ScanCodeWeaver2 implements IWeaver {
         if (!inputBaseDir.endsWith(FILE_SEP)) inputBaseDir = inputBaseDir + FILE_SEP;
         String className = inputFile.getAbsolutePath().replace(inputBaseDir, "").replace(FILE_SEP, ".");
 
+        String filePath = inputFile.getAbsolutePath();
         beforeWeaveClass(outputFile.getAbsolutePath(), className);
 
         if (isWeavableClass(className)) {
             FileUtils.touch(outputFile);
             InputStream inputStream = new FileInputStream(inputFile);
-            byte[] bytes = weaveSingleClassToByteArray(inputStream);
+            byte[] bytes = weaveSingleClassToByteArray(filePath, inputStream);
             FileOutputStream fos = new FileOutputStream(outputFile);
             fos.write(bytes);
             fos.close();
@@ -114,6 +116,15 @@ public class ScanCodeWeaver2 implements IWeaver {
         ClassReader classReader = new ClassReader(inputStream);
         ClassWriter classWriter = new ExtendClassWriter(classLoader, ClassWriter.COMPUTE_MAXS);
         ClassVisitor classWriterWrapper = wrapClassWriter(classWriter);
+        classReader.accept(classWriterWrapper, ClassReader.EXPAND_FRAMES);
+        return classWriter.toByteArray();
+    }
+
+    public byte[] weaveSingleClassToByteArray(String filePath, InputStream inputStream) throws IOException {
+        ClassReader classReader = new ClassReader(inputStream);
+        ClassWriter classWriter = new ExtendClassWriter(classLoader, ClassWriter.COMPUTE_MAXS);
+        ScanCodeAdapter classWriterWrapper = new ScanCodeAdapter(classWriter);
+        classWriterWrapper.setFilePath(filePath);
         classReader.accept(classWriterWrapper, ClassReader.EXPAND_FRAMES);
         return classWriter.toByteArray();
     }
