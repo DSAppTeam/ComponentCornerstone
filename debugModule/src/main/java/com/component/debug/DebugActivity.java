@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.component.debug.R;
 import com.plugin.component.ComponentManager;
-import com.plugin.component.anno.AutoInject;
 
 public class DebugActivity extends AppCompatActivity {
 
@@ -21,7 +20,6 @@ public class DebugActivity extends AppCompatActivity {
         initComponent(getApplication());
     }
 
-    @AutoInject
     public void initComponent(Application application){
         ComponentManager.init(application);
     }
