@@ -6,11 +6,10 @@ import com.android.build.api.transform.TransformInput
 import com.android.build.api.transform.TransformOutputProvider
 import com.plugin.component.Logger
 import com.plugin.component.transform.info.ScanRuntime
-import com.quinn.hunter.transform.HunterTransform
 import com.quinn.hunter.transform.RunVariant
 import org.gradle.api.Project
 
-class ScanCodeTransform extends HunterTransform {
+class ScanCodeTransform extends BaseTransform {
 
     ScanCodeTransform(Project project) {
         super(project)
