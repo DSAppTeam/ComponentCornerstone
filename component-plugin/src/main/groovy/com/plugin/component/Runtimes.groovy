@@ -22,6 +22,7 @@ class Runtimes {
     public static File sSdkDir
     public static File sImplDir
 
+    public static List<String> sAssembleModules = new ArrayList<>()
     public static String sAndroidJarPath
     public static String sMainModuleName
     public static CompileOptions sCompileOption
