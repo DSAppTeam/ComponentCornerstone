@@ -4,7 +4,6 @@ import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.plugin.component.anno.AutoInject;
 import com.plugin.library.IProvideFromLibrary;
 import com.plugin.library.ISdk;
 import com.plugin.library.ISdk2;
@@ -48,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.text)).setText(stringBuilder);
     }
 
-    @AutoInject
     public void initComponent(){
         ComponentManager.init(getApplication());
     }
