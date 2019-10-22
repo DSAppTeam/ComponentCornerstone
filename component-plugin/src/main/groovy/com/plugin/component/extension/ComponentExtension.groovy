@@ -3,7 +3,6 @@ package com.plugin.component.extension
 import com.plugin.component.Logger
 import com.plugin.component.Runtimes
 import com.plugin.component.extension.option.CompileOptions
-import com.plugin.component.extension.option.addition.AdditionOption
 import com.plugin.component.extension.option.publication.PublicationOption
 import com.plugin.component.extension.option.debug.DebugOption
 import com.plugin.component.utils.ProjectUtil
@@ -24,7 +23,6 @@ class ComponentExtension {
     int compileSdkVersion                           //编译版本
     CompileOptions compileOption                    //编译选项
     DebugOption debugOption                         //调试选项
-    AdditionOption additionOption                   //扩展选项
     Action<? super RepositoryHandler> configure     //仓库配置
     String includes = ""
     String excludes = ""
@@ -34,7 +32,6 @@ class ComponentExtension {
         this.project = project
         compileOption = new CompileOptions()
         debugOption = new DebugOption(project)
-        additionOption = new AdditionOption()
     }
 
     /**
@@ -143,13 +140,4 @@ class ComponentExtension {
     void debug(Closure closure) {
         ConfigureUtil.configure(closure, debugOption)
     }
-
-    /**
-     * 调试模块
-     * @param closure
-     */
-    void addition(Closure closure) {
-        ConfigureUtil.configure(closure, additionOption)
-    }
-
 }

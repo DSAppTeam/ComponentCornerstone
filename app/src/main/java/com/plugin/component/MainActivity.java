@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-        ComponentManager.init(getApplication());
+        initComponent();
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("library 提供 sdk：" + "\n");
         stringBuilder.append("IProvideFromLibrary ->" + SdkManager.getSdk(IProvideFromLibrary.class).provideString() + "\n");
@@ -45,6 +45,10 @@ public class MainActivity extends AppCompatActivity {
         stringBuilder.append("IProvideFromKotlin ->" +  SdkManager.getSdk(IProvideFromKotlin.class).provideString() + "\n");
         stringBuilder.append("IGetFromLibrary ->" +  SdkManager.getSdk(IGetFromLibrary.class).provideString() + "\n");
         ((TextView) findViewById(R.id.text)).setText(stringBuilder);
+    }
+
+    public void initComponent(){
+        ComponentManager.init(getApplication());
     }
 
 

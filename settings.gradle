@@ -6,7 +6,7 @@ include ':component-plugin'
 
 //调试插件
 //includeBuild './component-plugin'
-////
+//
 include ':app'
 include ':debugModule'
 include ':library', ':libraryKotlin', ':libraryWithoutPlugin'

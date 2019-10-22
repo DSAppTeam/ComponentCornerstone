@@ -6,6 +6,15 @@ README: [English](https://github.com/YummyLau/ComponentPlugin/blob/master/README
 
 From the very beginning, I learned that "WeChat's Modular Architecture Reconstruction Practice" began to focus on componentization, and benefited from contact with the US-based take-out/51 credit card/cat eye. I understand the same componentization, the project must meet the "module independence of different functional granularity", the business must meet the "functional independence", and the development must meet the "dependency isolation, interface-oriented programming". This is why my solution abandoned the use of routing schemes to forward apis. The wheel is more inclined to solve the "convenient debugging / full code isolation", and it is also convenient to support the binding and unbinding of the module api.
 
+### new version update
+* 2019/10/10 1.0.3-beta
+	* Support component circular dependency
+	* Support for concurrent transform to speed up compilation
+* 2019/10/22 1.0.4
+	* Adjust the gradle plugin version to 3.1
+	* Optimized debug log format
+	* Solve the problem of compile compilation failure under multi-task task
+
 ### Why use it
 
 **tip：** *The word module below refers to the native module created by android Studio. The term component means the module module processed by the plugin.*
@@ -67,7 +76,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "com.effective.plugins:component:1.0.3-beta
+        classpath "com.effective.plugins:component:1.0.4
     }
 }
 allprojects {

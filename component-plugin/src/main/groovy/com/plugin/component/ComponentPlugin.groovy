@@ -9,8 +9,9 @@ import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.option.debug.DebugDependenciesOption
 import com.plugin.component.extension.option.publication.PublicationDependenciesOption
 import com.plugin.component.extension.option.publication.PublicationOption
-import com.plugin.component.transform.MethodCostTransform
-import com.plugin.component.transform.ComponentTransform
+import com.plugin.component.transform.InjectCodeTransform
+
+import com.plugin.component.transform.ScanCodeTransform
 import com.plugin.component.utils.JarUtil
 import com.plugin.component.utils.ProjectUtil
 import com.plugin.component.utils.PublicationUtil
@@ -21,6 +22,7 @@ import org.gradle.api.Project
  *   ./gradlew --no-daemon ComponentPlugin  -Dorg.gradle.debug=true
  *   ./gradlew --no-daemon [clean, :app:generateDebugSources, :library:generateDebugSources, :module_lib:generateDebugSources]  -Dorg.gradle.debug=true
  *    ./gradlew --no-daemon :app:assemble  -Dorg.gradle.debug=true
+ *    ./gradlew --no-daemon [:library:assembleDebug, :libraryKotlin:assembleDebug, :debugModule:assembleDebug, :app:assembleDebug]  -Dorg.gradle.debug=true
  *  组件插件入口
  *  created by yummylau 2019/08/09
  */
@@ -74,13 +76,16 @@ class ComponentPlugin implements Plugin<Project> {
 
 
         project.afterEvaluate {
-            Logger.buildOutput("project[" + projectInfo.name + "] is modifying sdk SourceSet.")
+
             ProjectUtil.modifySourceSets(projectInfo)
 
             //调整debugModule结构
             if (ProjectUtil.isProjectSame(projectInfo.name, Runtimes.getDebugModuleName())) {
-                Logger.buildOutput("project[" + projectInfo.name + "] is debugModel,modifying DebugSets...")
+                Logger.buildOutput("")
+                Logger.buildOutput(" =====> project[" + projectInfo.name + "] is debugModel,modifying DebugSets <=====")
                 ProjectUtil.modifyDebugSets(projectInfo.project.rootProject, projectInfo)
+                Logger.buildOutput(" =====> project[" + projectInfo.name + "] is debugModel,modifying DebugSets <=====")
+                Logger.buildOutput("")
             }
 
             //todo 发布
@@ -107,8 +112,6 @@ class ComponentPlugin implements Plugin<Project> {
     }
 
     private void initPlugin(Project project) {
-
-        Logger.buildOutput("初始化 component 插件 ======> ")
 
         Runtimes.sSdkDir = new File(project.projectDir, Constants.SDK_DIR)
         Runtimes.sImplDir = new File(project.projectDir, Constants.IMPL_DIR)
@@ -167,11 +170,10 @@ class ComponentPlugin implements Plugin<Project> {
 
         project.afterEvaluate {
 
-            Logger.buildOutput("")
-            Logger.buildOutput("component.gradle 配置信息：")
             Runtimes.initRuntimeConfiguration(project, mComponentExtension)
 
-            Logger.buildOutput("处理 sdk/impl jar...")
+            Logger.buildOutput("")
+            Logger.buildOutput("=====> 处理 sdk/impl jar <=====")
             List<String> topSort = PublicationManager.getInstance().dependencyGraph.topSort()
             Collections.reverse(topSort)
             topSort.each {
@@ -188,13 +190,15 @@ class ComponentPlugin implements Plugin<Project> {
                 }
                 PublicationManager.getInstance().hitPublication(publication)
             }
+            Logger.buildOutput("=====> 处理 sdk/impl jar <=====")
+            Logger.buildOutput("")
 
             project.allprojects.each {
                 if (it == project) return
                 if (!Runtimes.shouldApplyComponentPlugin(it)) return
                 Project childProject = it
                 Logger.buildOutput("")
-                Logger.buildOutput("project[" + childProject.name + "] 配置信息 -->")
+                Logger.buildOutput("=====> project[" + childProject.name + "]配置信息 <=====")
                 ProjectInfo projectInfo = new ProjectInfo(childProject)
                 childProject.repositories {
                     flatDir {
@@ -213,30 +217,33 @@ class ComponentPlugin implements Plugin<Project> {
                 Logger.buildOutput("isSyncTask", projectInfo.isSync())
                 Logger.buildOutput("isAssemble", projectInfo.isAssemble)
                 Logger.buildOutput("isDebug", projectInfo.isDebug)
+                Logger.buildOutput("=====> project[" + childProject.name + "]配置信息 <=====")
+                Logger.buildOutput("")
 
 
                 childProject.plugins.whenObjectAdded {
                     if (it instanceof AppPlugin || it instanceof LibraryPlugin) {
-                        Logger.buildOutput("project[" + childProject.name + "] whenObjectAdded AppPlugin or LibraryPlugin-->")
+                        Logger.buildOutput("")
+                        Logger.buildOutput("=====> project[" + childProject.name + "]注入插件 <=====")
+                        Logger.buildOutput("project[" + childProject.name + "] whenObjectAdded(AppPlugin or LibraryPlugin)")
                         Logger.buildOutput("apply plugin: com.android.component")
                         childProject.pluginManager.apply(Constants.PLUGIN_COMPONENT)
                         childProject.dependencies {
                             Logger.buildOutput("add dependency: " + Constants.CORE_DEPENDENCY)
                             implementation Constants.CORE_DEPENDENCY
+//                            implementation childProject.project(":component-core")
                         }
                         if (it instanceof AppPlugin) {
                             if (projectInfo.isDebugModule() || projectInfo.isMainModule()) {
-                                Logger.buildOutput("plugin is AppPlugin and isDebugModule or isMainModule")
-                                Logger.buildOutput("registerTransform", "ComponentTransform")
-//                                Logger.buildOutput("registerTransform", "InjectCodeTransform")
-                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new ComponentTransform(childProject))
-//                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
-                                if (Runtimes.enbaleMethodCost()) {
-                                    Logger.buildOutput("registerTransform", "MethodCostTransform")
-                                    childProject.extensions.findByType(BaseExtension.class).registerTransform(new MethodCostTransform(project))
-                                }
+                                Logger.buildOutput("plugin is AppPlugin")
+                                Logger.buildOutput("registerTransform", "ScanCodeTransform")
+                                Logger.buildOutput("registerTransform", "InjectCodeTransform")
+                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new ScanCodeTransform(childProject))
+                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
                             }
                         }
+                        Logger.buildOutput("=====> project[" + childProject.name + "]注入插件 <=====")
+                        Logger.buildOutput("")
                     }
                 }
             }
@@ -246,41 +253,48 @@ class ComponentPlugin implements Plugin<Project> {
         project.gradle.projectsEvaluated {
             ProjectInfo compileProject = Runtimes.getCompileProjectWhenAssemble()
             if (compileProject != null) {
-                Logger.buildOutput("所有 project 配置完成 -->")
-                Logger.buildOutput("assemble project", compileProject.name)
-                Set<String> hasResolve = new HashSet<>()
-                Set<String> currentDependencies = new HashSet<>()
-                Set<String> nextDependencies = new HashSet<>()
-                currentDependencies.addAll(compileProject.componentDependencies)
-                Logger.buildOutput("project[" + compileProject.name + "] component 依赖", compileProject.getComponentDependenciesString())
+                Logger.buildOutput("")
+                Logger.buildOutput("=====> 处理循环依赖 <=====")
+                if (Runtimes.sAssembleModules.size() > 1) {
+                    Logger.buildOutput("task has one more assemble module,skip transforming [component] to [project]")
+                } else {
+                    Logger.buildOutput("assemble project", compileProject.name)
+                    Set<String> hasResolve = new HashSet<>()
+                    Set<String> currentDependencies = new HashSet<>()
+                    Set<String> nextDependencies = new HashSet<>()
+                    currentDependencies.addAll(compileProject.componentDependencies)
+                    Logger.buildOutput("project[" + compileProject.name + "] component 依赖", compileProject.getComponentDependenciesString())
 
-                while (!currentDependencies.isEmpty()) {
-                    for (String string : currentDependencies) {
-                        ProjectInfo projectInfo = Runtimes.getProjectInfo(string)
-                        String name = projectInfo.name
-                        if (!hasResolve.contains(name)) {
-                            hasResolve.add(name)
-                            nextDependencies.addAll(projectInfo.componentDependencies)
-                            Logger.buildOutput("project[" + projectInfo.name + "] component 依赖", projectInfo.getComponentDependenciesString())
+                    while (!currentDependencies.isEmpty()) {
+                        for (String string : currentDependencies) {
+                            ProjectInfo projectInfo = Runtimes.getProjectInfo(string)
+                            String name = projectInfo.name
+                            if (!hasResolve.contains(name)) {
+                                hasResolve.add(name)
+                                nextDependencies.addAll(projectInfo.componentDependencies)
+                                Logger.buildOutput("project[" + projectInfo.name + "] component 依赖", projectInfo.getComponentDependenciesString())
+                            }
                         }
+                        currentDependencies.clear()
+                        currentDependencies.addAll(nextDependencies)
+                        nextDependencies.clear()
                     }
-                    currentDependencies.clear()
-                    currentDependencies.addAll(nextDependencies)
-                    nextDependencies.clear()
-                }
 
-                if (!hasResolve.isEmpty()) {
-                    StringBuilder stringBuilder = new StringBuilder()
-                    for (String realDependency : hasResolve) {
-                        stringBuilder.append(" :project(")
-                        stringBuilder.append(realDependency)
-                        stringBuilder.append(")")
-                        compileProject.project.dependencies {
-                            implementation compileProject.project.project(":" + realDependency)
+                    if (!hasResolve.isEmpty()) {
+                        StringBuilder stringBuilder = new StringBuilder()
+                        for (String realDependency : hasResolve) {
+                            stringBuilder.append(" :project(")
+                            stringBuilder.append(realDependency)
+                            stringBuilder.append(")")
+                            compileProject.project.dependencies {
+                                implementation compileProject.project.project(":" + realDependency)
+                            }
                         }
+                        Logger.buildOutput("application[" + compileProject.name + "] component 合并依赖", stringBuilder.toString())
                     }
-                    Logger.buildOutput("application[" + compileProject.name + "] component 合并依赖", stringBuilder.toString())
                 }
+                Logger.buildOutput("=====> 处理循环依赖 <=====")
+                Logger.buildOutput("")
             }
         }
     }

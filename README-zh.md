@@ -6,6 +6,16 @@ README: [English](https://github.com/YummyLau/ComponentPlugin/blob/master/README
 
 从一开始了解到 《微信的模块化架构重构实践》 开始关注组件化，到接触得到/美团外卖/51信用卡/猫眼等方案，从中获益良多。我理解的组件化同，工程上要满足 “不同功能粒度的模块独立”，业务要满足 “功能独立”，开发上更要满足 “依赖隔离，面向接口编程”。这便是为何我方案放弃使用路由方案来转发 api 的原因。该轮子更偏向于解决 “便捷调试/完全代码隔离” ，同样便捷支持模块 api 的绑定解绑。
 
+### 版本更新
+* 2019/10/10 1.0.3-beta 
+	* 支持组件循环依赖
+	* 支持并发 transform 加快编译速度
+* 2019/10/22 1.0.4 
+	* 调整gradle插件版本为3.1
+	* 优化调试 log 格式
+	* 解决多task任务下 make project 编译失败的问题
+
+
 ### 为什么要使用
 
 **tip：** *下文 module 一词均表示 android Studio 创建的原生模块，组件 一词均表示经过插件处理后的 module 模块*
@@ -67,7 +77,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "com.effective.plugins:component:1.0.3-beta
+        classpath "com.effective.plugins:component:1.0.4
     }
 }
 allprojects {
