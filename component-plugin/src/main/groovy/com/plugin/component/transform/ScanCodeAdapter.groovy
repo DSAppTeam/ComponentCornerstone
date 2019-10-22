@@ -13,9 +13,14 @@ import org.objectweb.asm.Type
 class ScanCodeAdapter extends ClassVisitor {
 
     private String className
+    private String filePath
 
     ScanCodeAdapter(ClassVisitor classVisitor) {
         super(Opcodes.ASM7, classVisitor)
+    }
+
+    void setFilePath(String filePath) {
+        this.filePath = filePath
     }
 
     @Override

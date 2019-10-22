@@ -36,7 +36,7 @@ import java.util.Set;
  * desc   :
  * version: 1.0
  */
-public class ScanCodeTransform2 extends Transform {
+public class ComponentTransform extends Transform {
 
     private final Logger logger;
 
@@ -49,15 +49,15 @@ public class ScanCodeTransform2 extends Transform {
     }
 
     private Project project;
-    protected ScanCodeWeaver2 bytecodeWeaver;
+    protected ComponentWeaver bytecodeWeaver;
     private WaitableExecutor waitableExecutor;
     private boolean emptyRun = false;
 
-    public ScanCodeTransform2(Project project) {
+    public ComponentTransform(Project project) {
         this.project = project;
         this.logger = project.getLogger();
         this.waitableExecutor = WaitableExecutor.useGlobalSharedThreadPool();
-        this.bytecodeWeaver = new ScanCodeWeaver2();
+        this.bytecodeWeaver = new ComponentWeaver();
     }
 
     @Override
@@ -77,7 +77,7 @@ public class ScanCodeTransform2 extends Transform {
 
     @Override
     public boolean isIncremental() {
-        return false;
+        return true;
     }
 
 
