@@ -5,7 +5,7 @@
 //include ':component-plugin'
 
 //调试插件
-//includeBuild './component-plugin'
+includeBuild './component-plugin'
 //
 include ':app'
 include ':debugModule'
