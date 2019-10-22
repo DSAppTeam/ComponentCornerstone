@@ -41,7 +41,8 @@ class Runtimes {
         boolean includeModel = !includeModules.isEmpty()
         sValidComponents = getValidComponents(root, includeModules, excludeModules, includeModel)
 
-
+        Logger.buildOutput("")
+        Logger.buildOutput(" =====> component.gradle配置信息 <===== ")
         root.extensions.add("targetDebugName", sDebugOption.targetDebugName)
         Logger.buildOutput("AndroidJarPath", sAndroidJarPath)
         Logger.buildOutput("mainModuleName", getMainModuleName())
@@ -52,6 +53,8 @@ class Runtimes {
         Logger.buildOutput("Select module by " + (includeModel ? "include" : "exclude"))
         Logger.buildOutput("生效模块", sValidComponents.toList().toString())
         Logger.buildOutput("调试信息", sDebugOption.toString())
+        Logger.buildOutput(" =====> component.gradle配置信息 <===== ")
+        Logger.buildOutput("")
     }
 
     static boolean shouldApplyComponentPlugin(Project project) {
