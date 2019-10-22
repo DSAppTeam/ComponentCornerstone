@@ -22,6 +22,7 @@ import org.gradle.api.Project
  *   ./gradlew --no-daemon ComponentPlugin  -Dorg.gradle.debug=true
  *   ./gradlew --no-daemon [clean, :app:generateDebugSources, :library:generateDebugSources, :module_lib:generateDebugSources]  -Dorg.gradle.debug=true
  *    ./gradlew --no-daemon :app:assemble  -Dorg.gradle.debug=true
+ *    ./gradlew --no-daemon [:library:assembleDebug, :libraryKotlin:assembleDebug, :debugModule:assembleDebug, :app:assembleDebug]  -Dorg.gradle.debug=true
  *  组件插件入口
  *  created by yummylau 2019/08/09
  */
@@ -254,39 +255,43 @@ class ComponentPlugin implements Plugin<Project> {
             if (compileProject != null) {
                 Logger.buildOutput("")
                 Logger.buildOutput("=====> 处理循环依赖 <=====")
-                Logger.buildOutput("assemble project", compileProject.name)
-                Set<String> hasResolve = new HashSet<>()
-                Set<String> currentDependencies = new HashSet<>()
-                Set<String> nextDependencies = new HashSet<>()
-                currentDependencies.addAll(compileProject.componentDependencies)
-                Logger.buildOutput("project[" + compileProject.name + "] component 依赖", compileProject.getComponentDependenciesString())
+                if (Runtimes.sAssembleModules.size() > 1) {
+                    Logger.buildOutput("task has one more assemble module,skip transforming [component] to [project]")
+                } else {
+                    Logger.buildOutput("assemble project", compileProject.name)
+                    Set<String> hasResolve = new HashSet<>()
+                    Set<String> currentDependencies = new HashSet<>()
+                    Set<String> nextDependencies = new HashSet<>()
+                    currentDependencies.addAll(compileProject.componentDependencies)
+                    Logger.buildOutput("project[" + compileProject.name + "] component 依赖", compileProject.getComponentDependenciesString())
 
-                while (!currentDependencies.isEmpty()) {
-                    for (String string : currentDependencies) {
-                        ProjectInfo projectInfo = Runtimes.getProjectInfo(string)
-                        String name = projectInfo.name
-                        if (!hasResolve.contains(name)) {
-                            hasResolve.add(name)
-                            nextDependencies.addAll(projectInfo.componentDependencies)
-                            Logger.buildOutput("project[" + projectInfo.name + "] component 依赖", projectInfo.getComponentDependenciesString())
+                    while (!currentDependencies.isEmpty()) {
+                        for (String string : currentDependencies) {
+                            ProjectInfo projectInfo = Runtimes.getProjectInfo(string)
+                            String name = projectInfo.name
+                            if (!hasResolve.contains(name)) {
+                                hasResolve.add(name)
+                                nextDependencies.addAll(projectInfo.componentDependencies)
+                                Logger.buildOutput("project[" + projectInfo.name + "] component 依赖", projectInfo.getComponentDependenciesString())
+                            }
                         }
+                        currentDependencies.clear()
+                        currentDependencies.addAll(nextDependencies)
+                        nextDependencies.clear()
                     }
-                    currentDependencies.clear()
-                    currentDependencies.addAll(nextDependencies)
-                    nextDependencies.clear()
-                }
 
-                if (!hasResolve.isEmpty()) {
-                    StringBuilder stringBuilder = new StringBuilder()
-                    for (String realDependency : hasResolve) {
-                        stringBuilder.append(" :project(")
-                        stringBuilder.append(realDependency)
-                        stringBuilder.append(")")
-                        compileProject.project.dependencies {
-                            implementation compileProject.project.project(":" + realDependency)
+                    if (!hasResolve.isEmpty()) {
+                        StringBuilder stringBuilder = new StringBuilder()
+                        for (String realDependency : hasResolve) {
+                            stringBuilder.append(" :project(")
+                            stringBuilder.append(realDependency)
+                            stringBuilder.append(")")
+                            compileProject.project.dependencies {
+                                implementation compileProject.project.project(":" + realDependency)
+                            }
                         }
+                        Logger.buildOutput("application[" + compileProject.name + "] component 合并依赖", stringBuilder.toString())
                     }
-                    Logger.buildOutput("application[" + compileProject.name + "] component 合并依赖", stringBuilder.toString())
                 }
                 Logger.buildOutput("=====> 处理循环依赖 <=====")
                 Logger.buildOutput("")
