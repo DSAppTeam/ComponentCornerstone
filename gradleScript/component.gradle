@@ -43,15 +43,6 @@ component {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
             }
         }
-
-        'libraryKotlin2' {
-            groupId 'com.effective.android'
-            artifactId 'libraryKotlinSdk2'
-            dependencies {
-                implementation 'com.google.code.gson:gson:2.8.1'
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-            }
-        }
     }
 
 
