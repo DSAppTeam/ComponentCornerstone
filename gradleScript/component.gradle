@@ -18,7 +18,7 @@ component {
 
     //申明插件的作用域，用于有 include 和 exclude
     //生效的模块会自动添加组件依赖 core，可使用 component(:{projectName}) 使用其他组件提供的sdk，同时可在 componentSdks 中配置自己模块暴露的sdk
-    exclude 'libraryWithoutPlugin'
+    exclude 'libraryWithoutPlugin,component-core'
 
 //  上述 语句等价于下面语句
 //  include ':app,library,libraryKotlin,debugModule'
@@ -38,15 +38,6 @@ component {
         'libraryKotlin' {
             groupId 'com.effective.android'
             artifactId 'libraryKotlinSdk'
-            dependencies {
-                implementation 'com.google.code.gson:gson:2.8.1'
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-            }
-        }
-
-        'libraryKotlin2' {
-            groupId 'com.effective.android'
-            artifactId 'libraryKotlinSdk2'
             dependencies {
                 implementation 'com.google.code.gson:gson:2.8.1'
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -94,16 +85,6 @@ component {
 
         }
     }
-
-
-    addition {
-
-        methodCost {
-            enable false
-        }
-
-    }
-
 }
 
 

@@ -61,7 +61,6 @@ class ProjectInfo {
                     }
                     String[] strings = task.split(":")
                     modules.add(strings.length > 1 ? strings[strings.length - 2] : "all")
-                    break
                 }
             }
         }
@@ -76,6 +75,9 @@ class ProjectInfo {
             }
             if (compileModuleName == null || compileModuleName.trim().isEmpty()) {
                 compileModuleName = Constants.DEFAULT_MAIN_MODULE_NAME
+            }
+            if (Runtimes.sAssembleModules.isEmpty() && !modules.isEmpty()) {
+                Runtimes.sAssembleModules.addAll(modules)
             }
         }
     }

@@ -179,13 +179,13 @@ class ProjectUtil {
         } else {
             Logger.buildOutput("hasDebugOptions", false)
         }
-        Logger.buildOutput("DebugModule[" + project.name + "]" + "Main sourceSets ==> ")
+        Logger.buildOutput("DebugModule[" + project.name + "]" + "Main sourceSets: ")
         Logger.buildOutput("java", objMain.java.srcDirs.toString())
         Logger.buildOutput("res", objMain.res.srcDirs.toString())
         Logger.buildOutput("assets", objMain.assets.srcDirs.toString())
         Logger.buildOutput("jniLibs", objMain.jniLibs.srcDirs.toString())
         Logger.buildOutput("manifest", objAndroidTest.manifest.srcFile.path)
-        Logger.buildOutput("DebugModule[" + project.name + "]" + "AndroidTest sourceSets ==> ")
+        Logger.buildOutput("DebugModule[" + project.name + "]" + "AndroidTest sourceSets: ")
         Logger.buildOutput("java", objAndroidTest.java.srcDirs.toString())
         Logger.buildOutput("res", objAndroidTest.res.srcDirs.toString())
         Logger.buildOutput("assets", objAndroidTest.assets.srcDirs.toString())
