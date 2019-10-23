@@ -5,7 +5,7 @@ import com.plugin.component.Logger
 import com.plugin.component.Runtimes
 import com.plugin.component.extension.PublicationManager
 import com.plugin.component.extension.option.CompileOptions
-import com.plugin.component.extension.option.publication.PublicationOption
+import com.plugin.component.extension.option.sdk.PublicationOption
 import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project

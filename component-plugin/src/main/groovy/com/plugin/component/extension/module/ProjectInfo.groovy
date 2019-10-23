@@ -21,7 +21,7 @@ class ProjectInfo {
     public List<String> modules = new ArrayList<>()         //包含的模块
     public boolean isAssemble = false                       //是否是asAssemble
     public boolean isDebug = false                          //是否是debug
-    public String compileModuleName                         //入口模块名字
+    public String compileModuleName = ""                     //入口模块名字
     public Set<String> componentDependencies = new HashSet<>()   //模块依赖的component
 
     ProjectInfo(Project project) {
@@ -70,11 +70,6 @@ class ProjectInfo {
                     && modules.get(0).trim().length() > 0
                     && !modules.get(0).equals("all")) {
                 compileModuleName = modules.get(0)
-            } else {
-                compileModuleName = Runtimes.sMainModuleName
-            }
-            if (compileModuleName == null || compileModuleName.trim().isEmpty()) {
-                compileModuleName = Constants.DEFAULT_MAIN_MODULE_NAME
             }
             if (Runtimes.sAssembleModules.isEmpty() && !modules.isEmpty()) {
                 Runtimes.sAssembleModules.addAll(modules)
@@ -88,11 +83,6 @@ class ProjectInfo {
 
     boolean isDebugModule() {
         return ProjectUtil.isProjectSame(project.name, Runtimes.getDebugModuleName())
-    }
-
-
-    boolean isMainModule() {
-        return ProjectUtil.isProjectSame(project.name, Runtimes.getMainModuleName())
     }
 
     boolean isSync() {

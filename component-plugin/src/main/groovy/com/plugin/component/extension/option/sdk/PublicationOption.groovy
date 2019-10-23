@@ -1,4 +1,4 @@
-package com.plugin.component.extension.option.publication
+package com.plugin.component.extension.option.sdk
 
 
 import com.plugin.component.extension.module.SourceSet

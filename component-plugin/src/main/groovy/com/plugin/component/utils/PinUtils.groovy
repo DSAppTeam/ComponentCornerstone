@@ -1,11 +1,12 @@
-package com.plugin.pins
+package com.plugin.component.utils
 
+import com.plugin.component.extension.module.MicroModule
 import org.gradle.api.Project
 import org.w3c.dom.Element
 
 import javax.xml.parsers.DocumentBuilderFactory
 
-class Utils {
+class PinUtils {
 
     static String upperCase(String str) {
         char[] ch = str.toCharArray()

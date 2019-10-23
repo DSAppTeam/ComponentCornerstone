@@ -10,8 +10,8 @@ import com.plugin.component.extension.ComponentExtension
 import com.plugin.component.extension.PublicationManager
 import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.option.debug.DebugDependenciesOption
-import com.plugin.component.extension.option.publication.PublicationDependenciesOption
-import com.plugin.component.extension.option.publication.PublicationOption
+import com.plugin.component.extension.option.sdk.PublicationDependenciesOption
+import com.plugin.component.extension.option.sdk.PublicationOption
 import com.plugin.component.transform.InjectCodeTransform
 import com.plugin.component.transform.ScanCodeTransform
 import com.plugin.component.utils.JarUtil
@@ -192,7 +192,6 @@ class SdkPlugin implements BasePlugin{
             Logger.buildOutput("compileModuleName", projectInfo.compileModuleName)
             Logger.buildOutput("projectName", projectInfo.name)
             Logger.buildOutput("isDebugModule", projectInfo.isDebugModule())
-            Logger.buildOutput("isMainModule", projectInfo.isMainModule())
             Logger.buildOutput("taskNames", projectInfo.taskNames)
             Logger.buildOutput("isSyncTask", projectInfo.isSync())
             Logger.buildOutput("isAssemble", projectInfo.isAssemble)
@@ -214,7 +213,7 @@ class SdkPlugin implements BasePlugin{
 //                            implementation childProject.project(":component-core")
                     }
                     if (it instanceof AppPlugin) {
-                        if (projectInfo.isDebugModule() || projectInfo.isMainModule()) {
+                        if (projectInfo.isDebugModule() || projectInfo.isCompileModuleAndAssemble()) {
                             Logger.buildOutput("plugin is AppPlugin")
                             Logger.buildOutput("registerTransform", "ScanCodeTransform")
                             Logger.buildOutput("registerTransform", "InjectCodeTransform")

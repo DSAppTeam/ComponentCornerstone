@@ -1,8 +1,8 @@
-package com.plugin.pins.check
+package com.plugin.component.check
 
-import com.plugin.pins.MicroModule
-import com.plugin.pins.MicroModuleInfo
-import com.plugin.pins.ProductFlavorInfo
+import com.plugin.component.extension.module.MicroModule
+import com.plugin.component.extension.module.MicroModuleInfo
+import com.plugin.component.extension.module.ProductFlavorInfo
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Project
 import org.w3c.dom.Element

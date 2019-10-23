@@ -6,7 +6,7 @@ import com.plugin.component.Runtimes
 import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.module.SourceFile
 import com.plugin.component.extension.module.SourceSet
-import com.plugin.component.extension.option.publication.PublicationOption
+import com.plugin.component.extension.option.sdk.PublicationOption
 import com.plugin.component.task.CompileSdkTask
 import org.gradle.api.Project
 import org.gradle.api.publish.maven.MavenPublication

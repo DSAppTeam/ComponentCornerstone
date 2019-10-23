@@ -1,4 +1,4 @@
-package com.plugin.pins.extension
+package com.plugin.component.extension.option.pin
 
 interface MicroModuleExtension {
 

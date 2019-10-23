@@ -1,6 +1,7 @@
-package com.plugin.pins
+package com.plugin.component.extension.module
 
 import com.android.build.gradle.BaseExtension
+import com.plugin.component.utils.PinUtils
 import org.gradle.api.Project
 
 class ProductFlavorInfo {
@@ -74,7 +75,7 @@ class ProductFlavorInfo {
             String combined = item
             for (int j = 1; j < n; j++) {
                 item = flavorGroups.get(j).get(combination.get(j))
-                combined += Utils.upperCase(item)
+                combined += PinUtils.upperCase(item)
                 items.add(item)
             }
             combinedProductFlavors.add(combined)

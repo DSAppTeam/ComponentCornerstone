@@ -1,4 +1,4 @@
-package com.plugin.pins
+package com.plugin.component.plugin
 
 import com.android.build.gradle.*
 import com.android.build.gradle.api.BaseVariant
@@ -7,9 +7,13 @@ import com.android.manifmerger.ManifestMerger2
 import com.android.manifmerger.MergingReport
 import com.android.manifmerger.XmlDocument
 import com.android.utils.ILogger
-import com.plugin.pins.check.CodeChecker
-import com.plugin.pins.extension.DefaultMicroModuleExtension
-import com.plugin.pins.extension.OnMicroModuleListener
+import com.plugin.component.check.CodeChecker
+import com.plugin.component.extension.module.MicroModule
+import com.plugin.component.extension.module.MicroModuleInfo
+import com.plugin.component.extension.module.ProductFlavorInfo
+import com.plugin.component.utils.PinUtils
+import com.plugin.component.extension.option.pin.DefaultMicroModuleExtension
+import com.plugin.component.extension.option.pin.OnMicroModuleListener
 import org.gradle.BuildListener
 import org.gradle.BuildResult
 import org.gradle.api.*
@@ -25,6 +29,15 @@ class MicroModulePlugin implements Plugin<Project> {
     private final static String APPLY_NORMAL_MICRO_MODULE_SCRIPT = 'apply_normal_micro_module_script'
     private final static String APPLY_INCLUDE_MICRO_MODULE_SCRIPT = 'apply_include_micro_module_script'
     private final static String APPLY_EXPORT_MICRO_MODULE_SCRIPT = 'apply_export_micro_module_script'
+
+    Project project
+    String startTaskState = NORMAL
+    MicroModuleInfo microModuleInfo
+    ProductFlavorInfo productFlavorInfo
+    MicroModule currentMicroModule
+    String applyScriptState
+    boolean appliedLibraryPlugin
+    boolean clearedOriginSourceSets
 
     private final static BuildListener buildListener = new BuildListener() {
 
@@ -74,19 +87,6 @@ class MicroModulePlugin implements Plugin<Project> {
         }
     }
 
-    Project project
-
-    String startTaskState = NORMAL
-
-    MicroModuleInfo microModuleInfo
-    ProductFlavorInfo productFlavorInfo
-
-    MicroModule currentMicroModule
-    String applyScriptState
-
-    boolean appliedLibraryPlugin
-
-    boolean clearedOriginSourceSets
 
     void apply(Project project) {
         this.project = project
@@ -320,7 +320,7 @@ class MicroModulePlugin implements Plugin<Project> {
 
             def productFlavor = it
             productFlavorInfo.buildTypes.each {
-                mergeAndroidManifest(productFlavor + Utils.upperCase(it))
+                mergeAndroidManifest(productFlavor + PinUtils.upperCase(it))
             }
         }
 
@@ -329,12 +329,12 @@ class MicroModulePlugin implements Plugin<Project> {
         mergeAndroidManifest(androidTest + 'Debug')
         if (!productFlavorInfo.singleDimension) {
             productFlavorInfo.productFlavors.each {
-                mergeAndroidManifest(androidTest + Utils.upperCase(it))
+                mergeAndroidManifest(androidTest + PinUtils.upperCase(it))
             }
         }
         productFlavorInfo.combinedProductFlavors.each {
-            mergeAndroidManifest(androidTest + Utils.upperCase(it))
-            mergeAndroidManifest(androidTest + Utils.upperCase(it) + 'Debug')
+            mergeAndroidManifest(androidTest + PinUtils.upperCase(it))
+            mergeAndroidManifest(androidTest + PinUtils.upperCase(it) + 'Debug')
         }
     }
 
@@ -417,7 +417,7 @@ class MicroModulePlugin implements Plugin<Project> {
             addVariantSourceSet(microModule, it)
             def flavorName = it
             productFlavorInfo.buildTypes.each {
-                addVariantSourceSet(microModule, flavorName + Utils.upperCase(it))
+                addVariantSourceSet(microModule, flavorName + PinUtils.upperCase(it))
             }
         }
 
@@ -428,7 +428,7 @@ class MicroModulePlugin implements Plugin<Project> {
 
             if (testType == 'test') {
                 productFlavorInfo.buildTypes.each {
-                    addVariantSourceSet(microModule, testType + Utils.upperCase(it))
+                    addVariantSourceSet(microModule, testType + PinUtils.upperCase(it))
                 }
             } else {
                 addVariantSourceSet(microModule, testType + 'Debug')
@@ -436,17 +436,17 @@ class MicroModulePlugin implements Plugin<Project> {
 
             if (!productFlavorInfo.singleDimension) {
                 productFlavorInfo.productFlavors.each {
-                    addVariantSourceSet(microModule, testType + Utils.upperCase(it))
+                    addVariantSourceSet(microModule, testType + PinUtils.upperCase(it))
                 }
             }
 
             productFlavorInfo.combinedProductFlavors.each {
-                def productFlavorName = testType + Utils.upperCase(it)
+                def productFlavorName = testType + PinUtils.upperCase(it)
                 addVariantSourceSet(microModule, productFlavorName)
 
                 if (testType == 'test') {
                     productFlavorInfo.buildTypes.each {
-                        addVariantSourceSet(microModule, productFlavorName + Utils.upperCase(it))
+                        addVariantSourceSet(microModule, productFlavorName + PinUtils.upperCase(it))
                     }
                 } else {
                     addVariantSourceSet(microModule, productFlavorName + 'Debug')
@@ -473,7 +473,7 @@ class MicroModulePlugin implements Plugin<Project> {
             clearModuleSourceSet(it)
             def flavorName = it
             productFlavorInfo.buildTypes.each {
-                clearModuleSourceSet(flavorName + Utils.upperCase(it))
+                clearModuleSourceSet(flavorName + PinUtils.upperCase(it))
             }
         }
 
@@ -484,7 +484,7 @@ class MicroModulePlugin implements Plugin<Project> {
 
             if (testType == 'test') {
                 productFlavorInfo.buildTypes.each {
-                    clearModuleSourceSet(testType + Utils.upperCase(it))
+                    clearModuleSourceSet(testType + PinUtils.upperCase(it))
                 }
             } else {
                 clearModuleSourceSet(testType + 'Debug')
@@ -492,17 +492,17 @@ class MicroModulePlugin implements Plugin<Project> {
 
             if (!productFlavorInfo.singleDimension) {
                 productFlavorInfo.productFlavors.each {
-                    clearModuleSourceSet(testType + Utils.upperCase(it))
+                    clearModuleSourceSet(testType + PinUtils.upperCase(it))
                 }
             }
 
             productFlavorInfo.combinedProductFlavors.each {
-                def productFlavorName = testType + Utils.upperCase(it)
+                def productFlavorName = testType + PinUtils.upperCase(it)
                 clearModuleSourceSet(productFlavorName)
 
                 if (testType == 'test') {
                     productFlavorInfo.buildTypes.each {
-                        clearModuleSourceSet(productFlavorName + Utils.upperCase(it))
+                        clearModuleSourceSet(productFlavorName + PinUtils.upperCase(it))
                     }
                 } else {
                     clearModuleSourceSet(productFlavorName + 'Debug')
@@ -581,8 +581,8 @@ class MicroModulePlugin implements Plugin<Project> {
     def checkMicroModuleBoundary(String taskPrefix, String buildType, String flavorName, List<String> sourceFolders) {
         CodeChecker codeChecker
 
-        def buildTypeFirstUp = Utils.upperCase(buildType)
-        def productFlavorFirstUp = flavorName != null ? Utils.upperCase(flavorName) : ""
+        def buildTypeFirstUp = PinUtils.upperCase(buildType)
+        def productFlavorFirstUp = flavorName != null ? PinUtils.upperCase(flavorName) : ""
 
         def mergeResourcesTaskName = taskPrefix + productFlavorFirstUp + buildTypeFirstUp + 'Resources'
         def packageResourcesTask = project.tasks.findByName(mergeResourcesTaskName)
