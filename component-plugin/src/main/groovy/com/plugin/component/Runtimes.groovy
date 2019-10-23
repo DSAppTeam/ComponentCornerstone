@@ -2,7 +2,7 @@ package com.plugin.component
 
 import com.plugin.component.extension.ComponentExtension
 import com.plugin.component.extension.module.ProjectInfo
-import com.plugin.component.extension.option.CompileOptions
+import com.plugin.component.extension.option.sdk.CompileOptions
 import com.plugin.component.extension.option.debug.DebugConfiguration
 import com.plugin.component.extension.option.sdk.PublicationOption
 import com.plugin.component.extension.option.debug.DebugOption
@@ -31,9 +31,9 @@ class Runtimes {
 
     static initRuntimeConfiguration(Project root, ComponentExtension componentExtension) {
 
-        sAndroidJarPath = ProjectUtil.getAndroidJarPath(root, componentExtension.compileSdkVersion)
-        sCompileSdkVersion = componentExtension.compileSdkVersion
-        sCompileOption = componentExtension.compileOption
+        sAndroidJarPath = ProjectUtil.getAndroidJarPath(root, componentExtension.sdkOption.compileSdkVersion)
+        sCompileSdkVersion = componentExtension.sdkOption.compileSdkVersion
+        sCompileOption = componentExtension.sdkOption.compileOption
         sDebugOption = componentExtension.debugOption
         Set<String> includeModules = ProjectUtil.getModuleName(componentExtension.includes)
         Set<String> excludeModules = ProjectUtil.getModuleName(componentExtension.excludes)
