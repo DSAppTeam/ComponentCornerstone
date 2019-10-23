@@ -9,6 +9,7 @@ import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.option.debug.DebugDependenciesOption
 import com.plugin.component.extension.option.publication.PublicationDependenciesOption
 import com.plugin.component.extension.option.publication.PublicationOption
+import com.plugin.component.transform.ComponentTransform
 import com.plugin.component.transform.InjectCodeTransform
 
 import com.plugin.component.transform.ScanCodeTransform
@@ -236,10 +237,10 @@ class ComponentPlugin implements Plugin<Project> {
                         if (it instanceof AppPlugin) {
                             if (projectInfo.isDebugModule() || projectInfo.isMainModule()) {
                                 Logger.buildOutput("plugin is AppPlugin")
-                                Logger.buildOutput("registerTransform", "ScanCodeTransform")
-                                Logger.buildOutput("registerTransform", "InjectCodeTransform")
-                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new ScanCodeTransform(childProject))
-                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
+                                Logger.buildOutput("registerTransform", "ComponentTransform")
+//                                Logger.buildOutput("registerTransform", "InjectCodeTransform")
+//                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
+                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new ComponentTransform(childProject))
                             }
                         }
                         Logger.buildOutput("=====> project[" + childProject.name + "]注入插件 <=====")

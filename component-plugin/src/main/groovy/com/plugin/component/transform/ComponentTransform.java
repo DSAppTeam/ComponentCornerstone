@@ -13,13 +13,18 @@ import com.android.build.api.transform.TransformOutputProvider;
 import com.android.build.gradle.internal.pipeline.TransformManager;
 import com.android.ide.common.internal.WaitableExecutor;
 import com.google.common.io.Files;
+import com.google.gson.Gson;
+import com.plugin.component.Constants;
 import com.plugin.component.transform.info.ScanRuntime;
+import com.plugin.component.transform.info.ScanSummaryInfo;
+import com.plugin.component.utils.CacheDiskUtils;
 import com.quinn.hunter.transform.RunVariant;
 import com.quinn.hunter.transform.asm.ClassLoaderHelper;
 
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.Project;
 import org.gradle.api.logging.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -105,6 +110,9 @@ public class ComponentTransform extends Transform {
         for (TransformInput input : inputs) {
             for (JarInput jarInput : input.getJarInputs()) {
                 Status status = jarInput.getStatus();
+
+                String filePath = jarInput.getFile().getAbsolutePath();
+
                 File dest = outputProvider.getContentLocation(jarInput.getFile().getAbsolutePath(), jarInput.getContentTypes(), jarInput.getScopes(), Format.JAR);
                 if (isIncremental && !emptyRun) {
                     switch (status) {
@@ -118,6 +126,7 @@ public class ComponentTransform extends Transform {
                             if (dest.exists()) {
                                 FileUtils.forceDelete(dest);
                             }
+                            ScanRuntime.removedFile(filePath);
                             break;
                     }
                 } else {
@@ -150,6 +159,7 @@ public class ComponentTransform extends Transform {
                                     //noinspection ResultOfMethodCallIgnored
                                     destFile.delete();
                                 }
+                                ScanRuntime.removedFile(inputFile.getAbsolutePath());
                                 break;
                             case ADDED:
                             case CHANGED:
@@ -172,25 +182,66 @@ public class ComponentTransform extends Transform {
         }
         waitableExecutor.waitForTasksWithQuickFail(true);
 
+        ScanSummaryInfo cacheSummary = readPluginCache(); // 读取缓存
 
-        ScanRuntime.logScanInfo();
+        ScanSummaryInfo scanSummaryInfo = ScanRuntime.updateSummaryInfo(cacheSummary); // 整理本次扫码结果，返回最新的模块结构
         ScanRuntime.buildComponentSdkInfo();
+        ScanRuntime.logScanInfo();
+
+        updatePluginCache(cacheSummary);   // 保存缓存
 
         long costTime = System.currentTimeMillis() - startTime;
         logger.warn((getName() + "scan code  costed " + costTime + "ms"));
 
-        startTime = System.currentTimeMillis();
+        injectCode(scanSummaryInfo);
+    }
 
-        String injectFile = bytecodeWeaver.getInjectClassFile();
-        if (injectFile != null) {
-            logger.warn(" inject file find : file = " + injectFile);
-            CodeInjectProcessor codeInjectProcessor = new CodeInjectProcessor();
-            codeInjectProcessor.injectCode(injectFile);
+    private void injectCode(@NotNull ScanSummaryInfo scanSummaryInfo) {
+        long startTime = System.currentTimeMillis();
+
+        String injectInputPath = scanSummaryInfo.inputFilePath; // 输入文件
+        String injectOutputPath = scanSummaryInfo.outputFilePath; // 输出文件
+        if (injectInputPath != null) {
+            logger.warn(" inject file find : file = " + injectInputPath);
+            try {
+                CodeInjectProcessor codeInjectProcessor = new CodeInjectProcessor();
+                codeInjectProcessor.injectCode(injectInputPath, injectOutputPath);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("inject Code error");
+            }
             logger.warn("inject Code end");
         }
 
         long injectCostTime = System.currentTimeMillis() - startTime;
         logger.warn((getName() + " inject code costed " + injectCostTime + "ms"));
+        ScanRuntime.clearScanInfo();
+        ScanRuntime.clearSummaryInfo();
+    }
+
+    private void updatePluginCache(ScanSummaryInfo cacheSummary) {
+        try {
+            String json = new Gson().toJson(cacheSummary);
+            CacheDiskUtils.getInstance(project.getBuildDir()).put(Constants.PLUGIN_CACHE, json);
+            logger.warn((getName() + "save cache success"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @NotNull
+    private ScanSummaryInfo readPluginCache() {
+        ScanSummaryInfo cacheSummary = null;
+        try {
+            String json = CacheDiskUtils.getInstance(project.getBuildDir()).getString(Constants.PLUGIN_CACHE);
+            cacheSummary = new Gson().fromJson(json, ScanSummaryInfo.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (cacheSummary == null) {
+            cacheSummary = new ScanSummaryInfo();
+        }
+        return cacheSummary;
     }
 
     private void transformSingleFile(final File inputFile, final File outputFile, final String srcBaseDir) {
