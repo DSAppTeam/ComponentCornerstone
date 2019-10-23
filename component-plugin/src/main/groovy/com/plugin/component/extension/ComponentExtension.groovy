@@ -1,6 +1,7 @@
 package com.plugin.component.extension
 
-import com.plugin.component.extension.option.sdk.CompileOptions
+import com.plugin.component.Runtimes
+import com.plugin.component.extension.option.pin.PinOption
 import com.plugin.component.extension.option.debug.DebugOption
 import com.plugin.component.extension.option.sdk.SdkOption
 import org.gradle.api.Project
@@ -14,6 +15,7 @@ class ComponentExtension {
 
     DebugOption debugOption                         //调试选项
     SdkOption sdkOption                             //sdk选项
+    PinOption pinOption                             //pin选项
 
     String includes = ""
     String excludes = ""
@@ -23,6 +25,7 @@ class ComponentExtension {
         this.project = project
         debugOption = new DebugOption(project)
         sdkOption = new SdkOption(project)
+        pinOption = new PinOption(project)
     }
 
     /**
@@ -54,8 +57,16 @@ class ComponentExtension {
      * sdk模块
      * @param closure
      */
-    void componentSdks(Closure closure) {
+    void sdk(Closure closure) {
         ConfigureUtil.configure(closure, sdkOption)
+    }
+
+    /**
+     * sdk模块
+     * @param closure
+     */
+    void pin(Closure closure) {
+        ConfigureUtil.configure(closure, pinOption)
     }
 
     /**
@@ -64,5 +75,15 @@ class ComponentExtension {
      */
     void debug(Closure closure) {
         ConfigureUtil.configure(closure, debugOption)
+    }
+
+    @Override
+    String toString() {
+        StringBuilder stringBuilder = new StringBuilder("\n")
+        stringBuilder.append("               ------------------------------------------------------------------" + "\n")
+        stringBuilder.append("              | include = " + includes+  "\n")
+        stringBuilder.append("              | exclude = " + excludes +  "\n")
+        stringBuilder.append("               ------------------------------------------------------------------" + "\n")
+        return stringBuilder.toString()
     }
 }
