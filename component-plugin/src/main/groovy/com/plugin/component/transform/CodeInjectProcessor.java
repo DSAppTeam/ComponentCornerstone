@@ -33,14 +33,12 @@ public class CodeInjectProcessor {
     private static final String FILE_SEP = File.separator;
 
 
-    public void injectCode(String filePath) {
+    public void injectCode(String inputPath, String outputPath) {
         try {
-            if (filePath != null && filePath.endsWith(".jar")) {
-                File file = new File(filePath);
-                weaveJar(file);
-            } else if (filePath != null && filePath.endsWith(".class")) {
-                File file = new File(filePath);
-                weaveSingleClassToFile(file);
+            if (inputPath != null && inputPath.endsWith(".jar")) {
+                weaveJar(inputPath, outputPath);
+            } else if (inputPath != null && inputPath.endsWith(".class")) {
+                weaveSingleClassToFile(inputPath, outputPath);
             }
 
         } catch (Exception e) {
@@ -55,8 +53,13 @@ public class CodeInjectProcessor {
     }
 
 
-    public final void weaveSingleClassToFile(File inputFile) throws IOException {
-        File outputFile = new File(inputFile.getParent(), inputFile.getName() + ".temp");
+    public final void weaveSingleClassToFile(String inputPath, String outputPath) throws IOException {
+        File inputFile = new File(inputPath);
+        File outputFile = new File(outputPath);
+        if (outputFile.exists()) {
+            outputFile.delete();
+        }
+
         FileUtils.touch(outputFile);
         InputStream inputStream = new FileInputStream(inputFile);
         byte[] bytes = doGenerateCode(inputStream);
@@ -65,27 +68,22 @@ public class CodeInjectProcessor {
             fos.write(bytes);
             fos.close();
             inputStream.close();
-            if (inputFile.exists()) {
-                inputFile.delete();
-            }
-            outputFile.renameTo(inputFile);
         }
     }
 
 
-    public final void weaveJar(File inputJar) throws IOException {
+    public final void weaveJar(String inputPath, String outputPath) throws IOException {
 
-        File outputJar = new File(inputJar.getParent(), inputJar.getName() + ".temp");
+        File outputJar = new File(outputPath);
         if (outputJar.exists()) {
             outputJar.delete();
         }
 
-        ZipFile inputZip = new ZipFile(inputJar);
+        ZipFile inputZip = new ZipFile(new File(inputPath));
         ZipOutputStream outputZip = new ZipOutputStream(new BufferedOutputStream(java.nio.file.Files.newOutputStream(outputJar.toPath())));
         Enumeration<? extends ZipEntry> inEntries = inputZip.entries();
 
 
-        String outputPath = outputJar.getAbsolutePath();
         while (inEntries.hasMoreElements()) {
             ZipEntry entry = inEntries.nextElement();
             InputStream originalFile = new BufferedInputStream(inputZip.getInputStream(entry));
@@ -115,17 +113,7 @@ public class CodeInjectProcessor {
         }
         outputZip.flush();
         outputZip.close();
-
         inputZip.close();
-
-        if (inputJar.exists()) {
-            boolean result = inputJar.delete();
-            System.out.println("delete jar result = " + result);
-        }
-        boolean rename = outputJar.renameTo(inputJar);
-        System.out.println("rename jar result = " + rename);
-
-
     }
 
 

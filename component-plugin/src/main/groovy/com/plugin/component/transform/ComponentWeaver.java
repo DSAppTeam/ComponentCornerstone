@@ -1,5 +1,6 @@
 package com.plugin.component.transform;
 
+import com.plugin.component.transform.info.ScanRuntime;
 import com.quinn.hunter.transform.asm.ExtendClassWriter;
 import com.quinn.hunter.transform.asm.IWeaver;
 
@@ -47,11 +48,11 @@ public class ComponentWeaver implements IWeaver {
     }
 
     public final void weaveJar(File inputJar, File outputJar) throws IOException {
-        String filePath = inputJar.getAbsolutePath();
+        String inputPath = inputJar.getAbsolutePath();
+        String outputPath = outputJar.getAbsolutePath();
         ZipFile inputZip = new ZipFile(inputJar);
         ZipOutputStream outputZip = new ZipOutputStream(new BufferedOutputStream(java.nio.file.Files.newOutputStream(outputJar.toPath())));
         Enumeration<? extends ZipEntry> inEntries = inputZip.entries();
-        String outputPath = outputJar.getAbsolutePath();
         while (inEntries.hasMoreElements()) {
             ZipEntry entry = inEntries.nextElement();
             InputStream originalFile = new BufferedInputStream(inputZip.getInputStream(entry));
@@ -60,12 +61,12 @@ public class ComponentWeaver implements IWeaver {
             // seperator of entry name is always '/', even in windows
             String className = outEntry.getName().replace("/", ".");
 
-            beforeWeaveClass(outputPath, className);
+            beforeWeaveClass(inputPath, outputPath, className);
 
             if (!isWeavableClass(className)) {
                 newEntryContent = org.apache.commons.io.IOUtils.toByteArray(originalFile);
             } else {
-                newEntryContent = weaveSingleClassToByteArray(filePath, originalFile);
+                newEntryContent = weaveSingleClassToByteArray(inputPath, originalFile);
             }
             CRC32 crc32 = new CRC32();
             crc32.update(newEntryContent);
@@ -88,13 +89,15 @@ public class ComponentWeaver implements IWeaver {
         if (!inputBaseDir.endsWith(FILE_SEP)) inputBaseDir = inputBaseDir + FILE_SEP;
         String className = inputFile.getAbsolutePath().replace(inputBaseDir, "").replace(FILE_SEP, ".");
 
-        String filePath = inputFile.getAbsolutePath();
-        beforeWeaveClass(outputFile.getAbsolutePath(), className);
+        String inputPath = inputFile.getAbsolutePath();
+        String outputPath = outputFile.getAbsolutePath();
+
+        beforeWeaveClass(inputPath, outputPath, className);
 
         if (isWeavableClass(className)) {
             FileUtils.touch(outputFile);
             InputStream inputStream = new FileInputStream(inputFile);
-            byte[] bytes = weaveSingleClassToByteArray(filePath, inputStream);
+            byte[] bytes = weaveSingleClassToByteArray(inputPath, inputStream);
             FileOutputStream fos = new FileOutputStream(outputFile);
             fos.write(bytes);
             fos.close();
@@ -133,10 +136,13 @@ public class ComponentWeaver implements IWeaver {
     private static final String sComponentManagerPath = "com.plugin.component.ComponentManager";
 
 
-    public void beforeWeaveClass(String outputFile, String className) {
+    public void beforeWeaveClass(String inputPath, String outputFile, String className) {
         if (injectClassFile == null && className != null && className.contains(sComponentManagerPath)) {
             System.out.println("find class ComponentManager : file is : " + outputFile);
             injectClassFile = outputFile;
+            ScanRuntime.getsSummaryInfo().inputFilePath = inputPath;
+            ScanRuntime.getsSummaryInfo().outputFilePath = outputFile;
+
         }
     }
 

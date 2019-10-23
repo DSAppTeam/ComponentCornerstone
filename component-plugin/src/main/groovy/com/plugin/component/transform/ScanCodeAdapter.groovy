@@ -73,11 +73,13 @@ class ScanCodeAdapter extends ClassVisitor {
             @Override
             void visitEnd() {
                 if (scanComponentInfo != null) {
-                    ScanRuntime.addComponentInfo(scanComponentInfo)
+//                    ScanRuntime.addComponentInfo(scanComponentInfo)
+                    ScanRuntime.addComponentInfo(filePath, scanComponentInfo)
                     scanComponentInfo = null
                 }
                 if (scanSdkInfo != null) {
-                    ScanRuntime.addSdkInfo(scanSdkInfo)
+//                    ScanRuntime.addSdkInfo(scanSdkInfo)
+                    ScanRuntime.addSdkInfo(filePath, scanSdkInfo)
                     scanSdkInfo = null
                 }
                 super.visitEnd()
