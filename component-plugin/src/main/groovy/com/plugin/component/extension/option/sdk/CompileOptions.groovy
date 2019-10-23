@@ -1,4 +1,4 @@
-package com.plugin.component.extension.option
+package com.plugin.component.extension.option.sdk
 
 import org.gradle.api.JavaVersion
 

@@ -66,6 +66,7 @@ class SdkPlugin implements BasePlugin{
 
     @Override
     void afterEvaluateChild(Project child) {
+        ProjectInfo projectInfo = Runtimes.getProjectInfo(child.name)
         ProjectUtil.modifySourceSets(projectInfo)
 
         //todo 发布

@@ -52,30 +52,30 @@ class ComponentPlugin implements Plugin<Project>,BasePlugin{
 
     @Override
     void evaluateChild(Project child) {
-        sdk.evaluateChild(project)
-        debug.evaluateChild(project)
-        pins.evaluateChild(project)
+        sdk.evaluateChild(child)
+        debug.evaluateChild(child)
+        pins.evaluateChild(child)
     }
 
     @Override
     void afterEvaluateChild(Project child) {
-        sdk.afterEvaluateChild(project)
-        debug.afterEvaluateChild(project)
-        pins.afterEvaluateChild(project)
+        sdk.afterEvaluateChild(child)
+        debug.afterEvaluateChild(child)
+        pins.afterEvaluateChild(child)
     }
 
     @Override
     void evaluateRoot(Project root) {
-        sdk.evaluateRoot(project)
-        debug.evaluateRoot(project)
-        pins.evaluateRoot(project)
+        sdk.evaluateRoot(root)
+        debug.evaluateRoot(root)
+        pins.evaluateRoot(root)
     }
 
     @Override
     void afterEvaluateRoot(Project root) {
-        sdk.afterEvaluateRoot(project)
-        debug.afterEvaluateRoot(project)
-        pins.afterEvaluateRoot(project)
+        sdk.afterEvaluateRoot(root)
+        debug.afterEvaluateRoot(root)
+        pins.afterEvaluateRoot(root)
     }
 
     @Override

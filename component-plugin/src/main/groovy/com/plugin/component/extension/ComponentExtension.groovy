@@ -1,16 +1,9 @@
 package com.plugin.component.extension
 
-import com.plugin.component.Logger
-import com.plugin.component.Runtimes
-import com.plugin.component.extension.option.CompileOptions
-import com.plugin.component.extension.option.sdk.PublicationOption
+import com.plugin.component.extension.option.sdk.CompileOptions
 import com.plugin.component.extension.option.debug.DebugOption
-import com.plugin.component.utils.ProjectUtil
-import com.plugin.component.utils.PublicationUtil
-import org.gradle.api.Action
-import org.gradle.api.NamedDomainObjectContainer
+import com.plugin.component.extension.option.sdk.SdkOption
 import org.gradle.api.Project
-import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.util.ConfigureUtil
 
 /**
@@ -18,18 +11,18 @@ import org.gradle.util.ConfigureUtil
  * created by yummylau 2019/08/09
  */
 class ComponentExtension {
-    int compileSdkVersion                           //编译版本
-    CompileOptions compileOption                    //编译选项
+
     DebugOption debugOption                         //调试选项
-    Action<? super RepositoryHandler> configure     //仓库配置
+    SdkOption sdkOption                             //sdk选项
+
     String includes = ""
     String excludes = ""
     Project project
 
     ComponentExtension(Project project) {
         this.project = project
-        compileOption = new CompileOptions()
         debugOption = new DebugOption(project)
+        sdkOption = new SdkOption(project)
     }
 
     /**
@@ -56,79 +49,13 @@ class ComponentExtension {
         this.excludes = modules
     }
 
-    /**
-     * 编译sdk
-     * @param version
-     */
-    void compileSdkVersion(int version) {
-        compileSdkVersion = version
-    }
 
     /**
-     * 工程主项目名称
-     * @param name
-     */
-    void mainModuleName(String name) {
-        mainModuleName = name
-    }
-
-
-    /**
-     * 配置选项
-     * @param closure
-     */
-    void compileOptions(Closure closure) {
-        ConfigureUtil.configure(closure, compileOption)
-    }
-
-    /**
-     * 仓库配置
-     * @param configure
-     */
-    void repositories(Action<? super RepositoryHandler> configure) {
-        this.configure = configure
-    }
-
-    /**
-     * 申明组件sdk
+     * sdk模块
      * @param closure
      */
     void componentSdks(Closure closure) {
-        NamedDomainObjectContainer<PublicationOption> publications = project.container(PublicationOption)
-        ConfigureUtil.configure(closure, publications)
-        publications.each {
-            it.isSdk = true
-            it.name = ProjectUtil.getProjectName(it.name)
-            Project childProject = ProjectUtil.getProject(project, it.name)
-            if (childProject == null) {
-                Logger.buildOutput("publication's target[" + it.name + "] does not exist!")
-            } else {
-                Logger.buildOutput("publication's sdk[" + it.name + "] is " + it.groupId + ":" + it.artifactId)
-                PublicationUtil.initPublication(childProject, it)
-                PublicationManager.getInstance().addDependencyGraph(it.name, it)
-                Runtimes.addSdkPublication(childProject.name, it)
-            }
-        }
-    }
-
-    /**
-     * 未开放
-     * @param closure
-     */
-    void impl(Closure closure) {
-        NamedDomainObjectContainer<PublicationOption> publications = project.container(PublicationOption)
-        ConfigureUtil.configure(closure, publications)
-        publications.each {
-            it.isSdk = false
-            it.name = ProjectUtil.getProjectName(it.name)
-            Project childProject = ProjectUtil.getProject(project, it.name)
-            if (childProject == null) {
-                Logger.buildOutput("publication's target[" + it.name + "] does not exist!")
-            } else {
-                Logger.buildOutput("publication's impl[" + it.name + "] is " + it.groupId + ":" + it.artifactId)
-                //todo 预留后续逻辑
-            }
-        }
+        ConfigureUtil.configure(closure, sdkOption)
     }
 
     /**
