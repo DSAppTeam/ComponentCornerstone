@@ -4,7 +4,7 @@ import com.plugin.component.extension.ComponentExtension
 import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.option.CompileOptions
 import com.plugin.component.extension.option.debug.DebugConfiguration
-import com.plugin.component.extension.option.publication.PublicationOption
+import com.plugin.component.extension.option.sdk.PublicationOption
 import com.plugin.component.extension.option.debug.DebugOption
 import com.plugin.component.utils.ProjectUtil
 import org.gradle.api.Project
@@ -24,7 +24,6 @@ class Runtimes {
 
     public static List<String> sAssembleModules = new ArrayList<>()
     public static String sAndroidJarPath
-    public static String sMainModuleName
     public static CompileOptions sCompileOption
     public static DebugOption sDebugOption
     public static int sCompileSdkVersion
@@ -33,7 +32,6 @@ class Runtimes {
     static initRuntimeConfiguration(Project root, ComponentExtension componentExtension) {
 
         sAndroidJarPath = ProjectUtil.getAndroidJarPath(root, componentExtension.compileSdkVersion)
-        sMainModuleName = componentExtension.mainModuleName
         sCompileSdkVersion = componentExtension.compileSdkVersion
         sCompileOption = componentExtension.compileOption
         sDebugOption = componentExtension.debugOption
@@ -46,7 +44,6 @@ class Runtimes {
         Logger.buildOutput(" =====> component.gradle配置信息 <===== ")
         root.extensions.add("targetDebugName", sDebugOption.targetDebugName)
         Logger.buildOutput("AndroidJarPath", sAndroidJarPath)
-        Logger.buildOutput("mainModuleName", getMainModuleName())
         Logger.buildOutput("compileSdkVersion", sCompileSdkVersion)
         Logger.buildOutput("CompileOptions", sCompileOption.toString())
         Logger.buildOutput("includes", componentExtension.includes)
@@ -60,13 +57,6 @@ class Runtimes {
 
     static boolean shouldApplyComponentPlugin(Project project) {
         return sValidComponents.contains(ProjectUtil.getProjectName(project))
-    }
-
-    static String getMainModuleName() {
-        if (sMainModuleName == null || sMainModuleName.isEmpty()) {
-            sMainModuleName = Constants.DEFAULT_MAIN_MODULE_NAME
-        }
-        return sMainModuleName
     }
 
     static String getDebugModuleName() {

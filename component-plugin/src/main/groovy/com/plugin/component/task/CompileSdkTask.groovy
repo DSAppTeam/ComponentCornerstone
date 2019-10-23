@@ -3,7 +3,7 @@ package com.plugin.component.task
 
 import com.plugin.component.Runtimes
 import com.plugin.component.extension.PublicationManager
-import com.plugin.component.extension.option.publication.PublicationOption
+import com.plugin.component.extension.option.sdk.PublicationOption
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 

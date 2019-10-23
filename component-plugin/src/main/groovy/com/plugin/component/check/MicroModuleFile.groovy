@@ -1,4 +1,4 @@
-package com.plugin.pins.check
+package com.plugin.component.check
 
 class MicroModuleFile {
     String path

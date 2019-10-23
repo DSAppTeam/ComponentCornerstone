@@ -1,4 +1,4 @@
-package com.plugin.pins.check
+package com.plugin.component.check
 
 import org.w3c.dom.Document
 import org.w3c.dom.Element

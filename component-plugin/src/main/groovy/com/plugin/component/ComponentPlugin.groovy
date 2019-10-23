@@ -3,7 +3,7 @@ package com.plugin.component
 import com.plugin.component.extension.ComponentExtension
 import com.plugin.component.plugin.BasePlugin
 import com.plugin.component.plugin.DebugPlugin
-import com.plugin.component.plugin.PinsPlugin
+import com.plugin.component.plugin.PinPlugin
 import com.plugin.component.plugin.SdkPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -20,7 +20,7 @@ class ComponentPlugin implements Plugin<Project>,BasePlugin{
 
     private BasePlugin sdk = new SdkPlugin()
     private BasePlugin debug = new DebugPlugin()
-    private BasePlugin pins = new PinsPlugin()
+    private BasePlugin pins = new PinPlugin()
 
     @Override
     void apply(Project project) {

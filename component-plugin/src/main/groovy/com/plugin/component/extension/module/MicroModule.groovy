@@ -1,4 +1,4 @@
-package com.plugin.pins
+package com.plugin.component.extension.module
 
 
 class MicroModule {

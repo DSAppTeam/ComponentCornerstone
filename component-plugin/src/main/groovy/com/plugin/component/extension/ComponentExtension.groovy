@@ -3,7 +3,7 @@ package com.plugin.component.extension
 import com.plugin.component.Logger
 import com.plugin.component.Runtimes
 import com.plugin.component.extension.option.CompileOptions
-import com.plugin.component.extension.option.publication.PublicationOption
+import com.plugin.component.extension.option.sdk.PublicationOption
 import com.plugin.component.extension.option.debug.DebugOption
 import com.plugin.component.utils.ProjectUtil
 import com.plugin.component.utils.PublicationUtil
@@ -18,8 +18,6 @@ import org.gradle.util.ConfigureUtil
  * created by yummylau 2019/08/09
  */
 class ComponentExtension {
-
-    String mainModuleName
     int compileSdkVersion                           //编译版本
     CompileOptions compileOption                    //编译选项
     DebugOption debugOption                         //调试选项
@@ -117,7 +115,7 @@ class ComponentExtension {
      * 未开放
      * @param closure
      */
-    void componentImpls(Closure closure) {
+    void impl(Closure closure) {
         NamedDomainObjectContainer<PublicationOption> publications = project.container(PublicationOption)
         ConfigureUtil.configure(closure, publications)
         publications.each {

@@ -1,6 +1,6 @@
-package com.plugin.pins.extension
+package com.plugin.component.extension.option.pin
 
-import com.plugin.pins.MicroModule
+import com.plugin.component.extension.module.MicroModule
 
 
 interface OnMicroModuleListener {

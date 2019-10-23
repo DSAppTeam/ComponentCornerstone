@@ -1,5 +1,6 @@
-package com.plugin.pins
+package com.plugin.component.extension.module
 
+import com.plugin.component.utils.PinUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 
@@ -18,7 +19,7 @@ class MicroModuleInfo {
         this.exportMicroModules = new HashMap<>()
         dependencyGraph = new Digraph<String>()
 
-        MicroModule microModule = Utils.buildMicroModule(project, ':main')
+        MicroModule microModule = PinUtils.buildMicroModule(project, ':main')
         if (microModule != null) {
             setMainMicroModule(microModule)
         }
@@ -37,7 +38,7 @@ class MicroModuleInfo {
     }
 
     void addExportMicroModule(String name) {
-        MicroModule microModule = Utils.buildMicroModule(project, name)
+        MicroModule microModule = PinUtils.buildMicroModule(project, name)
         if (microModule == null) {
             throw new GradleException("MicroModule with path '${name}' could not be found in ${project.getDisplayName()}.")
         }
@@ -51,7 +52,7 @@ class MicroModuleInfo {
     void setMicroModuleDependency(String target, String dependency) {
         MicroModule dependencyMicroModule = getMicroModule(dependency)
         if(dependencyMicroModule == null) {
-            if(Utils.buildMicroModule(project, dependency) != null) {
+            if(PinUtils.buildMicroModule(project, dependency) != null) {
                 throw new GradleException("MicroModule '${target}' dependency MicroModle '${dependency}', but its not included.")
             } else {
                 throw new GradleException("MicroModule with path '${path}' could not be found in ${project.getDisplayName()}.")

@@ -6,7 +6,7 @@ import com.plugin.component.Runtimes
 import com.plugin.component.extension.module.Digraph
 import com.plugin.component.extension.module.SourceFile
 import com.plugin.component.extension.module.SourceSet
-import com.plugin.component.extension.option.publication.PublicationOption
+import com.plugin.component.extension.option.sdk.PublicationOption
 import com.plugin.component.utils.PublicationUtil
 import org.gradle.api.GradleException
 import org.gradle.api.Project
