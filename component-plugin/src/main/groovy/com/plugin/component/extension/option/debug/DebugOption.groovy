@@ -1,6 +1,4 @@
 package com.plugin.component.extension.option.debug
-
-import com.plugin.component.Constants
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.util.ConfigureUtil
@@ -43,32 +41,18 @@ class DebugOption {
         return !configurationList.isEmpty()
     }
 
-
     @Override
-    public String toString() {
-        return "DebugOption{" + '\n' +
-                "       targetModuleName = '" + targetModuleName + "," + "\n" +
-                "       targetDebugNam = '" + targetDebugName + "," + "\n" +
-                "       configurationLis = [" + configurationListToString() + '\n' +
-                "       ]} "
-    }
-
-    String configurationListToString() {
-        StringBuffer stringBuffer = new StringBuffer("\n")
-        for (DebugConfiguration debugConfiguration : configurationList) {
-            stringBuffer.append("               { name=")
-            stringBuffer.append(debugConfiguration.name)
-            if (debugConfiguration.dependencies != null && !debugConfiguration.dependencies.implementation.isEmpty()) {
-                stringBuffer.append(" dependencies=[")
-                for (Object obj : debugConfiguration.dependencies.implementation) {
-                    if (obj instanceof String) {
-                        stringBuffer.append(" " + obj.toString().replace(Constants.DEBUG_COMPONENT_PRE, ""))
-                    }
-                }
-                stringBuffer.append(" ]")
-            }
-            stringBuffer.append(" }\n")
+    String toString() {
+        StringBuilder stringBuilder = new StringBuilder("\n")
+        stringBuilder.append("               ------------------------------------------------------------------" + "\n")
+        stringBuilder.append("              | targetModuleName =  " +  targetModuleName + "\n" )
+        stringBuilder.append("              | targetDebugName =  " +  targetDebugName + "\n" )
+        stringBuilder.append("              | configuration = [ " +  "\n" )
+        for(DebugConfiguration configuration: configurationList){
+            stringBuilder.append("              |       name = " + configuration.name +  ", dependencies = " + configuration.dependencies.implementation.toString()  + "\n" )
         }
-        return stringBuffer.toString()
+        stringBuilder.append("              | ] " +  "\n" )
+        stringBuilder.append("               ------------------------------------------------------------------" + "\n")
+        return stringBuilder.toString()
     }
 }

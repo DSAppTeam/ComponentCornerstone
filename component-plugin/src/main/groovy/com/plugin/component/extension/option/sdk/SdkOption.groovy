@@ -76,13 +76,20 @@ class SdkOption {
     String toString() {
         StringBuilder stringBuilder = new StringBuilder("\n")
         stringBuilder.append("               ------------------------------------------------------------------" + "\n")
-        stringBuilder.append("              | targetDebugName = " + Runtimes.sDebugOption.targetDebugName +  "\n")
-        stringBuilder.append("              | AndroidJarPath = " + Runtimes.sAndroidJarPath +  "\n" )
-        stringBuilder.append("              | compileSdkVersion = " + Runtimes.sCompileSdkVersion +  "\n" )
-        stringBuilder.append("              | CompileOptions = " + Runtimes.sCompileOption.toString()+  "\n" )
+        stringBuilder.append("              | AndroidJarPath = " + Runtimes.getAndroidJarPath() +  "\n" )
+        stringBuilder.append("              | compileSdkVersion = " + compileSdkVersion +  "\n" )
+        stringBuilder.append("              | CompileOptions = " + compileOption.toString()+  "\n" )
+        stringBuilder.append("              | configuration = [ " +  "\n" )
+        Set<String> keys = Runtimes.getSdkPublicationMap().keySet()
+        for(String key: keys){
+            PublicationOption publicationOption = Runtimes.getSdkPublication(key)
+            stringBuilder.append("              |       name = " + publicationOption.name + ", gav = " + publicationOption.groupId + "." + publicationOption.artifactId + "\n" )
+        }
+        stringBuilder.append("              | ] " +  "\n" )
         stringBuilder.append("               -------------------------------------------------------------------" + "\n")
         return stringBuilder.toString()
     }
+
 //    /**
 //     * 未开放
 //     * @param closure

@@ -355,7 +355,7 @@ class JarUtil {
 
         if (target.exists()) {
             if (hasModifiedSource) {
-                def releaseJar = JarUtil.packJavaSourceJar(project, publication, Runtimes.sAndroidJarPath, Runtimes.sCompileOption, true)
+                def releaseJar = JarUtil.packJavaSourceJar(project, publication, Runtimes.getAndroidJarPath(), Runtimes.getCompileOption(), true)
                 if (releaseJar == null) {
                     publication.invalid = true
                     PublicationManager.getInstance().addPublication(publication)
@@ -380,7 +380,7 @@ class JarUtil {
             PublicationManager.getInstance().addPublication(publication)
             return
         } else {
-            def releaseJar = JarUtil.packJavaSourceJar(project, publication, Runtimes.sAndroidJarPath, Runtimes.sCompileOption, false)
+            def releaseJar = JarUtil.packJavaSourceJar(project, publication, Runtimes.getAndroidJarPath(), Runtimes.getCompileOption(), false)
             if (releaseJar == null) {
                 publication.invalid = true
                 PublicationManager.getInstance().addPublication(publication)
@@ -401,7 +401,7 @@ class JarUtil {
                 }
                 publication.useLocal = false
             } else {
-                releaseJar = JarUtil.packJavaSourceJar(project, publication, Runtimes.sAndroidJarPath, Runtimes.sCompileOption, true)
+                releaseJar = JarUtil.packJavaSourceJar(project, publication, Runtimes.getAndroidJarPath(), Runtimes.getCompileOption(), true)
                 FileUtil.copyFile(releaseJar, target)
                 publication.useLocal = true
             }
@@ -434,7 +434,7 @@ class JarUtil {
             }
         }
 
-        File releaseJar = JarUtil.packJavaSourceJar(project, publication, Runtimes.sAndroidJarPath, Runtimes.sCompileOption, true)
+        File releaseJar = JarUtil.packJavaSourceJar(project, publication, Runtimes.getAndroidJarPath(), Runtimes.getCompileOption(), true)
         if (releaseJar == null) {
             publication.invalid = true
             PublicationManager.getInstance().addPublication(publication)

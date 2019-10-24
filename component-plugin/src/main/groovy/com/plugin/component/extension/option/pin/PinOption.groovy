@@ -1,6 +1,5 @@
 package com.plugin.component.extension.option.pin
 
-
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.util.ConfigureUtil
@@ -8,7 +7,6 @@ import org.gradle.util.ConfigureUtil
 class PinOption {
 
     Project project
-
     List<PinConfiguration> configurationList = new ArrayList<>()         //配置信息
 
     PinOption(Project project) {
@@ -27,6 +25,12 @@ class PinOption {
     String toString() {
         StringBuilder stringBuilder = new StringBuilder("\n")
         stringBuilder.append("               ------------------------------------------------------------------" + "\n")
+        stringBuilder.append("              | configuration = [ " +  "\n" )
+        for(PinConfiguration configuration: configurationList){
+            stringBuilder.append("              |       name = " + configuration.name + ", codeCheckEnabled = " + configuration.codeCheckEnabled  + ", mathPath = " + configuration.mainPath
+                    + ", include = " + configuration.includePins.toString() + ", export = " + configuration.export.toString()  + "\n" )
+        }
+        stringBuilder.append("              | ] " +  "\n" )
         stringBuilder.append("               ------------------------------------------------------------------" + "\n")
         return stringBuilder.toString()
     }

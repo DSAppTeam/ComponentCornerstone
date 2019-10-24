@@ -42,7 +42,7 @@ class Constants {
     public static String SDK_PRE = 'sdk-'
     public static String IMPL_PRE = 'impl-'
     public static String COMPONENT_PRE = 'component-'
-    public static String DEBUG_COMPONENT_PRE = 'debugDependency-'
+    public static String DEBUG_COMPONENT_PRE = 'component(Debug)-'
     public static String CORE_DEPENDENCY = "com.effective.android:component-core:1.0.4"
 
     //sourceSet - default
