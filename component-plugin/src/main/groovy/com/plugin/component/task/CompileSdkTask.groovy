@@ -18,7 +18,7 @@ class CompileSdkTask extends DefaultTask {
     @TaskAction
     void compileSource() {
         def project = getProject()
-        def releaseJar = JarUtil.packJavaSourceJar(project, publication, Runtimes.sAndroidJarPath, Runtimes.sCompileOption, false)
+        def releaseJar = JarUtil.packJavaSourceJar(project, publication, Runtimes.getAndroidJarPath(), Runtimes.getCompileOption(), false)
         if (releaseJar == null) {
             throw new RuntimeException("nothing to push.")
         }

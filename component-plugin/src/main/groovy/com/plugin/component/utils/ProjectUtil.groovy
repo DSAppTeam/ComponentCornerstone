@@ -180,17 +180,35 @@ class ProjectUtil {
             Logger.buildOutput("hasDebugOptions", false)
         }
         Logger.buildOutput("DebugModule[" + project.name + "]" + "Main sourceSets: ")
-        Logger.buildOutput("java", objMain.java.srcDirs.toString())
-        Logger.buildOutput("res", objMain.res.srcDirs.toString())
-        Logger.buildOutput("assets", objMain.assets.srcDirs.toString())
-        Logger.buildOutput("jniLibs", objMain.jniLibs.srcDirs.toString())
+        Logger.buildOutput("java", sourceSetDirToString(objMain.java.srcDirs))
+        Logger.buildOutput("res", sourceSetDirToString(objMain.res.srcDirs))
+        Logger.buildOutput("assets", sourceSetDirToString(objMain.assets.srcDirs))
+        Logger.buildOutput("jniLibs", sourceSetDirToString(objMain.jniLibs.srcDirs))
         Logger.buildOutput("manifest", objAndroidTest.manifest.srcFile.path)
         Logger.buildOutput("DebugModule[" + project.name + "]" + "AndroidTest sourceSets: ")
-        Logger.buildOutput("java", objAndroidTest.java.srcDirs.toString())
-        Logger.buildOutput("res", objAndroidTest.res.srcDirs.toString())
-        Logger.buildOutput("assets", objAndroidTest.assets.srcDirs.toString())
-        Logger.buildOutput("jniLibs", objAndroidTest.jniLibs.srcDirs.toString())
+        Logger.buildOutput("java", sourceSetDirToString(objAndroidTest.java.srcDirs))
+        Logger.buildOutput("res", sourceSetDirToString(objAndroidTest.res.srcDirs))
+        Logger.buildOutput("assets", sourceSetDirToString(objAndroidTest.assets.srcDirs))
+        Logger.buildOutput("jniLibs", sourceSetDirToString(objAndroidTest.jniLibs.srcDirs))
         Logger.buildOutput("manifest", objAndroidTest.manifest.srcFile.path)
+    }
+
+    private static String sourceSetDirToString(Set<File> set) {
+        StringBuilder stringBuilder = new StringBuilder()
+        if (set != null && !set.isEmpty()) {
+            if(set.size() == 1){
+                for (File file : set) {
+                    stringBuilder.append("[ " + file.path + " ]")
+                }
+            }else{
+                stringBuilder.append("[ \n")
+                for (File file : set) {
+                    stringBuilder.append("                      " + file.path + "\n")
+                }
+                stringBuilder.append("                 ]")
+            }
+        }
+        return stringBuilder.toString()
     }
 
     /**
