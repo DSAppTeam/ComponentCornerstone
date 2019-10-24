@@ -7,10 +7,7 @@ buildscript {
     repositories {
         google()
         jcenter()
-//        maven { url 'https://dl.bintray.com/yummylau/maven' }
-        maven {
-            url uri('./repo')
-        }
+        maven { url 'https://dl.bintray.com/yummylau/maven' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.1.0'
@@ -29,10 +26,7 @@ allprojects {
         google()
         jcenter()
         maven { url "http://dl.bintray.com/kotlin/kotlin-eap" }
-//        maven { url 'https://dl.bintray.com/yummylau/maven' }
-        maven {
-            url uri('../repo')
-        }
+        maven { url 'https://dl.bintray.com/yummylau/maven' }
     }
 
     gradle.projectsEvaluated {
