@@ -1,0 +1,3 @@
+dependencies {
+    implementation fileTree(dir: 'main/libs', include: ['*.jar'])
+}

@@ -1,11 +1,8 @@
 package com.plugin.component.extension.module
 
 
-class MicroModule {
-
+class PinInfo {
     String name
-    File microModuleDir
-
+    File pinDir
     boolean appliedScript
-
 }

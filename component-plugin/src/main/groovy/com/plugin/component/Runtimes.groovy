@@ -1,7 +1,9 @@
 package com.plugin.component
 
 import com.plugin.component.extension.ComponentExtension
+import com.plugin.component.extension.module.PinInfo
 import com.plugin.component.extension.module.ProjectInfo
+import com.plugin.component.extension.option.pin.PinConfiguration
 import com.plugin.component.extension.option.pin.PinOption
 import com.plugin.component.extension.option.sdk.CompileOptions
 import com.plugin.component.extension.option.debug.DebugConfiguration
@@ -19,6 +21,8 @@ class Runtimes {
     private static Map<String, PublicationOption> sImplPublicationMap = new HashMap<>()
     //模块信息
     private static Map<String, ProjectInfo> sProjectInfoMap = new HashMap<>()
+
+    private static Map<String, PinConfiguration> sPinConfigurations = new HashMap<>()
 
     private static String sAndroidJarPath
     public static DebugOption sDebugOption
@@ -49,13 +53,35 @@ class Runtimes {
         Logger.buildOutput(componentExtension.debugOption.toString())
         Logger.buildOutput(" =====> component.gradle配置信息 <===== ")
         Logger.buildOutput("")
+
+        //初始化pins
+        root.allprojects.each {
+            for (PinConfiguration pinConfiguration : sPinOption.configurationList) {
+                if (ProjectUtil.isProjectSame(it.name, pinConfiguration.name)) {
+                    sPinConfigurations.put(it.name, pinConfiguration)
+                    pinConfiguration.initMainPin(it)
+                }
+            }
+        }
     }
 
-    static CompileOptions getCompileOption(){
+    static Map<String, PinConfiguration> getPinConfigurations() {
+        return sPinConfigurations
+    }
+
+    static boolean hasPinModule() {
+        return !sPinConfigurations.isEmpty()
+    }
+
+    static PinConfiguration getPinConfiguration(String name) {
+        return sPinConfigurations.get(name)
+    }
+
+    static CompileOptions getCompileOption() {
         return sSdkOption.compileOption
     }
 
-    static getAndroidJarPath(){
+    static getAndroidJarPath() {
         return sAndroidJarPath
     }
 

@@ -21,12 +21,12 @@ class ComponentPlugin implements Plugin<Project>,BasePlugin{
     private BasePlugin sdk = new SdkPlugin()
     private BasePlugin debug = new DebugPlugin()
     private BasePlugin pins = new PinPlugin()
+    private ComponentExtension componentExtension
 
     @Override
     void apply(Project project) {
-
         if (project == project.rootProject) {
-            ComponentExtension componentExtension = project.getExtensions().create(Constants.COMPONENT, ComponentExtension, project)
+            componentExtension = project.getExtensions().create(Constants.COMPONENT, ComponentExtension, project)
             initExtension(componentExtension)
             evaluateRoot(project)
             project.afterEvaluate {
@@ -73,6 +73,7 @@ class ComponentPlugin implements Plugin<Project>,BasePlugin{
 
     @Override
     void afterEvaluateRoot(Project root) {
+        Runtimes.initRuntimeConfiguration(root, componentExtension)
         sdk.afterEvaluateRoot(root)
         debug.afterEvaluateRoot(root)
         pins.afterEvaluateRoot(root)

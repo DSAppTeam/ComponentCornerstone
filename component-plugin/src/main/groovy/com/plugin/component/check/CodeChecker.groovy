@@ -1,8 +1,8 @@
 package com.plugin.component.check
 
-import com.plugin.component.extension.module.MicroModule
-import com.plugin.component.extension.module.MicroModuleInfo
+import com.plugin.component.extension.module.PinInfo
 import com.plugin.component.extension.module.ProductFlavorInfo
+import com.plugin.component.extension.option.pin.PinConfiguration
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Project
 import org.w3c.dom.Element
@@ -11,7 +11,7 @@ import org.w3c.dom.NodeList
 class CodeChecker {
 
     Project project
-    MicroModuleInfo microModuleInfo
+    PinConfiguration pinConfiguration
     ProductFlavorInfo productFlavorInfo
 
     String buildType
@@ -25,9 +25,9 @@ class CodeChecker {
 
     Map<String, List<String>> microModulePackageNameMap
 
-    CodeChecker(Project project, MicroModuleInfo microModuleInfo, ProductFlavorInfo productFlavorInfo, String buildType, String productFlavor) {
+    CodeChecker(Project project, PinConfiguration pinConfiguration, ProductFlavorInfo productFlavorInfo, String buildType, String productFlavor) {
         this.project = project
-        this.microModuleInfo = microModuleInfo
+        this.pinConfiguration = pinConfiguration
         this.productFlavorInfo = productFlavorInfo
         this.buildType = buildType
         this.productFlavor = productFlavor
@@ -50,7 +50,7 @@ class CodeChecker {
             throw new GradleScriptException(errorMessage, null)
         }
 
-        def manifest = new File(microModuleInfo.mainMicroModule.microModuleDir, "src/main/AndroidManifest.xml")
+        def manifest = new File(pinConfiguration.mainPin.pinDir, "src/main/AndroidManifest.xml")
         String packageName = Utils.getAndroidManifestPackageName(manifest)
         checkManifest.packageName = packageName
         saveModuleCheckManifest()
@@ -105,7 +105,7 @@ class CodeChecker {
                 def find = matcher.group()
                 def name = find.substring(find.indexOf("/") + 1)
                 def from = resourcesMap.get(name)
-                if (from != null && microModuleName != from && !microModuleInfo.hasDependency(microModuleName, from)) {
+                if (from != null && microModuleName != from && !pinConfiguration.hasDependency(microModuleName, from)) {
                     List<Number> lines = textLines.findIndexValues { it.contains(find) }
                     lines.each {
                         def lineIndex = it.intValue()
@@ -117,7 +117,7 @@ class CodeChecker {
                         def message = absolutePath + ':' + (lineIndex + 1)
                         if (!errorMessage.contains(message)) {
                             message += lineSeparator
-                            message += "- cannot use [" + find + "] which from MicroModule '${from}'."
+                            message += "- cannot use [" + find + "] which from PinInfo '${from}'."
                             message += lineSeparator
                             errorMessage += message
                         }
@@ -157,14 +157,14 @@ class CodeChecker {
     List<File> getModifiedClassesList(List<String> sourceFolders) {
         Map<String, MicroModuleFile> lastModifiedClassesMap = checkManifest.getClassesMap()
         List<File> modifiedClassesList = new ArrayList<>()
-        microModuleInfo.includeMicroModules.each {
-            MicroModule microModule = it.value
+        pinConfiguration.includePins.each {
+            PinInfo microModule = it.value
             sourceFolders.each {
-                File javaDir = new File(microModule.microModuleDir, "/src/${it}/java")
+                File javaDir = new File(microModule.pinDir, "/src/${it}/java")
                 if (javaDir.exists()) {
                     getModifiedJavaFile(javaDir, modifiedClassesList, lastModifiedClassesMap)
                 }
-                File kotlinDir = new File(microModule.microModuleDir, "/src/${it}/kotlin")
+                File kotlinDir = new File(microModule.pinDir, "/src/${it}/kotlin")
                 if (kotlinDir.exists()) {
                     getModifiedJavaFile(kotlinDir, modifiedClassesList, lastModifiedClassesMap)
                 }
@@ -229,7 +229,7 @@ class CodeChecker {
                     from = classesMap.get(name)
                 }
 
-                if (from != null && microModuleName != from && !microModuleInfo.hasDependency(microModuleName, from)) {
+                if (from != null && microModuleName != from && !pinConfiguration.hasDependency(microModuleName, from)) {
                     List<Number> lines = textLines.findIndexValues { it.contains(find) }
                     lines.each {
                         def lineIndex = it.intValue()
@@ -241,7 +241,7 @@ class CodeChecker {
                         def message = absolutePath + ':' + (lineIndex + 1)
                         if (!errorMessage.contains(message)) {
                             message += lineSeparator
-                            message += "- cannot use [" + find + "] which from MicroModule '${from}'."
+                            message += "- cannot use [" + find + "] which from PinInfo '${from}'."
                             message += lineSeparator
                             errorMessage += message
                         }
@@ -307,13 +307,13 @@ class CodeChecker {
 
     private String initMicroModulePackageName() {
         microModulePackageNameMap = new HashMap<>()
-        microModuleInfo.includeMicroModules.each {
-            MicroModule microModule = it.value
+        pinConfiguration.includePins.each {
+            PinInfo microModule = it.value
             boolean find = false
             List<String> flavorList = productFlavorInfo.combinedProductFlavorsMap.get(productFlavor)
             if (flavorList != null && !flavorList.isEmpty()) {
                 for (String flavor : flavorList) {
-                    File manifest = new File(microModule.microModuleDir, "/src/${flavor}/AndroidManifest.xml")
+                    File manifest = new File(microModule.pinDir, "/src/${flavor}/AndroidManifest.xml")
                     if (manifest.exists()) {
                         String packageName = Utils.getAndroidManifestPackageName(manifest)
                         if (packageName != null && !packageName.isEmpty()) {
@@ -331,7 +331,7 @@ class CodeChecker {
             }
 
             if (!find) {
-                File manifest = new File(microModule.microModuleDir, "/src/${buildType}/AndroidManifest.xml")
+                File manifest = new File(microModule.pinDir, "/src/${buildType}/AndroidManifest.xml")
                 if (manifest.exists()) {
                     String packageName = Utils.getAndroidManifestPackageName(manifest)
                     if (packageName != null && !packageName.isEmpty()) {
@@ -347,7 +347,7 @@ class CodeChecker {
             }
 
             if (!find) {
-                File manifest = new File(microModule.microModuleDir, "/src/main/AndroidManifest.xml")
+                File manifest = new File(microModule.pinDir, "/src/main/AndroidManifest.xml")
                 if (manifest.exists()) {
                     String packageName = Utils.getAndroidManifestPackageName(manifest)
                     if (packageName != null && !packageName.isEmpty()) {
