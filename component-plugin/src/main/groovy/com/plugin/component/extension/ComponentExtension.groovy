@@ -1,6 +1,5 @@
 package com.plugin.component.extension
 
-import com.plugin.component.Runtimes
 import com.plugin.component.extension.option.pin.PinOption
 import com.plugin.component.extension.option.debug.DebugOption
 import com.plugin.component.extension.option.sdk.SdkOption

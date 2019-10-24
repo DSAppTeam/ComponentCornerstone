@@ -151,8 +151,6 @@ class SdkPlugin implements BasePlugin{
 
     @Override
     void afterEvaluateRoot(Project root) {
-        Runtimes.initRuntimeConfiguration(root, mComponentExtension)
-
         Logger.buildOutput("")
         Logger.buildOutput("=====> 处理 sdk/impl jar <=====")
         List<String> topSort = PublicationManager.getInstance().dependencyGraph.topSort()

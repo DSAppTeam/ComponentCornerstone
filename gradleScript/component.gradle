@@ -9,7 +9,7 @@ component {
     exclude 'libraryWithoutPlugin','component-core'
 
 //  上述 语句等价于下面语句
-    include ':app','library','libraryKotlin','debugModule'
+//    include ':app','library','libraryKotlin','debugModule'
 
 
     sdk {
@@ -46,14 +46,12 @@ component {
     }
 
     pin {
-
         configuration {
-            'library' {
+            'pins' {
                 codeCheckEnabled true
                 include ':p_base'
                 include ':p_common'
                 include ':p_home'
-
                 export ':main', ':p_home'
                 export ':p_common'
             }
