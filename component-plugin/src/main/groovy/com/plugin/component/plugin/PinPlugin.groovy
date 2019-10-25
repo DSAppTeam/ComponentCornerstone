@@ -11,6 +11,7 @@ import com.plugin.component.Runtimes
 import com.plugin.component.extension.module.PinInfo
 import com.plugin.component.extension.option.pin.PinConfiguration
 import com.plugin.component.utils.PinUtils
+import com.plugin.component.utils.ProjectUtil
 import org.gradle.BuildListener
 import org.gradle.BuildResult
 import org.gradle.api.Action
@@ -44,12 +45,8 @@ class PinPlugin extends BasePlugin {
         return pinConfiguration != null
     }
 
-
     @Override
-    void evaluate(Project project, boolean isRoot) {
-        if (isRoot) {
-            return
-        }
+    void evaluateBeforeAndroidPlugin(Project project) {
 
         this.project = project
         pinConfiguration = Runtimes.getPinConfiguration(project.name)
@@ -154,59 +151,7 @@ class PinPlugin extends BasePlugin {
     }
 
     @Override
-    void afterEvaluate(Project project, boolean isRoot) {
-        if (isRoot) {
-            if (Runtimes.hasPinModule()) {
-                project.gradle.addBuildListener(new BuildListener() {
-                    @Override
-                    void buildStarted(Gradle gradle) {
-
-                    }
-
-                    @Override
-                    void settingsEvaluated(Settings settings) {
-
-                    }
-
-                    @Override
-                    void projectsLoaded(Gradle gradle) {
-
-                    }
-
-                    @Override
-                    void projectsEvaluated(Gradle gradle) {
-
-                    }
-
-                    @Override
-                    void buildFinished(BuildResult buildResult) {
-                        // generate microModules.xml for PinInfo IDEA plugin.
-                        def ideaFile = new File(buildResult.gradle.rootProject.rootDir, '.idea')
-                        if (!ideaFile.exists()) return
-                        def pininfos = '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<modules>\n'
-
-                        Map<String, PinConfiguration> allPins = Runtimes.getPinConfigurations()
-                        Set<String> moduleNames = allPins.keySet()
-                        for (String moduleName : moduleNames) {
-                            PinConfiguration pins = allPins.get(moduleName)
-                            def displayName = pins.name
-                            pininfos += '    <module name=\"' + displayName.substring(displayName.indexOf("'") + 1, displayName.lastIndexOf("'")) + '\" path=\"' + it.projectDir.getCanonicalPath() + '\">\n'
-                            pins.includePins.each {
-                                PinInfo microModule = it.value
-                                pininfos += '        <microModule name=\"' + microModule.name + '\" path=\"' + microModule.pinDir.getCanonicalPath() + '\" />\n'
-                            }
-                            pininfos += '    </module>\n'
-                        }
-
-                        pininfos += '</modules>'
-
-                        def pins = new File(ideaFile, 'microModules.xml')
-                        pins.write(pininfos, 'utf-8')
-                    }
-                })
-            }
-            return
-        }
+    void afterEvaluateBeforeAndroidPlugin(Project project) {
 
         if (!isSupportPins()) {
             return
@@ -271,7 +216,7 @@ class PinPlugin extends BasePlugin {
         PinUtils.generateAndroidManifest(project, pinConfiguration, startTaskState)
 
         project.tasks.preBuild.doFirst {
-            clearOriginSourceSet()
+            PinUtils.clearOriginSourceSet(project, pinConfiguration.productFlavorInfo)
             if (startTaskState == ASSEMBLE_OR_GENERATE) {
                 pinConfiguration.includePins.each {
                     PinInfo pin = it.value
@@ -285,6 +230,62 @@ class PinPlugin extends BasePlugin {
                 }
             }
             PinUtils.generateAndroidManifest(project, pinConfiguration, startTaskState)
+        }
+    }
+
+    @Override
+    void afterAllEvaluate(Project root) {
+        if (Runtimes.hasPinModule()) {
+            root.gradle.addBuildListener(new BuildListener() {
+                @Override
+                void buildStarted(Gradle gradle) {
+
+                }
+
+                @Override
+                void settingsEvaluated(Settings settings) {
+
+                }
+
+                @Override
+                void projectsLoaded(Gradle gradle) {
+
+                }
+
+                @Override
+                void projectsEvaluated(Gradle gradle) {
+
+                }
+
+                @Override
+                void buildFinished(BuildResult buildResult) {
+                    // generate microModules.xml for PinInfo IDEA plugin.
+                    def ideaFile = new File(buildResult.gradle.rootProject.rootDir, '.idea')
+                    if (!ideaFile.exists()) return
+                    def pininfos = '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<modules>\n'
+
+                    Map<String, PinConfiguration> allPins = Runtimes.getPinConfigurations()
+                    Set<String> moduleNames = allPins.keySet()
+                    for (String moduleName : moduleNames) {
+                        PinConfiguration pins = allPins.get(moduleName)
+                        Project project = ProjectUtil.getProject(root, pins.name)
+                        if (project != null) {
+                            def displayName = project.displayName
+                            pininfos += '    <module name=\"' + displayName.substring(displayName.indexOf("'") + 1, displayName.lastIndexOf("'")) + '\" path=\"' + project.projectDir.getCanonicalPath() + '\">\n'
+                            pins.includePins.each {
+                                PinInfo pin = it.value
+                                pininfos += '        <pin name=\"' + pin.name + '\" path=\"' + pin.pinDir.getCanonicalPath() + '\" />\n'
+                            }
+                            pininfos += '    </module>\n'
+                        }
+                    }
+
+                    pininfos += '</modules>'
+
+                    def pins = new File(ideaFile, 'modulePins.xml')
+                    pins.write(pininfos, 'utf-8')
+                }
+            })
         }
     }
 

@@ -14,6 +14,9 @@ import org.gradle.api.Project
  *    ./gradlew --no-daemon :app:assemble  -Dorg.gradle.debug=true
  *    ./gradlew --no-daemon [:library:assembleDebug, :libraryKotlin:assembleDebug, :debugModule:assembleDebug, :app:assembleDebug]  -Dorg.gradle.debug=true
  *  组件插件入口
+ *  插件统一在root模块配置收集：所有配置信息在root评估之后统一初始化完成
+ *  pin功能需要在android插件apply之前
+ *  debug/sdk功能需要在android插件apply之后
  *  created by yummylau 2019/08/09
  */
 class ComponentPlugin extends AbsPlugin implements Plugin<Project> {
@@ -28,47 +31,57 @@ class ComponentPlugin extends AbsPlugin implements Plugin<Project> {
         if (project == project.rootProject) {
             componentExtension = project.getExtensions().create(Constants.COMPONENT, ComponentExtension, project)
             initExtension(componentExtension)
-            evaluate(project, true)
+            Runtimes.initRuntimeConfigurationOnEvaluate(project)
             project.afterEvaluate {
-                afterEvaluate(project, true)
+                Runtimes.initRuntimeConfigurationAfterEvaluate(project, componentExtension)
+                Runtimes.hookAfterApplyingAndroidPlugin(project, this)
+                Runtimes.injectComponentPlugin(project)
             }
             project.gradle.projectsEvaluated {
-                afterAllEvaluate()
+                afterAllEvaluate(project)
             }
         } else {
-            evaluate(project, false)
+            evaluateBeforeAndroidPlugin(project)
             project.afterEvaluate {
-                afterEvaluate(project, false)
+                afterEvaluateBeforeAndroidPlugin(project)
             }
         }
     }
 
     @Override
-    void evaluate(Project project, boolean isRoot) {
-        sdk.evaluate(project, isRoot)
-        debug.evaluate(project, isRoot)
-        pins.evaluate(project, isRoot)
-    }
-
-    @Override
-    void afterEvaluate(Project project, boolean isRoot) {
-        sdk.afterEvaluate(project, isRoot)
-        debug.afterEvaluate(project, isRoot)
-        pins.afterEvaluate(project, isRoot)
-    }
-
-    @Override
     void initExtension(ComponentExtension componentExtension) {
+        this.componentExtension = componentExtension
         sdk.initExtension(componentExtension)
         debug.initExtension(componentExtension)
         pins.initExtension(componentExtension)
     }
 
+    @Override
+    void evaluateBeforeAndroidPlugin(Project project) {
+        pins.evaluateBeforeAndroidPlugin(project)
+    }
 
     @Override
-    void afterAllEvaluate() {
-        sdk.afterAllEvaluate()
-        debug.afterAllEvaluate()
-        pins.afterAllEvaluate()
+    void afterEvaluateBeforeAndroidPlugin(Project project) {
+        pins.afterEvaluateBeforeAndroidPlugin(project)
+    }
+
+    @Override
+    void evaluateAfterAndroidPlugin(Project project) {
+        sdk.evaluateAfterAndroidPlugin(project)
+        debug.evaluateAfterAndroidPlugin(project)
+    }
+
+    @Override
+    void afterEvaluateAfterAndroidPlugin(Project project) {
+        sdk.afterEvaluateAfterAndroidPlugin(project)
+        debug.afterEvaluateAfterAndroidPlugin(project)
+    }
+
+    @Override
+    void afterAllEvaluate(Project root) {
+        sdk.afterAllEvaluate(root)
+        debug.afterAllEvaluate(root)
+        pins.afterAllEvaluate(root)
     }
 }

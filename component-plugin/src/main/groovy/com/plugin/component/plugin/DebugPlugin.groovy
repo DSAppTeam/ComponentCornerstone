@@ -9,10 +9,9 @@ import org.gradle.api.Project
 class DebugPlugin extends BasePlugin {
 
     @Override
-    void afterEvaluate(Project project, boolean isRoot) {
+    void afterEvaluateAfterAndroidPlugin(Project project) {
         ProjectInfo projectInfo = Runtimes.getProjectInfo(project.name)
-        //调整debugModule结构
-        if (ProjectUtil.isProjectSame(projectInfo.name, Runtimes.getDebugModuleName())) {
+        if (projectInfo != null && ProjectUtil.isProjectSame(projectInfo.name, Runtimes.getDebugModuleName())) {
             Logger.buildOutput("")
             Logger.buildOutput(" =====> project[" + projectInfo.name + "] is debugModel,modifying DebugSets <=====")
             ProjectUtil.modifyDebugSets(projectInfo.project.rootProject, projectInfo)
