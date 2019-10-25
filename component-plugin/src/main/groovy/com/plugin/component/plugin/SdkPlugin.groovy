@@ -1,10 +1,11 @@
 package com.plugin.component.plugin
 
-import com.plugin.component.Logger
+import com.plugin.component.log.Logger
 import com.plugin.component.Runtimes
 import com.plugin.component.extension.PublicationManager
 import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.option.sdk.PublicationOption
+import com.plugin.component.log.MutLineLog
 import com.plugin.component.utils.ProjectUtil
 import com.plugin.component.utils.PublicationUtil
 import org.gradle.api.Project
@@ -78,17 +79,17 @@ class SdkPlugin extends BasePlugin {
     void afterAllEvaluate(Project root) {
         ProjectInfo compileProject = Runtimes.getCompileProjectWhenAssemble()
         if (compileProject != null) {
-            Logger.buildOutput("")
-            Logger.buildOutput("=====> 处理循环依赖 <=====")
+
+            MutLineLog mutLineLog = new MutLineLog()
             if (Runtimes.sAssembleModules.size() > 1) {
-                Logger.buildOutput("task has one more assemble module,skip transforming [component] to [project]")
+                mutLineLog.build4("task has one more assemble module,skip transforming [component] to [project]")
             } else {
-                Logger.buildOutput("assemble project", compileProject.name)
+                mutLineLog.build4("assemble project = " + compileProject.name)
                 Set<String> hasResolve = new HashSet<>()
                 Set<String> currentDependencies = new HashSet<>()
                 Set<String> nextDependencies = new HashSet<>()
                 currentDependencies.addAll(compileProject.componentDependencies)
-                Logger.buildOutput("project[" + compileProject.name + "] component 依赖", compileProject.getComponentDependenciesString())
+                mutLineLog.build4("project[" + compileProject.name + "] component 依赖 = " + compileProject.getComponentDependenciesString())
 
                 while (!currentDependencies.isEmpty()) {
                     for (String string : currentDependencies) {
@@ -97,7 +98,7 @@ class SdkPlugin extends BasePlugin {
                         if (!hasResolve.contains(name)) {
                             hasResolve.add(name)
                             nextDependencies.addAll(projectInfo.componentDependencies)
-                            Logger.buildOutput("project[" + projectInfo.name + "] component 依赖", projectInfo.getComponentDependenciesString())
+                            mutLineLog.build4("project[" + projectInfo.name + "] component 依赖 = " +  projectInfo.getComponentDependenciesString())
                         }
                     }
                     currentDependencies.clear()
@@ -115,11 +116,10 @@ class SdkPlugin extends BasePlugin {
                             implementation compileProject.project.project(":" + realDependency)
                         }
                     }
-                    Logger.buildOutput("application[" + compileProject.name + "] component 合并依赖", stringBuilder.toString())
+                    mutLineLog.build4("application[" + compileProject.name + "] component 合并依赖 = " + stringBuilder.toString())
                 }
             }
-            Logger.buildOutput("=====> 处理循环依赖 <=====")
-            Logger.buildOutput("")
+            Logger.buildBlockLog("单 ASSEMBLE 场景处理循环依赖", mutLineLog)
         }
     }
 }

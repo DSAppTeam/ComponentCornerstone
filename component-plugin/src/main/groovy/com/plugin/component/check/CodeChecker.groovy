@@ -3,6 +3,7 @@ package com.plugin.component.check
 import com.plugin.component.extension.module.PinInfo
 import com.plugin.component.extension.module.ProductFlavorInfo
 import com.plugin.component.extension.option.pin.PinConfiguration
+import com.plugin.component.utils.PinUtils
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Project
 import org.w3c.dom.Element
@@ -51,7 +52,7 @@ class CodeChecker {
         }
 
         def manifest = new File(pinConfiguration.mainPin.pinDir, "src/main/AndroidManifest.xml")
-        String packageName = Utils.getAndroidManifestPackageName(manifest)
+        String packageName = PinUtils.getAndroidManifestPackageName(manifest)
         checkManifest.packageName = packageName
         saveModuleCheckManifest()
     }
@@ -315,7 +316,7 @@ class CodeChecker {
                 for (String flavor : flavorList) {
                     File manifest = new File(microModule.pinDir, "/src/${flavor}/AndroidManifest.xml")
                     if (manifest.exists()) {
-                        String packageName = Utils.getAndroidManifestPackageName(manifest)
+                        String packageName = PinUtils.getAndroidManifestPackageName(manifest)
                         if (packageName != null && !packageName.isEmpty()) {
                             List<String> microModuleList = microModulePackageNameMap.get(packageName)
                             if (microModuleList == null) {
@@ -333,7 +334,7 @@ class CodeChecker {
             if (!find) {
                 File manifest = new File(microModule.pinDir, "/src/${buildType}/AndroidManifest.xml")
                 if (manifest.exists()) {
-                    String packageName = Utils.getAndroidManifestPackageName(manifest)
+                    String packageName = PinUtils.getAndroidManifestPackageName(manifest)
                     if (packageName != null && !packageName.isEmpty()) {
                         List<String> microModuleList = microModulePackageNameMap.get(packageName)
                         if (microModuleList == null) {
@@ -349,7 +350,7 @@ class CodeChecker {
             if (!find) {
                 File manifest = new File(microModule.pinDir, "/src/main/AndroidManifest.xml")
                 if (manifest.exists()) {
-                    String packageName = Utils.getAndroidManifestPackageName(manifest)
+                    String packageName = PinUtils.getAndroidManifestPackageName(manifest)
                     if (packageName != null && !packageName.isEmpty()) {
                         List<String> microModuleList = microModulePackageNameMap.get(packageName)
                         if (microModuleList == null) {
