@@ -7,9 +7,13 @@ abstract class AbsPlugin {
 
     abstract void initExtension(ComponentExtension componentExtension)
 
-    abstract void evaluate(Project project, boolean isRoot)
+    abstract void evaluateBeforeAndroidPlugin(Project project)
 
-    abstract void afterEvaluate(Project project, boolean isRoot)
+    abstract void afterEvaluateBeforeAndroidPlugin(Project project)
 
-    abstract void afterAllEvaluate()
+    abstract void evaluateAfterAndroidPlugin(Project project)
+
+    abstract void afterEvaluateAfterAndroidPlugin(Project project)
+
+    abstract void afterAllEvaluate(Project root)
 }
