@@ -1,5 +1,5 @@
 //发布调试 core
-//include ':component-core'
+include ':component-core'
 //
 //发布插件
 //include ':component-plugin'

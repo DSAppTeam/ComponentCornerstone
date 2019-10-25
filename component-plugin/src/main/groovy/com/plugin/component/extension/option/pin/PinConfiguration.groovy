@@ -42,19 +42,19 @@ class PinConfiguration {
         productFlavorInfo = new ProductFlavorInfo(project)
         PinUtils.clearOriginSourceSet(project, productFlavorInfo)
 
-        for (String include : include) {
-            PinInfo pin = PinUtils.buildPin(project, include)
-            if (microModule == null) {
-                throw new GradleException("PinInfo with path '${include}' could not be found in ${project.getDisplayName()}.")
+        for (String name : include) {
+            PinInfo pin = PinUtils.buildPin(project, name)
+            if (pin == null) {
+                throw new GradleException("PinInfo with path '${name}' could not be found in ${project.getDisplayName()}.")
             }
             addIncludePin(pin)
             PinUtils.addMicroModuleSourceSet(project, pin, productFlavorInfo)
         }
 
-        for (String export : export) {
-            PinInfo pin = PinUtils.buildPin(project, export)
+        for (String name : export) {
+            PinInfo pin = PinUtils.buildPin(project, name)
             if (pin == null) {
-                throw new GradleException("PinInfo with path '${export}' could not be found in ${project.getDisplayName()}.")
+                throw new GradleException("PinInfo with path '${name}' could not be found in ${project.getDisplayName()}.")
             }
             addExportPin(pin)
             PinUtils.addMicroModuleSourceSet(project, pin, productFlavorInfo)
@@ -79,12 +79,8 @@ class PinConfiguration {
         includePins.put(pin.name, pin)
     }
 
-    void addExportPin(String name) {
-        PinInfo pin = PinUtils.buildPin(project, name)
-        if (pin == null) {
-            throw new GradleException("PinInfo with path '${name}' could not be found in ${project.getDisplayName()}.")
-        }
-        exportPins.put(name, null)
+    void addExportPin(PinInfo pin) {
+        exportPins.put(pin.name, null)
     }
 
     PinInfo getIncludePin(String name) {
@@ -124,14 +120,14 @@ class PinConfiguration {
     void export(String... pinPaths) {
         int size = pinPaths.size()
         for (int i = 0; i < size; i++) {
-            include.add(pinPaths[i])
+            export.add(pinPaths[i])
         }
     }
 
     void include(String... pinPaths) {
         int size = pinPaths.size()
         for (int i = 0; i < size; i++) {
-            export.add(pinPaths[i])
+            include.add(pinPaths[i])
         }
     }
 

@@ -3,17 +3,27 @@ package com.plugin.component.plugin
 import com.plugin.component.extension.ComponentExtension
 import org.gradle.api.Project
 
-abstract interface BasePlugin {
+class BasePlugin extends AbsPlugin {
 
-    void initExtension(ComponentExtension componentExtension)
+    ComponentExtension componentExtension
 
-    void evaluateChild(Project child)
+    @Override
+    void initExtension(ComponentExtension componentExtension) {
+        this.componentExtension = componentExtension
+    }
 
-    void afterEvaluateChild(Project child)
+    @Override
+    void evaluate(Project project, boolean isRoot) {
 
-    void evaluateRoot(Project root)
+    }
 
-    void afterEvaluateRoot(Project root)
+    @Override
+    void afterEvaluate(Project project, boolean isRoot) {
 
-    void afterAllEvaluate()
+    }
+
+    @Override
+    void afterAllEvaluate() {
+
+    }
 }
