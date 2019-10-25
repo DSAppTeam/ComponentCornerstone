@@ -4,10 +4,11 @@ import com.android.build.gradle.AppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
 import com.plugin.component.Constants
-import com.plugin.component.Logger
+import com.plugin.component.log.Logger
 import com.plugin.component.Runtimes
 import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.option.debug.DebugConfiguration
+import com.plugin.component.log.MutLineLog
 import org.gradle.api.Project
 
 class ProjectUtil {
@@ -128,25 +129,26 @@ class ProjectUtil {
         if (root == null || projectInfo == null) {
             return
         }
+        MutLineLog mutLineLog = new MutLineLog()
         Project project = projectInfo.project
         BaseExtension baseExtension = project.extensions.getByName(Constants.ANDROID)
         def objMain = baseExtension.sourceSets.getByName(Constants.MAIN)
         def objAndroidTest = baseExtension.sourceSets.getByName("androidTest")
         def configurations = Runtimes.getDebugConfigurations()
         if (!configurations.isEmpty()) {
-            Logger.buildOutput("hasDebugOptions", true)
+            mutLineLog.build4("是否配置了调试选项 = 是")
             for (DebugConfiguration configuration : configurations) {
                 def componentName = configuration.name
                 def file = new File(project.projectDir, "src/main/" + componentName + "/")
                 if (file == null || !file.exists()) {
-                    Logger.buildOutput("skip component[" + componentName + "] directory does not exist!")
+                    mutLineLog.build4(" skip component[" + componentName + "] directory does not exist!")
                     continue
                 }
                 if (isProjectSame(componentName, Runtimes.getDebugTargetName())) {
-                    Logger.buildOutput("add dir[" + componentName + "] sourceSets to Main")
+                    mutLineLog.build4("add component[" + componentName + "] sourceSets to Main")
                     def applicationId = "com.component.debug." + componentName
-                    Logger.buildOutput("修改前 debug apk applicationId", baseExtension.defaultConfig.applicationId)
-                    Logger.buildOutput("修改后 debug apk applicationId", applicationId)
+                    mutLineLog.build4("修改前 debug apk applicationId", baseExtension.defaultConfig.applicationId)
+                    mutLineLog.build4("修改后 debug apk applicationId", applicationId)
                     baseExtension.defaultConfig.setApplicationId(applicationId)
                     objMain.java.srcDir("src/main/" + componentName + "/java")
                     objMain.res.srcDir("src/main/" + componentName + "/res")
@@ -154,21 +156,21 @@ class ProjectUtil {
                     objMain.jniLibs.srcDir("src/main/" + componentName + "/jniLibs")
                     objMain.manifest.srcFile("src/main/" + componentName + "/AndroidManifest.xml")
                     if (configuration.dependencies.implementation != null) {
-                        Logger.buildOutput("add dependencies ==> ")
+                        mutLineLog.build4("add dependencies ==> ")
                         projectInfo.project.dependencies {
                             configuration.dependencies.implementation.each {
                                 def dependency = it
                                 if (it instanceof String && it.startsWith(Constants.DEBUG_COMPONENT_PRE)) {
                                     dependency = PublicationUtil.parseComponent(projectInfo, it.replace(Constants.DEBUG_COMPONENT_PRE, ""))
                                 }
-                                Logger.buildOutput("implementation " + dependency)
+                                mutLineLog.build4(" implementation " + dependency)
                                 implementation dependency
                             }
                         }
                     }
 
                 } else {
-                    Logger.buildOutput("add component[" + componentName + "] sourceSets to AndroidTest")
+                    mutLineLog.build4("add component[" + componentName + "] sourceSets to AndroidTest")
                     objAndroidTest.java.srcDir("src/main/" + componentName + "/java")
                     objAndroidTest.res.srcDir("src/main/" + componentName + "/res")
                     objAndroidTest.assets.srcDir("src/main/" + componentName + "/assets")
@@ -177,30 +179,32 @@ class ProjectUtil {
                 }
             }
         } else {
-            Logger.buildOutput("hasDebugOptions", false)
+            mutLineLog.build4("是否配置了调试选项 = 否")
         }
-        Logger.buildOutput("DebugModule[" + project.name + "]" + "Main sourceSets: ")
-        Logger.buildOutput("java", sourceSetDirToString(objMain.java.srcDirs))
-        Logger.buildOutput("res", sourceSetDirToString(objMain.res.srcDirs))
-        Logger.buildOutput("assets", sourceSetDirToString(objMain.assets.srcDirs))
-        Logger.buildOutput("jniLibs", sourceSetDirToString(objMain.jniLibs.srcDirs))
-        Logger.buildOutput("manifest", objAndroidTest.manifest.srcFile.path)
-        Logger.buildOutput("DebugModule[" + project.name + "]" + "AndroidTest sourceSets: ")
-        Logger.buildOutput("java", sourceSetDirToString(objAndroidTest.java.srcDirs))
-        Logger.buildOutput("res", sourceSetDirToString(objAndroidTest.res.srcDirs))
-        Logger.buildOutput("assets", sourceSetDirToString(objAndroidTest.assets.srcDirs))
-        Logger.buildOutput("jniLibs", sourceSetDirToString(objAndroidTest.jniLibs.srcDirs))
-        Logger.buildOutput("manifest", objAndroidTest.manifest.srcFile.path)
+        mutLineLog.build4("* DebugModule[" + project.name + "]" + "Main sourceSets")
+        mutLineLog.build4(" java = " + sourceSetDirToString(objMain.java.srcDirs))
+        mutLineLog.build4(" res = " + sourceSetDirToString(objMain.res.srcDirs))
+        mutLineLog.build4(" assets = " + sourceSetDirToString(objMain.assets.srcDirs))
+        mutLineLog.build4(" jniLibs = " + sourceSetDirToString(objMain.jniLibs.srcDirs))
+        mutLineLog.build4(" manifest = " + objMain.manifest.srcFile.path)
+        mutLineLog.build4("* DebugModule[" + project.name + "]" + "AndroidTest sourceSets")
+        mutLineLog.build4(" java = " + sourceSetDirToString(objAndroidTest.java.srcDirs))
+        mutLineLog.build4(" res = " + sourceSetDirToString(objAndroidTest.res.srcDirs))
+        mutLineLog.build4(" assets = " + sourceSetDirToString(objAndroidTest.assets.srcDirs))
+        mutLineLog.build4(" jniLibs = " + sourceSetDirToString(objAndroidTest.jniLibs.srcDirs))
+        mutLineLog.build4(" manifest = " + objAndroidTest.manifest.srcFile.path)
+
+        Logger.buildBlockLog("调试模块调整 SOURCESET ", mutLineLog)
     }
 
     private static String sourceSetDirToString(Set<File> set) {
         StringBuilder stringBuilder = new StringBuilder()
         if (set != null && !set.isEmpty()) {
-            if(set.size() == 1){
+            if (set.size() == 1) {
                 for (File file : set) {
                     stringBuilder.append("[ " + file.path + " ]")
                 }
-            }else{
+            } else {
                 stringBuilder.append("[ \n")
                 for (File file : set) {
                     stringBuilder.append("                      " + file.path + "\n")

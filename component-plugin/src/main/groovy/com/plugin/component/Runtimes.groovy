@@ -8,7 +8,6 @@ import com.android.build.gradle.LibraryPlugin
 import com.android.build.gradle.TestedExtension
 import com.plugin.component.extension.ComponentExtension
 import com.plugin.component.extension.PublicationManager
-import com.plugin.component.extension.module.PinInfo
 import com.plugin.component.extension.module.ProjectInfo
 import com.plugin.component.extension.option.debug.DebugDependenciesOption
 import com.plugin.component.extension.option.pin.PinConfiguration
@@ -19,10 +18,10 @@ import com.plugin.component.extension.option.sdk.PublicationDependenciesOption
 import com.plugin.component.extension.option.sdk.PublicationOption
 import com.plugin.component.extension.option.debug.DebugOption
 import com.plugin.component.extension.option.sdk.SdkOption
+import com.plugin.component.log.Logger
+import com.plugin.component.log.MutLineLog
 import com.plugin.component.plugin.AbsPlugin
 import com.plugin.component.transform.ComponentTransform
-import com.plugin.component.transform.InjectCodeTransform
-import com.plugin.component.transform.ScanCodeTransform
 import com.plugin.component.utils.JarUtil
 import com.plugin.component.utils.ProjectUtil
 import com.plugin.component.utils.PublicationUtil
@@ -51,21 +50,15 @@ class Runtimes {
     public static File sImplDir
 
     static initRuntimeConfigurationOnEvaluate(Project root) {
+        //sdk目录及文件读取流程
         sSdkDir = new File(root.projectDir, Constants.SDK_DIR)
         sImplDir = new File(root.projectDir, Constants.IMPL_DIR)
-        Logger.buildOutput("sdk目录 File[" + sSdkDir.name + "]")
-        Logger.buildOutput("impl目录 File[" + sSdkDir.name + "]")
-
         if (!sSdkDir.exists()) {
             sSdkDir.mkdirs()
-            Logger.buildOutput("create File[" + sSdkDir.name + "]")
         }
-
         if (!sImplDir.exists()) {
             sImplDir.mkdirs()
-            Logger.buildOutput("create File[" + sImplDir.name + "]")
         }
-
         ProjectUtil.getTasks(root).each {
             if (it == Constants.CLEAN) {
                 if (!sSdkDir.deleteDir()) {
@@ -75,35 +68,30 @@ class Runtimes {
                     throw new RuntimeException("unable to delete dir " + sImplDir.absolutePath)
                 }
                 sSdkDir.mkdirs()
-                Logger.buildOutput("reset File[" + sSdkDir.name + "]")
-
                 sImplDir.mkdirs()
-                Logger.buildOutput("reset File[" + sImplDir.name + "]")
             }
         }
+
         root.repositories {
             flatDir {
                 dirs sSdkDir.absolutePath
-                Logger.buildOutput("flatDir Dir[" + sSdkDir.absolutePath + "]")
-
                 dirs sImplDir.absolutePath
-                Logger.buildOutput("flatDir Dir[" + sImplDir.absolutePath + "]")
             }
         }
-
-        Logger.buildOutput("读取 sdk/impl manifest 配置文件...")
         PublicationManager.getInstance().loadManifest(root)
-
-        Logger.buildOutput("读取 component.gradle 信息...")
-
-        //todo sdk中依赖sdk，需要特别区分，预留后续逻辑
         PublicationDependenciesOption.metaClass.component { String value ->
             return Constants.COMPONENT_PRE + value
         }
-
         DebugDependenciesOption.metaClass.component { String value ->
             return Constants.DEBUG_COMPONENT_PRE + value
         }
+        Logger.buildBlockLog(
+                "初始化辅助目录",
+                new MutLineLog()
+                        .build4("* 创建SDK目录 = " + sSdkDir.absolutePath)
+                        .build4("* 根项目添加 flatDir = " + sSdkDir.absolutePath)
+                        .build4("* 读取SDK目录下 publicationManifest.xml")
+        )
     }
 
     static initRuntimeConfigurationAfterEvaluate(Project root, ComponentExtension componentExtension) {
@@ -113,20 +101,22 @@ class Runtimes {
         sPinOption = sExtension.pinOption
         root.extensions.add("targetDebugName", sDebugOption.targetDebugName)
         sAndroidJarPath = ProjectUtil.getAndroidJarPath(root, componentExtension.sdkOption.compileSdkVersion)
-        Logger.buildOutput("")
-        Logger.buildOutput(" =====> component.gradle配置信息 <===== ")
-        Logger.buildOutput("")
-        Logger.buildOutput("    全局配置")
-        Logger.buildOutput(componentExtension.toString())
-        Logger.buildOutput("    SDK配置")
-        Logger.buildOutput(componentExtension.sdkOption.toString())
-        Logger.buildOutput("    PIN配置")
-        Logger.buildOutput(componentExtension.pinOption.toString())
-        Logger.buildOutput("    DEBUG配置")
-        Logger.buildOutput(componentExtension.debugOption.toString())
-        Logger.buildOutput(" =====> component.gradle配置信息 <===== ")
-        Logger.buildOutput("")
 
+        Logger.buildBlockLog(
+                "component.gradle 脚本信息",
+                new MutLineLog()
+                        .build4("* 添加ext(targetDebugName) = " + sDebugOption.targetDebugName)
+                        .build4("* 全局配置")
+                        .build4(componentExtension.toString())
+                        .build4("* SDK配置")
+                        .build4(componentExtension.sdkOption.toString())
+                        .build4("* PIN配置")
+                        .build4(componentExtension.pinOption.toString())
+                        .build4("* DEBUG配置")
+                        .build4(componentExtension.debugOption.toString())
+        )
+
+        MutLineLog mutLineLog = new MutLineLog()
         //初始化pins
         root.allprojects.each {
             for (PinConfiguration pinConfiguration : sPinOption.configurationList) {
@@ -137,8 +127,7 @@ class Runtimes {
             }
         }
 
-        Logger.buildOutput("")
-        Logger.buildOutput("=====> 处理 sdk/impl jar <=====")
+        mutLineLog.build4("* 初始化 pins main 目录")
         List<String> topSort = PublicationManager.getInstance().dependencyGraph.topSort()
         Collections.reverse(topSort)
         topSort.each {
@@ -151,33 +140,32 @@ class Runtimes {
             if (publication.version != null) {
                 JarUtil.handleMavenJar(childProject, publication)
             } else {
-                JarUtil.handleLocalJar(childProject, publication)
+                mutLineLog.build4("* " + JarUtil.handleLocalJar(childProject, publication))
             }
             PublicationManager.getInstance().hitPublication(publication)
         }
-        Logger.buildOutput("=====> 处理 sdk/impl jar <=====")
-        Logger.buildOutput("")
+
 
         //添加flat路径
         root.allprojects.each {
             if (it == root) return
             if (!shouldApplyComponentPlugin(it)) return
             Project childProject = it
-            Logger.buildOutput("")
-            Logger.buildOutput("=====> project[" + childProject.name + "]配置信息 <=====")
             childProject.repositories {
                 flatDir {
                     dirs sSdkDir.absolutePath
-                    Logger.buildOutput("add flatDir Dir[" + sSdkDir.absolutePath + "]")
+                    mutLineLog.build4("* " + childProject.name + "add flatDir Dir[" + sSdkDir.absolutePath + "]")
                     dirs sImplDir.absolutePath
-                    Logger.buildOutput("add flatDir Dir[" + sImplDir.absolutePath + "]")
                 }
             }
         }
 
+        Logger.buildBlockLog("预处理插件", mutLineLog)
     }
 
     static hookAfterApplyingAndroidPlugin(Project root, AbsPlugin... plugins) {
+
+        MutLineLog mutLineLog = new MutLineLog()
 
         root.allprojects.each {
             if (it == root) return
@@ -186,15 +174,16 @@ class Runtimes {
             Project childProject = it
             ProjectInfo projectInfo = new ProjectInfo(childProject)
             addProjectInfo(childProject.name, projectInfo)
-            Logger.buildOutput("compileModuleName", projectInfo.compileModuleName)
-            Logger.buildOutput("projectName", projectInfo.name)
-            Logger.buildOutput("isDebugModule", projectInfo.isDebugModule())
-            Logger.buildOutput("taskNames", projectInfo.taskNames)
-            Logger.buildOutput("isSyncTask", projectInfo.isSync())
-            Logger.buildOutput("isAssemble", projectInfo.isAssemble)
-            Logger.buildOutput("isDebug", projectInfo.isDebug)
-            Logger.buildOutput("=====> project[" + childProject.name + "]配置信息 <=====")
-            Logger.buildOutput("")
+
+
+            mutLineLog.build4("* " + childProject.name)
+            mutLineLog.build4("     compileModuleName = " + projectInfo.compileModuleName)
+            mutLineLog.build4("     projectName = " + projectInfo.name)
+            mutLineLog.build4("     isDebugModule = " + projectInfo.isDebugModule())
+            mutLineLog.build4("     taskNames = " + projectInfo.taskNames)
+            mutLineLog.build4("     isSyncTask = " + projectInfo.isSync())
+            mutLineLog.build4("     isAssemble = " + projectInfo.isAssemble)
+            mutLineLog.build4("     isDebug = " + projectInfo.isDebug)
 //
 //            childProject.plugins.all {
 //                Class extensionClass
@@ -229,15 +218,10 @@ class Runtimes {
                     }
                     if (it instanceof AppPlugin) {
                         if (projectInfo.isDebugModule() || projectInfo.isCompileModuleAndAssemble()) {
-                            Logger.buildOutput("plugin is AppPlugin")
-                            Logger.buildOutput("registerTransform", "ScanCodeTransform")
-                            Logger.buildOutput("registerTransform", "InjectCodeTransform")
                             childProject.extensions.findByType(BaseExtension.class).registerTransform(new ComponentTransform(childProject))
-//                                childProject.extensions.findByType(BaseExtension.class).registerTransform(new InjectCodeTransform(childProject))
                         }
                     }
                     childProject.dependencies {
-                        Logger.buildOutput("add dependency: " + Constants.CORE_DEPENDENCY)
                         implementation Constants.CORE_DEPENDENCY
                     }
                     if (plugins != null && plugins.size() > 0) {
@@ -248,6 +232,7 @@ class Runtimes {
                 }
             }
         }
+        Logger.buildBlockLog("子 PROJECT 信息", mutLineLog)
     }
 
     /**
@@ -305,13 +290,16 @@ class Runtimes {
     }
 
     static void injectComponentPlugin(Project root) {
+
+        MutLineLog mutLineLog = new MutLineLog()
+
         root.allprojects.each {
             if (it == root) return
             if (!shouldApplyComponentPlugin(it)) return
             it.pluginManager.apply(Constants.PLUGIN_COMPONENT)
-            Logger.buildOutput(it.name + "apply ==>" + "com.android.component")
-//            timeCallerTest(it)
+            mutLineLog.build4("* " + it.name + " apply plugin: com.android.component")
         }
+        Logger.buildBlockLog("子 PROJECT 注入插件", mutLineLog)
     }
 
 

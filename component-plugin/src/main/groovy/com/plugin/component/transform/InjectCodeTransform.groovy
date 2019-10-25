@@ -4,9 +4,8 @@ import com.android.build.api.transform.Context
 import com.android.build.api.transform.TransformException
 import com.android.build.api.transform.TransformInput
 import com.android.build.api.transform.TransformOutputProvider
-import com.plugin.component.Logger
+import com.plugin.component.log.Logger
 import com.plugin.component.transform.info.ScanRuntime
-import com.quinn.hunter.transform.HunterTransform
 import com.quinn.hunter.transform.RunVariant
 import org.gradle.api.Project
 

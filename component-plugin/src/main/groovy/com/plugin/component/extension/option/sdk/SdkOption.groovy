@@ -1,6 +1,6 @@
 package com.plugin.component.extension.option.sdk
 
-import com.plugin.component.Logger
+import com.plugin.component.log.Logger
 import com.plugin.component.Runtimes
 import com.plugin.component.extension.PublicationManager
 import com.plugin.component.utils.ProjectUtil
@@ -61,10 +61,7 @@ class SdkOption {
             it.isSdk = true
             it.name = ProjectUtil.getProjectName(it.name)
             Project childProject = ProjectUtil.getProject(project, it.name)
-            if (childProject == null) {
-                Logger.buildOutput("publication's target[" + it.name + "] does not exist!")
-            } else {
-                Logger.buildOutput("publication's sdk[" + it.name + "] is " + it.groupId + ":" + it.artifactId)
+            if (childProject != null) {
                 PublicationUtil.initPublication(childProject, it)
                 PublicationManager.getInstance().addDependencyGraph(it.name, it)
                 Runtimes.addSdkPublication(childProject.name, it)
