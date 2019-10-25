@@ -61,8 +61,8 @@ class PinUtils {
             }
         }
         pinConfiguration.productFlavorInfo.combinedProductFlavors.each {
-            mergeAndroidManifest(androidTest + Utils.upperCase(it), pinConfiguration, startTaskState)
-            mergeAndroidManifest(androidTest + Utils.upperCase(it) + 'Debug', pinConfiguration, startTaskState)
+            mergeAndroidManifest(project,androidTest + Utils.upperCase(it), pinConfiguration, startTaskState)
+            mergeAndroidManifest(project,androidTest + Utils.upperCase(it) + 'Debug', pinConfiguration, startTaskState)
         }
     }
 

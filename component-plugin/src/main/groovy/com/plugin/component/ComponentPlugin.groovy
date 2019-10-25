@@ -1,7 +1,7 @@
 package com.plugin.component
 
 import com.plugin.component.extension.ComponentExtension
-import com.plugin.component.plugin.BasePlugin
+import com.plugin.component.plugin.AbsPlugin
 import com.plugin.component.plugin.DebugPlugin
 import com.plugin.component.plugin.PinPlugin
 import com.plugin.component.plugin.SdkPlugin
@@ -16,11 +16,11 @@ import org.gradle.api.Project
  *  组件插件入口
  *  created by yummylau 2019/08/09
  */
-class ComponentPlugin implements Plugin<Project>,BasePlugin{
+class ComponentPlugin extends AbsPlugin implements Plugin<Project> {
 
-    private BasePlugin sdk = new SdkPlugin()
-    private BasePlugin debug = new DebugPlugin()
-    private BasePlugin pins = new PinPlugin()
+    private AbsPlugin sdk = new SdkPlugin()
+    private AbsPlugin debug = new DebugPlugin()
+    private AbsPlugin pins = new PinPlugin()
     private ComponentExtension componentExtension
 
     @Override
@@ -28,19 +28,33 @@ class ComponentPlugin implements Plugin<Project>,BasePlugin{
         if (project == project.rootProject) {
             componentExtension = project.getExtensions().create(Constants.COMPONENT, ComponentExtension, project)
             initExtension(componentExtension)
-            evaluateRoot(project)
+            evaluate(project, true)
             project.afterEvaluate {
-                afterEvaluateRoot(project)
+                afterEvaluate(project, true)
             }
             project.gradle.projectsEvaluated {
                 afterAllEvaluate()
             }
         } else {
-            evaluateChild(project)
+            evaluate(project, false)
             project.afterEvaluate {
-                afterEvaluateChild(project)
+                afterEvaluate(project, false)
             }
         }
+    }
+
+    @Override
+    void evaluate(Project project, boolean isRoot) {
+        sdk.evaluate(project, isRoot)
+        debug.evaluate(project, isRoot)
+        pins.evaluate(project, isRoot)
+    }
+
+    @Override
+    void afterEvaluate(Project project, boolean isRoot) {
+        sdk.afterEvaluate(project, isRoot)
+        debug.afterEvaluate(project, isRoot)
+        pins.afterEvaluate(project, isRoot)
     }
 
     @Override
@@ -50,34 +64,6 @@ class ComponentPlugin implements Plugin<Project>,BasePlugin{
         pins.initExtension(componentExtension)
     }
 
-    @Override
-    void evaluateChild(Project child) {
-        sdk.evaluateChild(child)
-        debug.evaluateChild(child)
-        pins.evaluateChild(child)
-    }
-
-    @Override
-    void afterEvaluateChild(Project child) {
-        sdk.afterEvaluateChild(child)
-        debug.afterEvaluateChild(child)
-        pins.afterEvaluateChild(child)
-    }
-
-    @Override
-    void evaluateRoot(Project root) {
-        sdk.evaluateRoot(root)
-        debug.evaluateRoot(root)
-        pins.evaluateRoot(root)
-    }
-
-    @Override
-    void afterEvaluateRoot(Project root) {
-        Runtimes.initRuntimeConfiguration(root, componentExtension)
-        sdk.afterEvaluateRoot(root)
-        debug.afterEvaluateRoot(root)
-        pins.afterEvaluateRoot(root)
-    }
 
     @Override
     void afterAllEvaluate() {

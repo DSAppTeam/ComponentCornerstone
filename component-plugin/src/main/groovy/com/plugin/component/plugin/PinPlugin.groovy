@@ -8,7 +8,6 @@ import com.android.build.gradle.TestedExtension
 import com.android.build.gradle.api.BaseVariant
 import com.android.builder.model.ProductFlavor
 import com.plugin.component.Runtimes
-import com.plugin.component.extension.ComponentExtension
 import com.plugin.component.extension.module.PinInfo
 import com.plugin.component.extension.option.pin.PinConfiguration
 import com.plugin.component.utils.PinUtils
@@ -22,7 +21,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.initialization.Settings
 import org.gradle.api.invocation.Gradle
 
-class PinPlugin implements BasePlugin {
+class PinPlugin extends BasePlugin {
 
     private final static String NORMAL = 'normal'
     private final static String ASSEMBLE_OR_GENERATE = 'assemble_or_generate'
@@ -36,26 +35,24 @@ class PinPlugin implements BasePlugin {
     String applyScriptState
     boolean appliedLibraryPlugin
 
-    ComponentExtension componentExtension
     PinConfiguration pinConfiguration
     PinInfo currentPin
     Project project
-
-
-    @Override
-    void initExtension(ComponentExtension componentExtension) {
-        this.componentExtension = componentExtension
-    }
 
 
     boolean isSupportPins() {
         return pinConfiguration != null
     }
 
+
     @Override
-    void evaluateChild(Project child) {
-        this.project = child
-        pinConfiguration = Runtimes.getPinConfiguration(child.name)
+    void evaluate(Project project, boolean isRoot) {
+        if (isRoot) {
+            return
+        }
+
+        this.project = project
+        pinConfiguration = Runtimes.getPinConfiguration(project.name)
         if (!isSupportPins()) {
             return
         }
@@ -67,7 +64,7 @@ class PinPlugin implements BasePlugin {
             startTaskState = ASSEMBLE_OR_GENERATE
         }
 
-        //非sync情况下，在configuration添加的时候
+        //非sync情况下，在configuration添加的时候添加依赖的时候进行处理
         if (startTaskState != NORMAL) {
             project.getConfigurations().whenObjectAdded {
                 Configuration configuration = it
@@ -104,7 +101,7 @@ class PinPlugin implements BasePlugin {
             def result = []
             if (startTaskState == ASSEMBLE_OR_GENERATE) {
                 PinUtils.addMicroModuleSourceSet(project, microModule, pinConfiguration.productFlavorInfo)
-                PinUtils.applyMicroModuleScript(child, microModule, currentPin)
+                PinUtils.applyMicroModuleScript(project, microModule, currentPin)
                 microModule.appliedScript = true
             }
             return result
@@ -145,9 +142,9 @@ class PinPlugin implements BasePlugin {
                                 for (ProductFlavor productFlavor : variant.productFlavors) {
                                     sourceFolders.add(productFlavor.name)
                                 }
-                                PinUtils.checkMicroModuleBoundary(child, pinConfiguration, taskNamePrefix, variant.buildType.name, variant.flavorName, sourceFolders)
+                                PinUtils.checkMicroModuleBoundary(project, pinConfiguration, taskNamePrefix, variant.buildType.name, variant.flavorName, sourceFolders)
                             } else {
-                                PinUtils.checkMicroModuleBoundary(child, pinConfiguration, taskNamePrefix, variant.buildType.name, null, sourceFolders)
+                                PinUtils.checkMicroModuleBoundary(project, pinConfiguration, taskNamePrefix, variant.buildType.name, null, sourceFolders)
                             }
                         }
                     }
@@ -157,7 +154,60 @@ class PinPlugin implements BasePlugin {
     }
 
     @Override
-    void afterEvaluateChild(Project child) {
+    void afterEvaluate(Project project, boolean isRoot) {
+        if (isRoot) {
+            if (Runtimes.hasPinModule()) {
+                project.gradle.addBuildListener(new BuildListener() {
+                    @Override
+                    void buildStarted(Gradle gradle) {
+
+                    }
+
+                    @Override
+                    void settingsEvaluated(Settings settings) {
+
+                    }
+
+                    @Override
+                    void projectsLoaded(Gradle gradle) {
+
+                    }
+
+                    @Override
+                    void projectsEvaluated(Gradle gradle) {
+
+                    }
+
+                    @Override
+                    void buildFinished(BuildResult buildResult) {
+                        // generate microModules.xml for PinInfo IDEA plugin.
+                        def ideaFile = new File(buildResult.gradle.rootProject.rootDir, '.idea')
+                        if (!ideaFile.exists()) return
+                        def pininfos = '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<modules>\n'
+
+                        Map<String, PinConfiguration> allPins = Runtimes.getPinConfigurations()
+                        Set<String> moduleNames = allPins.keySet()
+                        for (String moduleName : moduleNames) {
+                            PinConfiguration pins = allPins.get(moduleName)
+                            def displayName = pins.name
+                            pininfos += '    <module name=\"' + displayName.substring(displayName.indexOf("'") + 1, displayName.lastIndexOf("'")) + '\" path=\"' + it.projectDir.getCanonicalPath() + '\">\n'
+                            pins.includePins.each {
+                                PinInfo microModule = it.value
+                                pininfos += '        <microModule name=\"' + microModule.name + '\" path=\"' + microModule.pinDir.getCanonicalPath() + '\" />\n'
+                            }
+                            pininfos += '    </module>\n'
+                        }
+
+                        pininfos += '</modules>'
+
+                        def pins = new File(ideaFile, 'microModules.xml')
+                        pins.write(pininfos, 'utf-8')
+                    }
+                })
+            }
+            return
+        }
+
         if (!isSupportPins()) {
             return
         }
@@ -173,11 +223,11 @@ class PinPlugin implements BasePlugin {
         pinConfiguration.includePins.each {
             PinInfo microModule = it.value
             pinConfiguration.dependencyGraph.add(microModule.name)
-            applyMicroModuleScript(child, microModule)
+            applyMicroModuleScript(project, microModule)
         }
 
         //清除所有 srouceSet 信息
-        PinUtils.clearOriginSourceSet(child, pinConfiguration.productFlavorInfo)
+        PinUtils.clearOriginSourceSet(project, pinConfiguration.productFlavorInfo)
 
         //如果非 sync
         if (startTaskState == ASSEMBLE_OR_GENERATE) {
@@ -200,7 +250,7 @@ class PinPlugin implements BasePlugin {
                     if (microModule.appliedScript) return
 
                     PinUtils.addMicroModuleSourceSet(project, microModule, pinConfiguration.productFlavorInfo)
-                    applyMicroModuleScript(child, microModule)
+                    applyMicroModuleScript(project, microModule)
                     microModule.appliedScript = true
                 }
             }
@@ -213,7 +263,7 @@ class PinPlugin implements BasePlugin {
             pinConfiguration.includePins.each {
                 PinInfo microModule = it.value
                 PinUtils.addMicroModuleSourceSet(project, microModule, pinConfiguration.productFlavorInfo)
-                applyMicroModuleScript(child, microModule)
+                applyMicroModuleScript(project, microModule)
             }
         }
         currentPin = null
@@ -238,67 +288,6 @@ class PinPlugin implements BasePlugin {
         }
     }
 
-    @Override
-    void evaluateRoot(Project root) {
-
-    }
-
-    @Override
-    void afterEvaluateRoot(Project root) {
-        if (Runtimes.hasPinModule()) {
-            root.gradle.addBuildListener(new BuildListener() {
-                @Override
-                void buildStarted(Gradle gradle) {
-
-                }
-
-                @Override
-                void settingsEvaluated(Settings settings) {
-
-                }
-
-                @Override
-                void projectsLoaded(Gradle gradle) {
-
-                }
-
-                @Override
-                void projectsEvaluated(Gradle gradle) {
-
-                }
-
-                @Override
-                void buildFinished(BuildResult buildResult) {
-                    // generate microModules.xml for PinInfo IDEA plugin.
-                    def ideaFile = new File(buildResult.gradle.rootProject.rootDir, '.idea')
-                    if (!ideaFile.exists()) return
-                    def pininfos = '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<modules>\n'
-
-                    Map<String, PinConfiguration> allPins = Runtimes.getPinConfigurations()
-                    Set<String> moduleNames = allPins.keySet()
-                    for (String moduleName : moduleNames) {
-                        PinConfiguration pins = allPins.get(moduleName)
-                        def displayName = pins.name
-                        pininfos += '    <module name=\"' + displayName.substring(displayName.indexOf("'") + 1, displayName.lastIndexOf("'")) + '\" path=\"' + it.projectDir.getCanonicalPath() + '\">\n'
-                        pins.includePins.each {
-                            PinInfo microModule = it.value
-                            pininfos += '        <microModule name=\"' + microModule.name + '\" path=\"' + microModule.pinDir.getCanonicalPath() + '\" />\n'
-                        }
-                        pininfos += '    </module>\n'
-                    }
-
-                    pininfos += '</modules>'
-
-                    def pins = new File(ideaFile, 'microModules.xml')
-                    pins.write(pininfos, 'utf-8')
-                }
-            })
-        }
-    }
-
-    @Override
-    void afterAllEvaluate() {
-    }
 
     void applyMicroModuleScript(Project project, PinInfo microModule) {
         def pinBuild = new File(microModule.pinDir, 'build.gradle')

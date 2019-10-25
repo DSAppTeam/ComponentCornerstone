@@ -24,6 +24,7 @@ class Constants {
     public static String PUBLISHING = 'publishing'
     public static String LOCAL_PROPERTIES = "local.properties"
     public static String CLEAN = 'clean'
+    public static String PLUGIN_CACHE = "scan_cache"
 
     //file
     public static String DEFAULT_MAIN_MODULE_NAME = "app"
