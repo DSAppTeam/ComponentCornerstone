@@ -29,9 +29,16 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'com.google.android.material:material:1.0.0'
+    /**
+     * component 会自动根据插件配置情况进行降级处理
+     * component(':libraryKotlin') 由于配置了sdk，所以会编译时依赖sdk
+     * component(':pins') 由于配置了子项目，所以编译时会处理子工程，同时降级为 project(':pins')
+     * component(':libraryWithoutPlugin') 什么都没有配置，直接降级为 project(':libraryWithoutPlugin')
+     */
     implementation component(':library')
-    implementation component(':libraryKotlin')
-    implementation project(':libraryWithoutPlugin')
+    implementation component(':libraryKotlin')              //需要如此申明才能享受编译时依赖sdk，打包时包括sdk及实现
+    implementation component(':pins')                       //等价 project(':libraryWithoutPlugin')
+    implementation component(':libraryWithoutPlugin')       //等价 project(':libraryWithoutPlugin')
 }
 
 

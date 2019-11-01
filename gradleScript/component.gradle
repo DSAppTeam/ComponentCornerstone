@@ -6,7 +6,7 @@ component {
 
     //申明插件的作用域，用于有 include 和 exclude
     //生效的模块会自动添加组件依赖 core，可使用 component(:{projectName}) 使用其他组件提供的sdk，同时可在 componentSdks 中配置自己模块暴露的sdk
-    exclude 'libraryWithoutPlugin','component-core'
+    exclude 'libraryWithoutPlugin', 'component-core'
 
 //  上述 语句等价于下面语句
 //    include ':app','library','libraryKotlin','debugModule'
@@ -49,11 +49,10 @@ component {
         configuration {
             'pins' {
                 codeCheckEnabled true
-                include ':p_base'
-                include ':p_common'
-                include ':p_home'
-                export ':main', ':p_home'
-                export ':p_common'
+                //参与编译的模块
+                include ':p_base',':p_common',":p_home"
+                //对外把暴露的模块
+                export ':main'
             }
         }
     }

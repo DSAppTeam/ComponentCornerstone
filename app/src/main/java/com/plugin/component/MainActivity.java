@@ -4,12 +4,17 @@ import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.library.LibraryWithoutPlugin;
 import com.plugin.library.IProvideFromLibrary;
 import com.plugin.library.ISdk;
 import com.plugin.library.ISdk2;
 import com.plugin.librarykotlin.IGetFromLibrary;
 import com.plugin.librarykotlin.IProvideFromKotlin;
 import com.plugin.module.R;
+import com.plugin.pin.MainBase;
+import com.plugin.pin.base.PBase;
+import com.plugin.pin.common.PCommon;
+import com.plugin.pin.home.PHome;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -42,12 +47,18 @@ public class MainActivity extends AppCompatActivity {
         stringBuilder.append("ISdk ->" + SdkManager.getSdk(ISdk.class).getSdkName() + "\n");
         stringBuilder.append("ISdk2 ->" + SdkManager.getSdk(ISdk2.class).getSdk2Name() + "\n");
         stringBuilder.append("libraryKotlin 提供 sdk:" + "\n");
-        stringBuilder.append("IProvideFromKotlin ->" +  SdkManager.getSdk(IProvideFromKotlin.class).provideString() + "\n");
-        stringBuilder.append("IGetFromLibrary ->" +  SdkManager.getSdk(IGetFromLibrary.class).provideString() + "\n");
+        stringBuilder.append("IProvideFromKotlin ->" + SdkManager.getSdk(IProvideFromKotlin.class).provideString() + "\n");
+        stringBuilder.append("IGetFromLibrary ->" + SdkManager.getSdk(IGetFromLibrary.class).provideString() + "\n");
+        stringBuilder.append("pin子工程测试 \n");
+        stringBuilder.append("main -> " + new MainBase().getString() + "\n");
+        stringBuilder.append("base -> " + new PBase().getString() + "\n");
+        stringBuilder.append("home -> " + new PHome().getString() + "\n");
+        stringBuilder.append("common -> " + new PCommon().getString() + "\n");
+        stringBuilder.append("普通模块测试 -> " + new LibraryWithoutPlugin().getString() + "\n");
         ((TextView) findViewById(R.id.text)).setText(stringBuilder);
     }
 
-    public void initComponent(){
+    public void initComponent() {
         ComponentManager.init(getApplication());
     }
 

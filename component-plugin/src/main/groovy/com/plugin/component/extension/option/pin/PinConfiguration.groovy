@@ -48,7 +48,7 @@ class PinConfiguration {
                 throw new GradleException("PinInfo with path '${name}' could not be found in ${project.getDisplayName()}.")
             }
             addIncludePin(pin)
-            PinUtils.addMicroModuleSourceSet(project, pin, productFlavorInfo)
+            PinUtils.addPinModuleSourceSet(project, pin, productFlavorInfo)
         }
 
         for (String name : export) {
@@ -57,13 +57,13 @@ class PinConfiguration {
                 throw new GradleException("PinInfo with path '${name}' could not be found in ${project.getDisplayName()}.")
             }
             addExportPin(pin)
-            PinUtils.addMicroModuleSourceSet(project, pin, productFlavorInfo)
+            PinUtils.addPinModuleSourceSet(project, pin, productFlavorInfo)
         }
 
         if (mainPath != null && !mainPath.isEmpty()) {
             PinInfo pin = PinUtils.buildPin(project, mainPath)
             setMainPin(pin)
-            PinUtils.addMicroModuleSourceSet(project, pin, productFlavorInfo)
+            PinUtils.addPinModuleSourceSet(project, pin, productFlavorInfo)
         }
     }
 

@@ -83,7 +83,7 @@ class PinPlugin extends BasePlugin {
             }
         }
 
-        project.dependencies.metaClass.microModule { String path ->
+        project.dependencies.metaClass.pinProject { String path ->
             if (currentPin == null || applyScriptState == APPLY_NORMAL_MICRO_MODULE_SCRIPT) {
                 return []
             }
@@ -93,13 +93,13 @@ class PinPlugin extends BasePlugin {
                 return []
             }
 
-            PinInfo microModule = pinConfiguration.getIncludePin(path)
+            PinInfo pin = pinConfiguration.getIncludePin(path)
 
             def result = []
             if (startTaskState == ASSEMBLE_OR_GENERATE) {
-                PinUtils.addMicroModuleSourceSet(project, microModule, pinConfiguration.productFlavorInfo)
-                PinUtils.applyMicroModuleScript(project, microModule, currentPin)
-                microModule.appliedScript = true
+                PinUtils.addPinModuleSourceSet(project, pin, pinConfiguration.productFlavorInfo)
+                applyPinProjectScript(project, pin)
+                pin.appliedScript = true
             }
             return result
         }
@@ -166,9 +166,9 @@ class PinPlugin extends BasePlugin {
         appliedLibraryPlugin = project.pluginManager.hasPlugin('com.android.library')
         applyScriptState = APPLY_INCLUDE_MICRO_MODULE_SCRIPT
         pinConfiguration.includePins.each {
-            PinInfo microModule = it.value
-            pinConfiguration.dependencyGraph.add(microModule.name)
-            applyMicroModuleScript(project, microModule)
+            PinInfo pin = it.value
+            pinConfiguration.dependencyGraph.add(pin.name)
+            applyPinProjectScript(project, pin)
         }
 
         //清除所有 srouceSet 信息
@@ -178,37 +178,37 @@ class PinPlugin extends BasePlugin {
         if (startTaskState == ASSEMBLE_OR_GENERATE) {
             //读取所有 export 配置
             applyScriptState = APPLY_EXPORT_MICRO_MODULE_SCRIPT
-            boolean hasExportMainMicroModule = false
+            boolean hasExportMainPinModule = false
             boolean isEmpty = pinConfiguration.exportPins.isEmpty()
             List<String> dependencySort = pinConfiguration.dependencyGraph.topSort()
             dependencySort.each {
                 if (isEmpty || pinConfiguration.exportPins.containsKey(it)) {
-                    PinInfo microModule = pinConfiguration.getIncludePin(it)
-                    if (microModule == null) {
+                    PinInfo pin = pinConfiguration.getIncludePin(it)
+                    if (pin == null) {
                         throw new GradleException("PinInfo with path '${it}' could not be found in ${project.getDisplayName()}.")
                     }
 
-                    if (microModule == pinConfiguration.mainPin) {
-                        hasExportMainMicroModule = true
+                    if (pin == pinConfiguration.mainPin) {
+                        hasExportMainPinModule = true
                     }
 
-                    if (microModule.appliedScript) return
+                    if (pin.appliedScript) return
 
-                    PinUtils.addMicroModuleSourceSet(project, microModule, pinConfiguration.productFlavorInfo)
-                    applyMicroModuleScript(project, microModule)
-                    microModule.appliedScript = true
+                    PinUtils.addPinModuleSourceSet(project, pin, pinConfiguration.productFlavorInfo)
+                    applyPinProjectScript(project, pin)
+                    pin.appliedScript = true
                 }
             }
 
-            if (!hasExportMainMicroModule) {
+            if (!hasExportMainPinModule) {
                 throw new GradleException("the main PinInfo '${pinConfiguration.mainPin.name}' is not in the export list.")
             }
         } else {
             applyScriptState = APPLY_NORMAL_MICRO_MODULE_SCRIPT
             pinConfiguration.includePins.each {
-                PinInfo microModule = it.value
-                PinUtils.addMicroModuleSourceSet(project, microModule, pinConfiguration.productFlavorInfo)
-                applyMicroModuleScript(project, microModule)
+                PinInfo pin = it.value
+                PinUtils.addPinModuleSourceSet(project, pin, pinConfiguration.productFlavorInfo)
+                applyPinProjectScript(project, pin)
             }
         }
         currentPin = null
@@ -221,12 +221,12 @@ class PinPlugin extends BasePlugin {
                 pinConfiguration.includePins.each {
                     PinInfo pin = it.value
                     if (pin.appliedScript) {
-                        PinUtils.addMicroModuleSourceSet(project, pin, pinConfiguration.productFlavorInfo)
+                        PinUtils.addPinModuleSourceSet(project, pin, pinConfiguration.productFlavorInfo)
                     }
                 }
             } else {
                 pinConfiguration.includePins.each {
-                    PinUtils.addMicroModuleSourceSet(project, it.value, pinConfiguration.productFlavorInfo)
+                    PinUtils.addPinModuleSourceSet(project, it.value, pinConfiguration.productFlavorInfo)
                 }
             }
             PinUtils.generateAndroidManifest(project, pinConfiguration, startTaskState)
@@ -290,11 +290,11 @@ class PinPlugin extends BasePlugin {
     }
 
 
-    void applyMicroModuleScript(Project project, PinInfo microModule) {
-        def pinBuild = new File(microModule.pinDir, 'build.gradle')
+    void applyPinProjectScript(Project project, PinInfo pin) {
+        def pinBuild = new File(pin.pinDir, 'build.gradle')
         if (pinBuild.exists()) {
             PinInfo tempMicroModule = currentPin
-            currentPin = microModule
+            currentPin = pin
             project.apply from: pinBuild.absolutePath
             currentPin = tempMicroModule
         }
