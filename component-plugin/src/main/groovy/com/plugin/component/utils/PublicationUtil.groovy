@@ -43,7 +43,12 @@ class PublicationUtil {
         String key = ProjectUtil.getComponentValue(value)
         projectInfo.componentDependencies.add(key)
         PublicationOption publication = Runtimes.getSdkPublication(key)
-        return getPublication(publication)
+        //对于依赖的模块，其使用插件但没有配置sdk，则直接依赖该项目
+        if (publication == null) {
+            return projectInfo.project.project(":" + key)
+        } else {
+            return getPublication(publication)
+        }
     }
 
     /**

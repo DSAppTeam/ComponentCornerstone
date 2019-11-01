@@ -128,7 +128,7 @@ class PinUtils {
         obj.manifest.srcFile project.projectDir.absolutePath + "/build/pin/merge-manifest/${variantName}/AndroidManifest.xml"
     }
 
-    static void addMicroModuleSourceSet(Project project, PinInfo pin, ProductFlavorInfo productFlavorInfo) {
+    static void addPinModuleSourceSet(Project project, PinInfo pin, ProductFlavorInfo productFlavorInfo) {
         addVariantSourceSet(project, pin, 'main')
 
         productFlavorInfo.buildTypes.each {

@@ -94,11 +94,14 @@ class SdkPlugin extends BasePlugin {
                 while (!currentDependencies.isEmpty()) {
                     for (String string : currentDependencies) {
                         ProjectInfo projectInfo = Runtimes.getProjectInfo(string)
+                        if (projectInfo == null) {
+                            continue
+                        }
                         String name = projectInfo.name
                         if (!hasResolve.contains(name)) {
                             hasResolve.add(name)
                             nextDependencies.addAll(projectInfo.componentDependencies)
-                            mutLineLog.build4("project[" + projectInfo.name + "] component 依赖 = " +  projectInfo.getComponentDependenciesString())
+                            mutLineLog.build4("project[" + projectInfo.name + "] component 依赖 = " + projectInfo.getComponentDependenciesString())
                         }
                     }
                     currentDependencies.clear()
