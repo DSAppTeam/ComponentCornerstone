@@ -147,8 +147,8 @@ class ProjectUtil {
                 if (isProjectSame(componentName, Runtimes.getDebugTargetName())) {
                     mutLineLog.build4("add component[" + componentName + "] sourceSets to Main")
                     def applicationId = "com.component.debug." + componentName
-                    mutLineLog.build4("修改前 debug apk applicationId", baseExtension.defaultConfig.applicationId)
-                    mutLineLog.build4("修改后 debug apk applicationId", applicationId)
+                    mutLineLog.build4("修改前 debug apk applicationId = " + baseExtension.defaultConfig.applicationId)
+                    mutLineLog.build4("修改后 debug apk applicationId = " + applicationId)
                     baseExtension.defaultConfig.setApplicationId(applicationId)
                     objMain.java.srcDir("src/main/" + componentName + "/java")
                     objMain.res.srcDir("src/main/" + componentName + "/res")

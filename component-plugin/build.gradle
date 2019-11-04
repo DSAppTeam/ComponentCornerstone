@@ -4,7 +4,7 @@ apply plugin: 'maven'
 
 group = 'com.effective.plugins'
 archivesBaseName = 'component'
-version = '1.0.4-beta'
+version = '1.0.5'
 
 //设置本地发布路径
 uploadArchives {
@@ -47,7 +47,7 @@ repositories {
 //    userOrg = 'yummylau'
 //    groupId = 'com.effective.plugins'
 //    artifactId = 'component'
-//    publishVersion = '1.0.4'
+//    publishVersion = '1.0.5'
 //    desc = 'Android component plugin'
 //    website = 'https://github.com/YummyLau/ComponentPlugin'
 //}

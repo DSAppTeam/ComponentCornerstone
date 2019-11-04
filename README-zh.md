@@ -14,6 +14,9 @@ README: [English](https://github.com/YummyLau/ComponentPlugin/blob/master/README
 	* 调整gradle插件版本为3.1
 	* 优化调试 log 格式
 	* 解决多task任务下 make project 编译失败的问题
+* 2019/11/04 1.0.5 
+    * 支持模块内自工程pin
+    * 提供更人性化的调试日志格式
 
 
 ### 为什么要使用

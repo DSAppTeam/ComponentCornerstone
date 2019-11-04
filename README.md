@@ -14,6 +14,9 @@ From the very beginning, I learned that "WeChat's Modular Architecture Reconstru
 	* Adjust the gradle plugin version to 3.1
 	* Optimized debug log format
 	* Solve the problem of compile compilation failure under multi-task task
+* 2019/11/04 1.0.5
+     * Support module self-engineering pin
+     * Provide a more user-friendly debug log format
 
 ### Why use it
 
