@@ -15,7 +15,7 @@ README: [English](https://github.com/YummyLau/ComponentPlugin/blob/master/README
 	* 优化调试 log 格式
 	* 解决多task任务下 make project 编译失败的问题
 * 2019/11/04 1.0.5 
-    * 支持模块内自工程pin
+    * 支持模块内子工程pin
     * 提供更人性化的调试日志格式
 
 
