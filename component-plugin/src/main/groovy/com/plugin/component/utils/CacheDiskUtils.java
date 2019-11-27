@@ -199,6 +199,20 @@ public final class CacheDiskUtils {
         return DiskCacheHelper.getDataWithoutDueTime(data);
     }
 
+    /**
+     * 判断是否存在 String 文件缓存
+     * @param key key
+     * @return true / false
+     */
+    public boolean existsStrCache(String key) {
+        DiskCacheManager diskCacheManager = getDiskCacheManager();
+        if (diskCacheManager == null) {
+            return false;
+        }
+        final File file = diskCacheManager.getFileIfExists(TYPE_STRING + key);
+        return file != null;
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // about String
     ///////////////////////////////////////////////////////////////////////////
