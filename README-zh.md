@@ -17,6 +17,8 @@ README: [English](https://github.com/YummyLau/ComponentPlugin/blob/master/README
 * 2019/11/04 1.0.5 
     * 支持模块内子工程pin
     * 提供更人性化的调试日志格式
+* 2019/12/09
+    * 优化插件 gradle 增量编译
 
 
 ### 为什么要使用
@@ -80,7 +82,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "com.effective.plugins:component:1.0.4
+        classpath "com.effective.plugins:component:1.0.6
     }
 }
 allprojects {

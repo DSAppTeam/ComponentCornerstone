@@ -17,6 +17,8 @@ From the very beginning, I learned that "WeChat's Modular Architecture Reconstru
 * 2019/11/04 1.0.5
      * Support sub-project pin in the module
      * Provide a more user-friendly debug log format
+* 2019/12/09
+    * Optimization plugin gradle incremental compilation
 
 ### Why use it
 
@@ -79,7 +81,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "com.effective.plugins:component:1.0.4
+        classpath "com.effective.plugins:component:1.0.6
     }
 }
 allprojects {
