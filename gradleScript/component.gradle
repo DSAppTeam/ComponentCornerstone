@@ -40,6 +40,7 @@ component {
                 dependencies {
                     implementation 'com.google.code.gson:gson:2.8.1'
                     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+                    implementation "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
                 }
             }
         }
@@ -64,7 +65,7 @@ component {
         targetModuleName 'debugModule'
 
         //申明调试模块运行时链接组件的资源，表明运行 debugModule 时使用目录资源
-//        targetDebugName 'libraryWithoutPlugin'
+        targetDebugName 'library'
 
         configuration {
 

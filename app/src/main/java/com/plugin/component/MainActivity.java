@@ -1,5 +1,6 @@
 package com.plugin.component;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -10,6 +11,8 @@ import com.plugin.library.ISdk;
 import com.plugin.library.ISdk2;
 import com.plugin.librarykotlin.IGetFromLibrary;
 import com.plugin.librarykotlin.IProvideFromKotlin;
+import com.plugin.librarykotlin.JavaParcelable;
+import com.plugin.librarykotlin.KotlinParcelable;
 import com.plugin.module.R;
 import com.plugin.pin.MainBase;
 import com.plugin.pin.base.PBase;
@@ -56,6 +59,18 @@ public class MainActivity extends AppCompatActivity {
         stringBuilder.append("common -> " + new PCommon().getString() + "\n");
         stringBuilder.append("普通模块测试 -> " + new LibraryWithoutPlugin().getString() + "\n");
         ((TextView) findViewById(R.id.text)).setText(stringBuilder);
+        findViewById(R.id.text).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                JavaParcelable javaParcelable = new JavaParcelable();
+                KotlinParcelable kotlinParcelable = new KotlinParcelable();
+                Intent intent = new Intent(MainActivity.this, ParcelableActivity.class);
+                intent.putExtra("javaParcelable",javaParcelable);
+                intent.putExtra("kotlinParcelable",kotlinParcelable);
+                startActivity(intent);
+            }
+        });
+
     }
 
     public void initComponent() {
