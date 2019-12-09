@@ -1,0 +1,22 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.component.debug">
+
+    <application
+        android:name=".librarykotlin.LibraryKotlinApplication"
+        android:allowBackup="true"
+        android:label="@string/kotlin_app_name"
+        android:supportsRtl="true"
+        android:icon="@drawable/librarykotlin_ic_launcher"
+        android:theme="@style/Theme.AppCompat.Light">
+        <activity android:name=".librarykotlin.LibraryKotlinMainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>

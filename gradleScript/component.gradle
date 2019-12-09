@@ -1,0 +1,107 @@
+apply plugin: 'com.android.component'
+
+component {
+
+    //注意：下面使用到的模块命等同于 setting 中申明的模块名，严格遵守规范
+
+    //申明插件的作用域，用于有 include 和 exclude
+    //生效的模块会自动添加组件依赖 core，可使用 component(:{projectName}) 使用其他组件提供的sdk，同时可在 componentSdks 中配置自己模块暴露的sdk
+    exclude 'libraryWithoutPlugin', 'component-core'
+
+//  上述 语句等价于下面语句
+//    include ':app','library','libraryKotlin','debugModule'
+
+
+    sdk {
+
+        //编译版本
+        compileSdkVersion 27
+
+        //java编译版本
+        compileOptions {
+            sourceCompatibility JavaVersion.VERSION_1_8
+            targetCompatibility JavaVersion.VERSION_1_8
+        }
+
+        configuration {
+
+            'library' {
+                groupId 'com.effective.android'
+                artifactId 'librarySdk'
+                dependencies {
+                    // 只支持 compileOnly 和 implementation
+                    implementation 'com.google.code.gson:gson:2.8.1'
+                }
+            }
+
+            'libraryKotlin' {
+                groupId 'com.effective.android'
+                artifactId 'libraryKotlinSdk'
+                dependencies {
+                    implementation 'com.google.code.gson:gson:2.8.1'
+                    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+                    implementation "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
+                }
+            }
+        }
+    }
+
+    pin {
+        configuration {
+            'pins' {
+                codeCheckEnabled true
+                //参与编译的模块
+                include ':p_base',':p_common',":p_home"
+                //对外把暴露的模块
+                export ':main'
+            }
+        }
+    }
+
+    //组件调试声明
+    debug {
+
+        //调试模块，随意在当前项目新建一个module用于调试即可
+        targetModuleName 'debugModule'
+
+        //申明调试模块运行时链接组件的资源，表明运行 debugModule 时使用目录资源
+        targetDebugName 'library'
+
+        configuration {
+
+            'library' {
+                dependencies {
+                    //只支持 implementation，足够了
+                    implementation component(':library')
+                }
+            }
+
+            'libraryKotlin' {
+                dependencies {
+                    implementation component(':libraryKotlin')
+                }
+            }
+
+            'libraryWithoutPlugin' {
+                dependencies {
+                    implementation project(':libraryWithoutPlugin')
+                }
+            }
+
+            'customDebug' {
+                dependencies {
+                    implementation component(':library')
+                    implementation component(':libraryKotlin')
+                }
+            }
+
+        }
+    }
+}
+
+
+//tasks.whenTaskAdded { task ->
+//    if (task.name.contains('AndroidTest') || task.name.contains('Test')) {
+//        task.enabled = false
+//    }
+//}

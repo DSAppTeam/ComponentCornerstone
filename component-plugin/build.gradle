@@ -1,0 +1,55 @@
+apply plugin: 'groovy'
+apply plugin: 'maven'
+//apply plugin: 'com.novoda.bintray-release'
+
+group = 'com.effective.plugins'
+archivesBaseName = 'component'
+version = '1.0.5'
+
+//设置本地发布路径
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            /**配置Maven部署器，将工件上传到本地目录，这里是放到与该项目同级目录的repo目录下*/
+            repository(url: uri('../repo'))
+        }
+    }
+}
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation 'com.android.tools.build:gradle:3.1.0'
+    implementation 'org.jetbrains.kotlin:kotlin-compiler-embeddable:1.3.50'
+    implementation 'org.ow2.asm:asm:7.1'
+    implementation 'org.ow2.asm:asm-commons:7.1'
+    implementation 'org.ow2.asm:asm-util:7.1'
+    implementation 'com.quinn.hunter:hunter-transform:0.9.3'
+}
+
+sourceSets {
+    main {
+        groovy {
+            srcDirs = ['src/main/groovy']
+        }
+    }
+}
+
+
+repositories {
+    jcenter()
+    google()
+    mavenCentral()
+}
+
+
+//publish {
+//    userOrg = 'yummylau'
+//    groupId = 'com.effective.plugins'
+//    artifactId = 'component'
+//    publishVersion = '1.0.5'
+//    desc = 'Android component plugin'
+//    website = 'https://github.com/YummyLau/ComponentPlugin'
+//}
+
+

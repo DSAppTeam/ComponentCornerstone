@@ -1,0 +1,6 @@
+dependencies {
+    implementation fileTree(dir: 'main/libs', include: ['*.jar'])
+    implementation pinProject(':p_common')
+    implementation pinProject(':p_home')
+    implementation pinProject(':p_base')
+}
