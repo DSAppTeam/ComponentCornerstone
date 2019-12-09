@@ -82,7 +82,7 @@ public class ComponentTransform extends Transform {
 
     @Override
     public boolean isIncremental() {
-        return true;
+        return CacheDiskUtils.getInstance(project.getBuildDir()).existsStrCache(Constants.PLUGIN_CACHE);
     }
 
 
