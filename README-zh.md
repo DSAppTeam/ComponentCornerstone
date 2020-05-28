@@ -19,6 +19,8 @@ README: [English](https://github.com/YummyLau/ComponentPlugin/blob/master/README
     * 提供更人性化的调试日志格式
 * 2019/12/09
     * 优化插件 gradle 增量编译
+* 2020/05/28
+    * 调整sdk注入逻辑，优化 sdk 注册，避免极端情况下多模块重复注册导致已绑定的实现丢失
 
 
 ### 为什么要使用
@@ -82,7 +84,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "com.effective.plugins:component:1.0.6
+        classpath "com.effective.plugins:component:1.0.8
     }
 }
 allprojects {

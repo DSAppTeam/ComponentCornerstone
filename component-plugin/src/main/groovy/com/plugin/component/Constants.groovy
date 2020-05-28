@@ -44,7 +44,7 @@ class Constants {
     public static String IMPL_PRE = 'impl-'
     public static String COMPONENT_PRE = 'component-'
     public static String DEBUG_COMPONENT_PRE = 'component(Debug)-'
-    public static String CORE_DEPENDENCY = "com.effective.android:component-core:1.0.4"
+    public static String CORE_DEPENDENCY = "com.effective.android:component-core:1.0.5"
 
     //sourceSet - default
     public static String JAVA_PATH = "src/main/java"

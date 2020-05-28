@@ -19,6 +19,8 @@ From the very beginning, I learned that "WeChat's Modular Architecture Reconstru
      * Provide a more user-friendly debug log format
 * 2019/12/09
     * Optimization plugin gradle incremental compilation
+* 2020/05/28
+     * Adjust the sdk injection logic, optimize the sdk registration, to avoid the repeated registration of multiple modules in extreme cases, resulting in the loss of the bound implementation
 
 ### Why use it
 
@@ -81,7 +83,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "com.effective.plugins:component:1.0.6
+        classpath "com.effective.plugins:component:1.0.8
     }
 }
 allprojects {

@@ -2,6 +2,7 @@ package com.plugin.component
 
 import android.app.Application
 import android.util.ArrayMap
+import android.util.Log
 
 /**
  * 运行时完成收集
@@ -40,7 +41,9 @@ class ComponentInfo {
 
 
     fun registerSdk(sdkClass: Class<*>, sdkImpl: Any) {
-        sdkMap[sdkClass] = sdkImpl
+        if(!isSdkReady(sdkClass) || sdkImpl!is Class<*>){
+            sdkMap[sdkClass] = sdkImpl
+        }
     }
 
     fun unregisterSdk(sdkKey: Class<*>): Boolean {

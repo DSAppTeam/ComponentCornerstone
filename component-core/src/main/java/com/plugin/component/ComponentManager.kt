@@ -31,6 +31,14 @@ object ComponentManager {
         ComponentManager.application = application
         sComponentInfoArrayMap = ArrayMap()
         sInit = true
+        injectComponentWithSdk(application)
+    }
+
+    /**
+     * 仅仅用于 asm 注入
+     */
+    private fun injectComponentWithSdk(application: Application){
+
     }
 
     private fun checkInit() {

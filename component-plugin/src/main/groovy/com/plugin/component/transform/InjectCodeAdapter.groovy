@@ -73,7 +73,7 @@ class InjectCodeAdapter extends ClassVisitor {
             @Override
             protected void onMethodEnter() {
                 injectComponentAutoInitCode =
-                        className == sComponentManagerPath && name == "init" && descriptor == "(Landroid/app/Application;)V"
+                        className == sComponentManagerPath && name == "injectComponentWithSdk" && descriptor == "(Landroid/app/Application;)V"
             }
 
             @Override
