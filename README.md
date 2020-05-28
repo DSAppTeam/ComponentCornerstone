@@ -15,12 +15,12 @@ From the very beginning, I learned that "WeChat's Modular Architecture Reconstru
 	* Optimized debug log format
 	* Solve the problem of compile compilation failure under multi-task task
 * 2019/11/04 1.0.5
-     * Support sub-project pin in the module
-     * Provide a more user-friendly debug log format
+	* Support sub-project pin in the module
+	* Provide a more user-friendly debug log format
 * 2019/12/09
-    * Optimization plugin gradle incremental compilation
+	* Optimization plugin gradle incremental compilation
 * 2020/05/28
-     * Adjust the sdk injection logic, optimize the sdk registration, to avoid the repeated registration of multiple modules in extreme cases, resulting in the loss of the bound implementation
+	* Adjust the sdk injection logic, optimize the sdk registration, to avoid the repeated registration of multiple modules in extreme cases, resulting in the loss of the bound implementation
 
 ### Why use it
 
