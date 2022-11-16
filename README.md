@@ -21,6 +21,15 @@ From the very beginning, I learned that "WeChat's Modular Architecture Reconstru
 	* Optimization plugin gradle incremental compilation
 * 2020/05/28
 	* Adjust the sdk injection logic, optimize the sdk registration, to avoid the repeated registration of multiple modules in extreme cases, resulting in the loss of the bound implementation
+* 2022/11/16
+     * Support one-way dependency between sdk, see demo for details
+     * Optimize the compilation cache of components and optimize the compilation speed
+     * Support publishing sdk and impl to maven
+     * Support component automatic switching maven dependencies, local file dependencies and source code compilation (depending on git to provide basic capabilities)
+     * Support automatic version management of components (depending on git to provide basic capabilities)
+     * Support automatic injection from maven product, local compilation cache and source code compilation when compiling and injecting impl
+     - Temporarily cancel the component debug ability
+     - Temporarily cancel the pin project support capability
 
 ### Why use it
 
@@ -80,15 +89,15 @@ In fact, dependent scenarios will change dynamically based on different build pr
 ```
 buildscript {
     repositories {
-        jcenter()
+        maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath "com.effective.plugins:component:1.0.8
+        classpath "com.effective.plugins:component:1.0.10
     }
 }
 allprojects {
     repositories {
-        jcenter()
+        maven { url 'https://jitpack.io' }
     }
 }
 

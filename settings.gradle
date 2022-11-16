@@ -7,6 +7,6 @@
 //调试插件
 includeBuild './component-plugin'
 
-include ':app'/*, ':pins'*/
+//include ':app'/*, ':pins'*/
 //include ':debugModule'
-include ':library', ':libraryKotlin', ':libraryWithoutPlugin'
+//include ':library', ':libraryKotlin', ':libraryWithoutPlugin'
