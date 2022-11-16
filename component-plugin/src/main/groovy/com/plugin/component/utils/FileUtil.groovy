@@ -1,6 +1,8 @@
 package com.plugin.component.utils
 
+import com.plugin.component.ComponentPlugin
 import com.plugin.component.Constants
+import org.gradle.api.Project
 
 class FileUtil {
 
@@ -61,5 +63,31 @@ class FileUtil {
         } catch (IOException e) {
             e.printStackTrace()
         }
+    }
+
+    static String findAarPath(Project project) {
+        File aarDir = new File(project.buildDir.absolutePath + "/outputs/aar/")
+        if (aarDir.exists()) {
+            File[] files = aarDir.listFiles(new FilenameFilter() {
+                @Override
+                boolean accept(File dir, String name) {
+                    return name.endsWith(".aar")
+                }
+            })
+            if (files.size() > 0) {
+                return files.first().absolutePath
+            }
+        }
+        return null
+    }
+
+    static String shell(String cmd) {
+        def out = new ByteArrayOutputStream()
+        ComponentPlugin.rootProject.exec {
+            executable 'bash'
+            args '-c', cmd
+            standardOutput = out
+        }
+        return out.toString().trim()
     }
 }

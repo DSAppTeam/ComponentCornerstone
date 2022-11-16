@@ -13,7 +13,7 @@ abstract class AbsPlugin {
 
     abstract void evaluateAfterAndroidPlugin(Project project)
 
-    abstract void afterEvaluateAfterAndroidPlugin(Project project)
+    abstract void afterEvaluateAfterAndroidPlugin(Project project,Project androidProject)
 
     abstract void afterAllEvaluate(Project root)
 }

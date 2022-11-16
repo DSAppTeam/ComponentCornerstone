@@ -21,13 +21,29 @@ import com.plugin.component.extension.option.sdk.SdkOption
 import com.plugin.component.log.Logger
 import com.plugin.component.log.MutLineLog
 import com.plugin.component.plugin.AbsPlugin
+import com.plugin.component.task.ComponentPublishTask
 import com.plugin.component.transform.ComponentTransform
+import com.plugin.component.utils.FileUtil
+import com.plugin.component.utils.GitUtil
 import com.plugin.component.utils.JarUtil
 import com.plugin.component.utils.ProjectUtil
 import com.plugin.component.utils.PublicationUtil
+import org.gradle.BuildListener
 import org.gradle.api.Action
+import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.plugins.AppliedPlugin
+import org.gradle.api.tasks.TaskExecutionException
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.internal.event.BroadcastDispatch
+import org.gradle.internal.event.ListenerBroadcast
+import org.gradle.invocation.DefaultGradle
+import org.gradle.listener.ClosureBackedMethodInvocationDispatch
+
+import java.lang.reflect.Field
+import java.lang.reflect.Modifier
+import java.util.concurrent.ConcurrentHashMap
 
 class Runtimes {
 
@@ -36,7 +52,7 @@ class Runtimes {
     //impl 发布信息
     private static Map<String, PublicationOption> sImplPublicationMap = new HashMap<>()
     //模块信息
-    private static Map<String, ProjectInfo> sProjectInfoMap = new HashMap<>()
+    private static Map<String, ProjectInfo> sProjectInfoMap = new ConcurrentHashMap<>()
 
     private static Map<String, PinConfiguration> sPinConfigurations = new HashMap<>()
 
@@ -71,6 +87,7 @@ class Runtimes {
                 sImplDir.mkdirs()
             }
         }
+        initGitHooks(root)
 
         root.repositories {
             flatDir {
@@ -79,6 +96,7 @@ class Runtimes {
             }
         }
         PublicationManager.getInstance().loadManifest(root)
+        Logger.buildOutput("load Manifest")
         PublicationDependenciesOption.metaClass.component { String value ->
             return Constants.COMPONENT_PRE + value
         }
@@ -92,6 +110,25 @@ class Runtimes {
                         .build4("* 根项目添加 flatDir = " + sSdkDir.absolutePath)
                         .build4("* 读取SDK目录下 publicationManifest.xml")
         )
+    }
+
+    private static void initGitHooks(Project root) {
+        if (GitUtil.gitExist) {
+            File hooksDir = new File(root.projectDir, Constants.HOOKS_DIR)
+            if (!hooksDir.exists()) {
+                hooksDir.mkdirs()
+            }
+            File prePushHook = new File(hooksDir, "pre-push")
+            if (!prePushHook.exists()) {
+                prePushHook.createNewFile()
+                FileOutputStream fos = new FileOutputStream(prePushHook)
+                OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8")
+                osw.write(Constants.HOOKS_CONTENT)
+                osw.flush()
+                osw.close()
+            }
+            FileUtil.shell("git config core.hooksPath ${hooksDir.absolutePath} && chmod 700 ${hooksDir.absolutePath}/*")
+        }
     }
 
     static initRuntimeConfigurationAfterEvaluate(Project root, ComponentExtension componentExtension) {
@@ -127,6 +164,23 @@ class Runtimes {
             }
         }
 
+        //添加flat路径
+        root.allprojects.each {
+            if (it == root) return
+            if (!shouldApplyComponentPlugin(it)) return
+            Project childProject = it
+            ProjectInfo projectInfo = new ProjectInfo(childProject)
+            addProjectInfo(childProject.name, projectInfo)
+            childProject.repositories {
+                flatDir {
+                    dirs sSdkDir.absolutePath
+                    dirs sImplDir.absolutePath
+                    mutLineLog.build4("* " + childProject.name + " add flatDir Dir[" + sSdkDir.absolutePath + "]")
+                    mutLineLog.build4("* " + childProject.name + " add flatDir Dir[" + sImplDir.absolutePath + "]")
+                }
+            }
+        }
+
         mutLineLog.build4("* 初始化 pins main 目录")
         List<String> topSort = PublicationManager.getInstance().dependencyGraph.topSort()
         Collections.reverse(topSort)
@@ -136,44 +190,42 @@ class Runtimes {
                 return
             }
             Project childProject = root.findProject(publication.project)
+            ProjectInfo projectInfo = getProjectInfo(childProject.name)
+            if (projectInfo != null && projectInfo.isPublish || sSdkOption.isPublishMode) {
+                publication.sdkNeedPublish = true
+                publication.impNeedPublish = true
+                publication.forceUseLocal(true)
+                //发布时删除本地文件，确保不会使用本地文件
+                File targetSdk = new File(sSdkDir, PublicationUtil.getJarName(publication))
+                if (targetSdk.exists()) {
+                    targetSdk.delete()
+                }
+                File targetImpl = new File(sImplDir, PublicationUtil.getAarName(publication))
+                if (targetImpl.exists()) {
+                    targetImpl.delete()
+                }
+            }
             PublicationUtil.filterPublicationDependencies(publication)
-            if (publication.version != null) {
-                JarUtil.handleMavenJar(childProject, publication)
+            if (!publication.forceLocal && publication.sdkVersion != null) {
+                mutLineLog.build4("* " + JarUtil.handleMavenJar(childProject, publication))
             } else {
                 mutLineLog.build4("* " + JarUtil.handleLocalJar(childProject, publication))
             }
             PublicationManager.getInstance().hitPublication(publication)
         }
 
-
-        //添加flat路径
-        root.allprojects.each {
-            if (it == root) return
-            if (!shouldApplyComponentPlugin(it)) return
-            Project childProject = it
-            childProject.repositories {
-                flatDir {
-                    dirs sSdkDir.absolutePath
-                    mutLineLog.build4("* " + childProject.name + "add flatDir Dir[" + sSdkDir.absolutePath + "]")
-                    dirs sImplDir.absolutePath
-                }
-            }
-        }
-
         Logger.buildBlockLog("预处理插件", mutLineLog)
     }
 
-    static hookAfterApplyingAndroidPlugin(Project root, AbsPlugin... plugins) {
+    static hookAfterApplyingAndroidPlugin(Project root, Project androidProject, AbsPlugin... plugins) {
 
         MutLineLog mutLineLog = new MutLineLog()
-
         root.allprojects.each {
             if (it == root) return
             if (!shouldApplyComponentPlugin(it)) return
 
             Project childProject = it
-            ProjectInfo projectInfo = new ProjectInfo(childProject)
-            addProjectInfo(childProject.name, projectInfo)
+            ProjectInfo projectInfo = getProjectInfo(it.name)
 
 
             mutLineLog.build4("* " + childProject.name)
@@ -183,32 +235,10 @@ class Runtimes {
             mutLineLog.build4("     taskNames = " + projectInfo.taskNames)
             mutLineLog.build4("     isSyncTask = " + projectInfo.isSync())
             mutLineLog.build4("     isAssemble = " + projectInfo.isAssemble)
+            mutLineLog.build4("     isPublish = " + projectInfo.isPublish)
             mutLineLog.build4("     isDebug = " + projectInfo.isDebug)
-//
-//            childProject.plugins.all {
-//                Class extensionClass
-//                if (it instanceof AppPlugin) {
-//                    extensionClass = AppExtension
-//                } else if (it instanceof LibraryPlugin) {
-//                    extensionClass = LibraryExtension
-//                } else {
-//                    return
-//                }
-//                childProject.extensions.configure(extensionClass, new Action<? extends TestedExtension>() {
-//                    @Override
-//                    void execute(TestedExtension testedExtension) {
-//                        if (plugins != null && plugins.size() > 0) {
-//                            for (AbsPlugin absPlugin : plugins) {
-//                                absPlugin.evaluateAfterAndroidPlugin(childProject)
-//                            }
-//                        }
-//                    }
-//                })
-//            }
+            mutLineLog.build4("     modules = " + projectInfo.modules)
 
-            /**
-             * 代替上述注解逻辑
-             */
             childProject.plugins.whenObjectAdded {
                 if (it instanceof AppPlugin || it instanceof LibraryPlugin) {
                     if (plugins != null && plugins.size() > 0) {
@@ -226,13 +256,72 @@ class Runtimes {
                     }
                     if (plugins != null && plugins.size() > 0) {
                         for (AbsPlugin absPlugin : plugins) {
-                            absPlugin.afterEvaluateAfterAndroidPlugin(childProject)
+                            absPlugin.afterEvaluateAfterAndroidPlugin(childProject, androidProject)
                         }
                     }
                 }
             }
         }
         Logger.buildBlockLog("子 PROJECT 信息", mutLineLog)
+    }
+
+    //AGP4.1.0后调整了插件入口，废弃。
+    //把所有 监听了 projectsEvaluated 的匿名内部类移除
+    static List<BroadcastDispatch<BuildListener>> hookProjectsEvaluatedAction(Project project) {
+        def removeDispatch = new ArrayList<BroadcastDispatch<BuildListener>>()
+        try {
+            ListenerBroadcast<BuildListener> buildListenerBroadcast
+            def fBuildListenerBroadcast = DefaultGradle.class.getDeclaredField("buildListenerBroadcast")
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true)
+            modifiersField.setInt(fBuildListenerBroadcast, fBuildListenerBroadcast.getModifiers() & ~Modifier.FINAL)
+            fBuildListenerBroadcast.setAccessible(true)
+            buildListenerBroadcast = (ListenerBroadcast<BuildListener>) fBuildListenerBroadcast.get(project.gradle)
+
+            Field fBroadcast = ListenerBroadcast.class.getDeclaredField("broadcast")
+            fBroadcast.setAccessible(true)
+            BroadcastDispatch<BuildListener> broadcast = (BroadcastDispatch<BuildListener>) fBroadcast.get(buildListenerBroadcast)
+            def fDispatchers = broadcast.getClass().getDeclaredField("dispatchers")
+            fDispatchers.setAccessible(true)
+            ArrayList<BroadcastDispatch<BuildListener>> dispatchers = (ArrayList<BroadcastDispatch<BuildListener>>) fDispatchers.get(broadcast)
+
+            Class clazz =
+                    Class.forName("org.gradle.internal.event.BroadcastDispatch\$ActionInvocationHandler")
+            Class clazz2 =
+                    Class.forName("org.gradle.listener.ClosureBackedMethodInvocationDispatch")
+
+            def iterator = dispatchers.iterator()
+
+            while (iterator.hasNext()) {
+                try {
+                    def next = iterator.next()
+                    def fDispatch = next.getClass().getDeclaredField("dispatch")
+                    fDispatch.setAccessible(true)
+                    def dispatch = fDispatch.get(next)
+                    Logger.buildOutput("dispatch:$dispatch")
+                    def fMethodName
+                    if (dispatch instanceof ClosureBackedMethodInvocationDispatch) {
+                        fMethodName = clazz2.getDeclaredField("methodName")
+                    } else if (dispatch.getClass() == clazz) {
+                        fMethodName = clazz.getDeclaredField("methodName")
+                    } else {
+                        continue
+                    }
+                    fMethodName.setAccessible(true)
+                    def methodName = fMethodName.get(dispatch)
+                    if (methodName instanceof String && methodName.contains("projectsEvaluated")) {
+                        removeDispatch.add(next)
+                        iterator.remove()
+                    }
+                } catch (Exception ignore) {
+                    ignore.printStackTrace()
+                }
+            }
+
+        } catch (Exception ignore) {
+            ignore.printStackTrace()
+        }
+        return removeDispatch
     }
 
     /**
@@ -300,6 +389,33 @@ class Runtimes {
             mutLineLog.build4("* " + it.name + " apply plugin: com.android.component")
         }
         Logger.buildBlockLog("子 PROJECT 注入插件", mutLineLog)
+    }
+
+    static void registerPublishTask(Project root) {
+        TaskProvider<ComponentPublishTask> debugTask = root.tasks.register("ComponentPublishDebug", ComponentPublishTask.class)
+        TaskProvider<ComponentPublishTask> releaseTask = root.tasks.register("ComponentPublishRelease", ComponentPublishTask.class)
+    }
+
+    static void checkPublishEnable(Project project) {
+        boolean shouldShutdown = false
+        project.rootProject.allprojects.each { childProject ->
+            if (childProject == project) return
+            if (!shouldApplyComponentPlugin(childProject)) return
+
+            PublicationOption sdkPublication = getSdkPublication(childProject.name)
+            PublicationOption implPublication = getImplPublication(childProject.name)
+
+            if (sdkPublication == null || implPublication == null) {
+                return
+            }
+
+            if (!GitUtil.canPublish(sdkPublication.sdkSourceSet.path) || !GitUtil.canPublish(implPublication.impSourceSet.path)) {
+                shouldShutdown = true
+            }
+        }
+        if (shouldShutdown) {
+            throw new GradleException("Must commit and push changes before publish！！！")
+        }
     }
 
 
@@ -376,5 +492,13 @@ class Runtimes {
             }
         }
         return null
+    }
+
+    static void clean() {
+        sSdkPublicationMap.clear()
+        sImplPublicationMap.clear()
+        sProjectInfoMap.clear()
+        sPinConfigurations.clear()
+        sAssembleModules.clear()
     }
 }

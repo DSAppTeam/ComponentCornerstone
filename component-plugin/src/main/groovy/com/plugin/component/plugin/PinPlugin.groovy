@@ -262,7 +262,7 @@ class PinPlugin extends BasePlugin {
                     // generate microModules.xml for PinInfo IDEA plugin.
                     def ideaFile = new File(buildResult.gradle.rootProject.rootDir, '.idea')
                     if (!ideaFile.exists()) return
-                    def pininfos = '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<modules>\n'
+                    def pininfos = '<?xml sdkVersion=\"1.0\" encoding=\"UTF-8\"?>\n<modules>\n'
 
                     Map<String, PinConfiguration> allPins = Runtimes.getPinConfigurations()
                     Set<String> moduleNames = allPins.keySet()

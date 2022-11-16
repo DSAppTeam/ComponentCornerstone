@@ -10,6 +10,9 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 
+/**
+ * 扫描注解并且收集
+ */
 class ScanCodeAdapter extends ClassVisitor {
 
     private String className

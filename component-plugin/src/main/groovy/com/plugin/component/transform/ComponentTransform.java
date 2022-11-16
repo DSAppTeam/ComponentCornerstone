@@ -184,7 +184,7 @@ public class ComponentTransform extends Transform {
 
         ScanSummaryInfo cacheSummary = readPluginCache(); // 读取缓存
 
-        ScanSummaryInfo scanSummaryInfo = ScanRuntime.updateSummaryInfo(cacheSummary); // 整理本次扫码结果，返回最新的模块结构
+        ScanSummaryInfo scanSummaryInfo = ScanRuntime.updateSummaryInfo(cacheSummary); // 整理本次扫描结果，返回最新的模块结构
         ScanRuntime.buildComponentSdkInfo();
         ScanRuntime.logScanInfo();
 

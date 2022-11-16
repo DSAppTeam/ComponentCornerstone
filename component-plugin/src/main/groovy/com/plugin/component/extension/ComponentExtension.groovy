@@ -22,6 +22,8 @@ class ComponentExtension {
     Set<String> validModules
     Project project
 
+    String appModule //app模块
+
     ComponentExtension(Project project) {
         this.project = project
         debugOption = new DebugOption(project)
@@ -61,6 +63,16 @@ class ComponentExtension {
         }
     }
 
+    /**
+     * 配置app主模块名称
+     * @param moduleName
+     */
+    void app(String... modules) {
+        if(modules != null && modules.size() > 0){
+            this.appModule = modules[0]
+        }
+
+    }
 
     /**
      * sdk模块
@@ -118,6 +130,7 @@ class ComponentExtension {
     String toString() {
         StringBuilder stringBuilder = new StringBuilder("\n")
         stringBuilder.append("               ------------------------------------------------------------------" + "\n")
+        stringBuilder.append("              | appModule = " + appModule.toString() +  "\n")
         stringBuilder.append("              | include = " + includeModules.toList().toString() +  "\n")
         stringBuilder.append("              | exclude = " + excludeModules.toList().toString() +  "\n")
         stringBuilder.append("              | Select by " + (!includeModules.isEmpty() ? "includeModel" : "excludeModel") +  "\n")

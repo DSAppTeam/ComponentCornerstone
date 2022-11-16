@@ -51,7 +51,6 @@ public class ComponentWeaver implements IWeaver {
         String inputPath = inputJar.getAbsolutePath();
         String outputPath = outputJar.getAbsolutePath();
         ZipFile inputZip = new ZipFile(inputJar);
-        ZipOutputStream outputZip = new ZipOutputStream(new BufferedOutputStream(java.nio.file.Files.newOutputStream(outputJar.toPath())));
         Enumeration<? extends ZipEntry> inEntries = inputZip.entries();
         while (inEntries.hasMoreElements()) {
             ZipEntry entry = inEntries.nextElement();
@@ -63,26 +62,11 @@ public class ComponentWeaver implements IWeaver {
 
             beforeWeaveClass(inputPath, outputPath, className);
 
-            if (!isWeavableClass(className)) {
-                newEntryContent = org.apache.commons.io.IOUtils.toByteArray(originalFile);
-            } else {
-                newEntryContent = weaveSingleClassToByteArray(inputPath, originalFile);
+            if (isWeavableClass(className)) {
+                weaveSingleClassToByteArray(inputPath, originalFile);
             }
-            CRC32 crc32 = new CRC32();
-            crc32.update(newEntryContent);
-            outEntry.setCrc(crc32.getValue());
-            outEntry.setMethod(ZipEntry.STORED);
-            outEntry.setSize(newEntryContent.length);
-            outEntry.setCompressedSize(newEntryContent.length);
-            outEntry.setLastAccessTime(ZERO);
-            outEntry.setLastModifiedTime(ZERO);
-            outEntry.setCreationTime(ZERO);
-            outputZip.putNextEntry(outEntry);
-            outputZip.write(newEntryContent);
-            outputZip.closeEntry();
         }
-        outputZip.flush();
-        outputZip.close();
+        FileUtils.copyFile(inputJar, outputJar);
     }
 
     public final void weaveSingleClassToFile(File inputFile, File outputFile, String inputBaseDir) throws IOException {
@@ -98,10 +82,8 @@ public class ComponentWeaver implements IWeaver {
             FileUtils.touch(outputFile);
             InputStream inputStream = new FileInputStream(inputFile);
             byte[] bytes = weaveSingleClassToByteArray(inputPath, inputStream);
-            FileOutputStream fos = new FileOutputStream(outputFile);
-            fos.write(bytes);
-            fos.close();
             inputStream.close();
+            FileUtils.copyFile(inputFile, outputFile);
         } else {
             if (inputFile.isFile()) {
                 FileUtils.touch(outputFile);

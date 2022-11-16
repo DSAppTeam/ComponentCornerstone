@@ -24,7 +24,7 @@ public class FlatDirModuleComponentSelector implements ModuleComponentSelector {
     private FlatDirModuleComponentSelector(ModuleIdentifier module, ImmutableVersionConstraint version, ImmutableAttributes attributes, List<Capability> requestedCapabilities) {
         assert module != null: "module cannot be null"
 
-        assert version != null: "version cannot be null"
+        assert version != null: "sdkVersion cannot be null"
 
         assert attributes != null: "attributes cannot be null"
 

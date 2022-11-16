@@ -23,6 +23,25 @@ component {
             targetCompatibility JavaVersion.VERSION_1_8
         }
 
+        //组件发布相关
+        //是否自动化版本，依赖git
+//        autoVersion true
+        //是否发布模式
+//        publishMode false
+        //maven寻址地址与下面地址一直
+//        mavenUrl "$ex_private_maven_repository"
+        //maven发布仓库配置
+//        repositories {
+//            maven {
+//                allowInsecureProtocol true
+//                credentials {
+//                    username = "$ex_private_maven_username"
+//                    password = "$ex_private_maven_password"
+//                }
+//                url = "$ex_private_maven_repository"
+//            }
+//        }
+
         configuration {
 
             'library' {
@@ -41,62 +60,64 @@ component {
                     implementation 'com.google.code.gson:gson:2.8.1'
                     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
                     implementation "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
+                    implementation component(":library")//SDK依赖其他组件
                 }
             }
         }
     }
 
-    pin {
-        configuration {
-            'pins' {
-                codeCheckEnabled true
-                //参与编译的模块
-                include ':p_base',':p_common',":p_home"
-                //对外把暴露的模块
-                export ':main'
-            }
-        }
-    }
+    //1.0.10版本暂不支持
+//    pin {
+//        configuration {
+//            'pins' {
+//                codeCheckEnabled true
+//                //参与编译的模块
+//                include ':p_base',':p_common',":p_home"
+//                //对外把暴露的模块
+//                export ':main'
+//            }
+//        }
+//    }
 
-    //组件调试声明
-    debug {
-
-        //调试模块，随意在当前项目新建一个module用于调试即可
-        targetModuleName 'debugModule'
-
-        //申明调试模块运行时链接组件的资源，表明运行 debugModule 时使用目录资源
-        targetDebugName 'library'
-
-        configuration {
-
-            'library' {
-                dependencies {
-                    //只支持 implementation，足够了
-                    implementation component(':library')
-                }
-            }
-
-            'libraryKotlin' {
-                dependencies {
-                    implementation component(':libraryKotlin')
-                }
-            }
-
-            'libraryWithoutPlugin' {
-                dependencies {
-                    implementation project(':libraryWithoutPlugin')
-                }
-            }
-
-            'customDebug' {
-                dependencies {
-                    implementation component(':library')
-                    implementation component(':libraryKotlin')
-                }
-            }
-
-        }
-    }
+    //组件调试声明1.0.10版本暂不支持
+//    debug {
+//
+//        //调试模块，随意在当前项目新建一个module用于调试即可
+//        targetModuleName 'debugModule'
+//
+//        //申明调试模块运行时链接组件的资源，表明运行 debugModule 时使用目录资源
+//        targetDebugName 'library'
+//
+//        configuration {
+//
+//            'library' {
+//                dependencies {
+//                    //只支持 implementation，足够了
+//                    implementation component(':library')
+//                }
+//            }
+//
+//            'libraryKotlin' {
+//                dependencies {
+//                    implementation component(':libraryKotlin')
+//                }
+//            }
+//
+//            'libraryWithoutPlugin' {
+//                dependencies {
+//                    implementation project(':libraryWithoutPlugin')
+//                }
+//            }
+//
+//            'customDebug' {
+//                dependencies {
+//                    implementation component(':library')
+//                    implementation component(':libraryKotlin')
+//                }
+//            }
+//
+//        }
+//    }
 }
 
 

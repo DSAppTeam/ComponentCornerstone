@@ -20,6 +20,7 @@ class ProjectInfo {
     public String taskNames
     public List<String> modules = new ArrayList<>()         //包含的模块
     public boolean isAssemble = false                       //是否是asAssemble
+    public boolean isPublish = false                        //是否发布
     public boolean isDebug = false                          //是否是debug
     public String compileModuleName = ""                     //入口模块名字
     public Set<String> componentDependencies = new HashSet<>()   //模块依赖的component
@@ -61,6 +62,11 @@ class ProjectInfo {
                     }
                     String[] strings = task.split(":")
                     modules.add(strings.length > 1 ? strings[strings.length - 2] : "all")
+                } else if (task.toUpperCase().contains("COMPONENTPUBLISH")) {
+                    isPublish = true
+                    if (task.toUpperCase().contains("DEBUG")) {
+                        isDebug = true
+                    }
                 }
             }
         }

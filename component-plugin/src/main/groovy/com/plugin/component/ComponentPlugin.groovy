@@ -1,12 +1,25 @@
 package com.plugin.component
 
 import com.plugin.component.extension.ComponentExtension
+import com.plugin.component.log.Logger
 import com.plugin.component.plugin.AbsPlugin
 import com.plugin.component.plugin.DebugPlugin
 import com.plugin.component.plugin.PinPlugin
 import com.plugin.component.plugin.SdkPlugin
+import com.plugin.component.utils.ProjectUtil
+import org.gradle.BuildListener
+import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.internal.dispatch.MethodInvocation
+import org.gradle.internal.event.BroadcastDispatch
+import org.gradle.internal.event.ListenerBroadcast
+import org.gradle.invocation.DefaultGradle
+import org.gradle.listener.ClosureBackedMethodInvocationDispatch
+
+import java.lang.reflect.Field
+import java.lang.reflect.Method
+import java.lang.reflect.Modifier
 
 /**
  *   ./gradlew --no-daemon ComponentPlugin  -Dorg.gradle.debug=true
@@ -25,20 +38,39 @@ class ComponentPlugin extends AbsPlugin implements Plugin<Project> {
     private AbsPlugin debug = new DebugPlugin()
     private AbsPlugin pins = new PinPlugin()
     private ComponentExtension componentExtension
+    private boolean isFirst = true
+    static Project androidProject
+    static Project rootProject
 
     @Override
     void apply(Project project) {
         if (project == project.rootProject) {
+            rootProject = project.rootProject
             componentExtension = project.getExtensions().create(Constants.COMPONENT, ComponentExtension, project)
             initExtension(componentExtension)
             Runtimes.initRuntimeConfigurationOnEvaluate(project)
             project.afterEvaluate {
+                androidProject = ProjectUtil.getProject(project, componentExtension.appModule)
                 Runtimes.initRuntimeConfigurationAfterEvaluate(project, componentExtension)
-                Runtimes.hookAfterApplyingAndroidPlugin(project, this)
+                Runtimes.hookAfterApplyingAndroidPlugin(project, androidProject, this)
                 Runtimes.injectComponentPlugin(project)
+                Runtimes.registerPublishTask(project)
             }
+//            def projectsEvaluatedList = Runtimes.hookProjectsEvaluatedAction(project)
             project.gradle.projectsEvaluated {
-                afterAllEvaluate(project)
+                if (isFirst) {
+                    isFirst = false
+                    //修改引用
+                    afterAllEvaluate(project)
+//                    //后执行移除的监听（主要调整执行顺序，重依赖才能生效和不报错，可能有AGP 版本兼容问题）
+//                    Class clazz = Class.forName("org.gradle.api.invocation.Gradle")
+//                    Method method = clazz.getDeclaredMethod("projectsEvaluated", Action.class)
+//                    Object[] objects = [it]
+//                    MethodInvocation mMethodInvocation = new MethodInvocation(method, objects)
+//                    projectsEvaluatedList.forEach {
+//                        it.dispatch(mMethodInvocation)
+//                    }
+                }
             }
         } else {
             evaluateBeforeAndroidPlugin(project)
@@ -73,9 +105,9 @@ class ComponentPlugin extends AbsPlugin implements Plugin<Project> {
     }
 
     @Override
-    void afterEvaluateAfterAndroidPlugin(Project project) {
-        sdk.afterEvaluateAfterAndroidPlugin(project)
-        debug.afterEvaluateAfterAndroidPlugin(project)
+    void afterEvaluateAfterAndroidPlugin(Project project, Project androidProject) {
+        sdk.afterEvaluateAfterAndroidPlugin(project, androidProject)
+        debug.afterEvaluateAfterAndroidPlugin(project, androidProject)
     }
 
     @Override

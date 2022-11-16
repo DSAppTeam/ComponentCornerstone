@@ -28,7 +28,7 @@ class BasePlugin extends AbsPlugin {
     }
 
     @Override
-    void afterEvaluateAfterAndroidPlugin(Project project) {
+    void afterEvaluateAfterAndroidPlugin(Project project, Project androidProject) {
 
     }
 
