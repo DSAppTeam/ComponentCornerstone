@@ -21,7 +21,15 @@ README: [English](https://github.com/YummyLau/ComponentPlugin/blob/master/README
     * 优化插件 gradle 增量编译
 * 2020/05/28
     * 调整sdk注入逻辑，优化 sdk 注册，避免极端情况下多模块重复注册导致已绑定的实现丢失
-
+* 2022/11/16
+    * 支持sdk之间的单向依赖，详细见demo
+    * 优化组件的编译缓存，优化编译速度
+    * 支持sdk和impl发布至maven
+    * 支持组件自动化切换maven依赖，本地文件依赖和源码编译(依赖git提供基础能力)
+    * 支持组件自动化版本管理(依赖git提供基础能力）
+    * 支持编译注入impl时从maven产物，本地编译缓存和源码编译三者中自动注入
+    - 暂时取消组件debug能力
+    - 暂时取消pin工程支持能力
 
 ### 为什么要使用
 
@@ -81,15 +89,15 @@ README: [English](https://github.com/YummyLau/ComponentPlugin/blob/master/README
 ```
 buildscript {
     repositories {
-        jcenter()
+        maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath "com.effective.plugins:component:1.0.8
+        classpath "com.effective.plugins:component:1.0.10
     }
 }
 allprojects {
     repositories {
-        jcenter()
+        maven { url 'https://jitpack.io' }
     }
 }
 
