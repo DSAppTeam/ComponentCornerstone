@@ -2,10 +2,10 @@
 //include ':component-core'
 
 //发布插件
-//include ':component-plugin'
+include ':component-plugin'
 
 //调试插件
-includeBuild './component-plugin'
+//includeBuild './component-plugin'
 
 //include ':app'/*, ':pins'*/
 //include ':debugModule'

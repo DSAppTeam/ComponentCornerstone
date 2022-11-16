@@ -14,7 +14,7 @@ buildscript {
 //        classpath "com.effective.plugins:component:$component_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         //调试需要
-        classpath "com.effective.plugins:component-plugin"
+//        classpath "com.effective.plugins:component-plugin"
 
         //发布需要
 //        classpath 'com.novoda:bintray-release:0.9.1'
@@ -47,4 +47,4 @@ allprojects {
 //    delete rootProject.buildDir
 //}
 //
-apply from: "./gradleScript/component.gradle"
+//apply from: "./gradleScript/component.gradle"
