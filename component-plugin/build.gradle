@@ -18,11 +18,11 @@ afterEvaluate {
                 version = version
             }
         }
-        repositories {
-            maven {
-                url = "../repo"
-            }
-        }
+//        repositories {
+//            maven {
+//                url = "../repo"
+//            }
+//        }
     }
 }
 
@@ -51,6 +51,7 @@ repositories {
     jcenter()
     google()
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 
