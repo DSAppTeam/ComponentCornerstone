@@ -21,10 +21,10 @@ class SdkOption {
     int compileSdkVersion                           //编译版本
     CompileOptions compileOption                    //编译选项
     Action<? super RepositoryHandler> repositories     //仓库配置
-    boolean isAutoVersion                           //是否使用自动版本
-    boolean isPublishMode                           //是否发布模式
-    boolean isOnline
-    boolean needGitHook                             //是否创建git钩子
+    boolean isAutoVersion=false                        //是否使用自动版本
+    boolean isPublishMode=false                         //是否发布模式
+    boolean isOnline=false
+    boolean needGitHook=false                             //是否创建git钩子
     String mavenUrl                                 //maven仓库
 
     SdkOption(Project project) {
