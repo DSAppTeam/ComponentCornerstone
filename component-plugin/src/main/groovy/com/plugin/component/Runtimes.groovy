@@ -87,7 +87,6 @@ class Runtimes {
                 sImplDir.mkdirs()
             }
         }
-        initGitHooks(root)
 
         root.repositories {
             flatDir {
@@ -138,7 +137,7 @@ class Runtimes {
         sPinOption = sExtension.pinOption
         root.extensions.add("targetDebugName", sDebugOption.targetDebugName)
         sAndroidJarPath = ProjectUtil.getAndroidJarPath(root, componentExtension.sdkOption.compileSdkVersion)
-
+        initGitHooks(root)
         Logger.buildBlockLog(
                 "component.gradle 脚本信息",
                 new MutLineLog()
