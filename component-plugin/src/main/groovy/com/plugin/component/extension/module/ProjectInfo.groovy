@@ -53,6 +53,8 @@ class ProjectInfo {
                         || task.contains("aR")
                         || task.contains("asR")
                         || task.contains("asD")
+                        || task.toUpperCase().contains("BUNDLE")
+                        || task.toUpperCase().contains("EXTRACTAPKS")
                         || task.toUpperCase().contains("TINKER")
                         || task.toUpperCase().contains("INSTALL")
                         || task.toUpperCase().contains("RESGUARD")) {

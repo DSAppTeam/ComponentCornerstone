@@ -24,6 +24,7 @@ class SdkOption {
     boolean isAutoVersion                           //是否使用自动版本
     boolean isPublishMode                           //是否发布模式
     boolean isOnline
+    boolean needGitHook                             //是否创建git钩子
     String mavenUrl                                 //maven仓库
 
     SdkOption(Project project) {
@@ -96,6 +97,14 @@ class SdkOption {
      */
     void online(boolean flag) {
         this.isOnline = flag
+    }
+
+    /**
+     * 是否需要创建githook
+     * @param flag
+     */
+    void githook(boolean flag) {
+        this.needGitHook = flag
     }
 
     /**

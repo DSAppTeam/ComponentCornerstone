@@ -113,7 +113,7 @@ class Runtimes {
     }
 
     private static void initGitHooks(Project root) {
-        if (GitUtil.gitExist) {
+        if (GitUtil.gitExist && sSdkOption.needGitHook) {
             File hooksDir = new File(root.projectDir, Constants.HOOKS_DIR)
             if (!hooksDir.exists()) {
                 hooksDir.mkdirs()
