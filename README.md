@@ -92,7 +92,7 @@ buildscript {
         maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath "com.github.DSAppTeam:ComponentCornerstone:1.0.12
+        classpath "com.github.DSAppTeam:ComponentCornerstone:1.0.13
     }
 }
 allprojects {
