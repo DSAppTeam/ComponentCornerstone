@@ -8,12 +8,12 @@ README: [English](https://github.com/YummyLau/ComponentPlugin/blob/master/README
 
 ### 版本更新
 * 2019/10/10 1.0.3-beta 
-	* 支持组件循环依赖
-	* 支持并发 transform 加快编译速度
+    * 支持组件循环依赖
+    * 支持并发 transform 加快编译速度
 * 2019/10/22 1.0.4 
-	* 调整gradle插件版本为3.1
-	* 优化调试 log 格式
-	* 解决多task任务下 make project 编译失败的问题
+    * 调整gradle插件版本为3.1
+    * 优化调试 log 格式
+    * 解决多task任务下 make project 编译失败的问题
 * 2019/11/04 1.0.5 
     * 支持模块内子工程pin
     * 提供更人性化的调试日志格式
@@ -30,6 +30,8 @@ README: [English](https://github.com/YummyLau/ComponentPlugin/blob/master/README
     * 支持编译注入impl时从maven产物，本地编译缓存和源码编译三者中自动注入
     - 暂时取消组件debug能力
     - 暂时取消pin工程支持能力
+* 2023/03/01
+    * 发布功能优化
 
 ### 为什么要使用
 

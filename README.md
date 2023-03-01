@@ -30,6 +30,8 @@ From the very beginning, I learned that "WeChat's Modular Architecture Reconstru
      * Support automatic injection from maven product, local compilation cache and source code compilation when compiling and injecting impl
      - Temporarily cancel the component debug ability
      - Temporarily cancel the pin project support capability
+* 2023/03/01
+	* Some optimization
 
 ### Why use it
 
