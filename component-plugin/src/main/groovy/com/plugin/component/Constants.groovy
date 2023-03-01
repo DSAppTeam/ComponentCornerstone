@@ -66,6 +66,35 @@ branch=\$(git symbolic-ref --short -q HEAD)
 
 strB="BUILD SUCCESSFUL"
 echo "current branch:\$branch"
+
+#尝试读取指定的JAVA_HOME配置
+config="./local.properties"
+echo "config path: \${config}"
+# 定义一个函数从properties文件读取key
+function prop {
+\t[ -f "\$config" ] && grep -E "^\\s*[^#]?\${1}=.*\$" \$config | cut -d'=' -f2
+}
+
+hookJavaHome=\$(prop "hook.gradle.jdk.home")
+echo "\$hookJavaHome"
+if [ -n "\$hookJavaHome" ]; then
+    export JAVA_HOME="\$hookJavaHome"
+fi
+if [ -z "\$hookJavaHome" ]; then
+    echo "hookJavaHome is empty"
+    config="./gradle.properties"
+    echo "config path: \${config}"
+
+    spJavaHome=\$(prop "org.gradle.java.home")
+    echo "\$spJavaHome"
+    if [ -n "\$spJavaHome" ]; then
+        export JAVA_HOME="\$spJavaHome"
+    fi
+    if [ -z "\$spJavaHome" ]; then
+        echo "spJavaHome is empty"
+    fi
+fi
+
 tempLog=/tmp/\$(date +%s).log && touch \$tempLog
 if [[ "\$branch" =~ (^develop\$)|(^release/*) ]]; then
    ./gradlew ComponentPublishDebug | tee \$tempLog

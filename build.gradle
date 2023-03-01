@@ -2,7 +2,7 @@ apply from: "./gradleScript/config.gradle"
 
 buildscript {
     ext.kotlin_version = '1.6.21'
-    ext.component_version = '1.0.13'
+    ext.component_version = '2.0.0'
 
     repositories {
         google()
@@ -11,7 +11,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.0'
-        classpath "com.github.DSAppTeam:ComponentCornerstone:$component_version"
+//        classpath "com.github.DSAppTeam:ComponentCornerstone:$component_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         //调试需要
 //        classpath "com.effective.plugins:component-plugin"
@@ -47,4 +47,4 @@ allprojects {
 //    delete rootProject.buildDir
 //}
 //
-apply from: "./gradleScript/component.gradle"
+//apply from: "./gradleScript/component.gradle"

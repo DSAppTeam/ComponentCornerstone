@@ -126,7 +126,11 @@ class Runtimes {
                 osw.flush()
                 osw.close()
             }
-            FileUtil.shell("git config core.hooksPath ${hooksDir.absolutePath} && chmod 700 ${hooksDir.absolutePath}/*")
+            String hooksDirPath = hooksDir.absolutePath
+            String cmd = "git config core.hooksPath ${hooksDirPath} && chmod 700 ${hooksDirPath}${File.separator}*"
+            Logger.buildOutput("hooks Path:${hooksDirPath}")
+            Logger.buildOutput("hooks cmd:${cmd}")
+            FileUtil.shell(cmd)
         }
     }
 
@@ -205,7 +209,7 @@ class Runtimes {
                 }
             }
             PublicationUtil.filterPublicationDependencies(publication)
-            if (!publication.forceLocal && publication.sdkVersion != null) {
+            if (/*!publication.forceLocal && */publication.sdkVersion != null) {
                 mutLineLog.build4("* " + JarUtil.handleMavenJar(childProject, publication))
             } else {
                 mutLineLog.build4("* " + JarUtil.handleLocalJar(childProject, publication))

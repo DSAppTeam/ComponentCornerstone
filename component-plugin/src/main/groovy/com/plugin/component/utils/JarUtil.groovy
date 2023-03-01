@@ -323,45 +323,11 @@ class JarUtil {
         String fileName = publication.artifactId + "-" + publication.sdkVersion + ".jar"
 //  http://172.16.xxx.xxx:8081/nexus/content/groups/public/com/xxx/cif/xxx-cif-api/0.0.1-SNAPSHOT/xxx-cif-api-0.0.1-20170515.040917-89.jar
         String url = Runtimes.sSdkOption.getMavenUrl()
+        if (TextUtils.isEmpty(url)) return false
         String line = HttpUrlConnectHelper.sendRequest("$url/${publication.groupId.replace('.', '/')}/${publication.artifactId}/${publication.sdkVersion}/$fileName", "HEAD")
         if (!TextUtils.isEmpty(line)) {
             filePath = "$url/${publication.groupId.replace('.', '/')}/${publication.artifactId}/${publication.sdkVersion}/$fileName"
         }
-//        def name = "component[${publication.groupId}-${publication.artifactId}]Classpath"
-//        Configuration configuration = project.configurations.create(name)
-//        if (publication.dependencies != null) {
-//            if (publication.dependencies.implementation != null) {
-//                publication.dependencies.implementation.each { dependency ->
-////                    Logger.buildOutput("packJar: publication:${PublicationUtil.getPublicationId(publication)} move dependencies:${it}")
-//                    if (dependency instanceof PublicationDependencyModuleOption) {
-//                        project.dependencies.add(name, dependency.path)
-//                    } else {
-//                        project.dependencies.add(name, dependency)
-//                    }
-//                }
-//            }
-//            if (publication.dependencies.compileOnly != null) {
-//                publication.dependencies.compileOnly.each { dependency ->
-//                    if (dependency instanceof PublicationDependencyModuleOption) {
-//                        project.dependencies.add(name, dependency.path)
-//                    } else {
-//                        project.dependencies.add(name, dependency)
-//                    }
-//                }
-//            }
-//        }
-//        project.dependencies.add(name, PublicationUtil.getMavenGAV(publication))
-//        try {
-//            configuration.copy().files.each {
-//                if (it.name.endsWith(fileName)) {
-//                    filePath = it.absolutePath
-//                }
-//            }
-//        } catch (Exception e) {
-////            e.printStackTrace()
-//            Logger.buildOutput(e.getMessage())
-//        }
-//        project.configurations.remove(configuration)
         return filePath != null
     }
 

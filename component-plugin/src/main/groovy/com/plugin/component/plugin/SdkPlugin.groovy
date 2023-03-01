@@ -73,6 +73,8 @@ class SdkPlugin extends BasePlugin {
 //        handleImpAar(root)
         List<String> topSort = PublicationManager.getInstance().dependencyGraph.topSort()
         Collections.reverse(topSort)
+        boolean isAssemble = false
+        boolean isPublish = false
         topSort.each {
             PublicationOption publication = PublicationManager.getInstance().publicationDependencies.get(it)
             if (publication == null) {
@@ -81,12 +83,14 @@ class SdkPlugin extends BasePlugin {
             Project childProject = root.findProject(publication.project)
             ProjectInfo projectInfo = Runtimes.getProjectInfo(childProject.name)
             if (projectInfo.isAssemble) {
+                isAssemble = true
                 if (Runtimes.sSdkOption.isPublishMode) {
                     Runtimes.checkPublishEnable(childProject)
                 }
                 PublicationUtil.handleSdkPublish(childProject, ComponentPlugin.androidProject, publication, null)
                 handleImpAar(childProject, publication)
             } else if (projectInfo.isPublish) {
+                isPublish = true
                 publication.impNeedPublish = true
                 publication.sdkNeedPublish = true
                 def publishTask = null
@@ -100,7 +104,131 @@ class SdkPlugin extends BasePlugin {
                 PublicationManager.getInstance().addImpPublication(publication)
             }
         }
-        dealAssemble(root)
+        if (isAssemble) {
+            dealAssemble(root)
+        } else if (isPublish) {
+            dealPublish(root)
+        } else {
+            dealAssemble(root)
+        }
+    }
+
+    private dealPublish(Project root) {
+        MutLineLog mutLineLog = new MutLineLog()
+        mutLineLog.build4("开始处理Publish场景")
+        //收集所有模块的引用配置
+        ArrayList<Configuration> allConfigList = new ArrayList<>()
+        root.allprojects.each { project ->
+            if (project == root) return
+            if (!Runtimes.shouldApplyComponentPlugin(project)) return
+            project.configurations.each { config ->
+                if (config.name == "api" || config.name == "implementation"
+                        || config.name == "compileOnly"
+                        || config.name == "debugImplementation"
+                        || config.name == "debugApi"
+                        || config.name == "debugCompileOnly") {
+                    allConfigList.add(config)
+                }
+            }
+        }
+        //收集project之间的引用依赖关系 收集被依赖的project，需要参与编译
+        HashMap<Project, ArrayList<Configuration>> needCompileProjectConfigMap = new HashMap<>()
+        HashMap<String, Map<String, String>> aarList = new HashMap<>()
+        root.allprojects.each { project ->
+            if (project == root) return
+            allConfigList.each { config ->
+                for (Dependency dependency : config.dependencies) {
+                    if (dependency instanceof DefaultProjectDependency && dependency.dependencyProject.name == project.name) {
+                        ArrayList<Configuration> configs = needCompileProjectConfigMap.get(project)
+                        if (configs == null) {
+                            configs = new ArrayList<>()
+                            needCompileProjectConfigMap.put(project, configs)
+                        }
+                        configs.add(config)
+                        //一个config只需要添加一次就好了
+                        return
+                    }
+                }
+            }
+            PublicationOption publication = Runtimes.getImplPublication(project.name)
+            if (publication != null && !publication.impNeedPublish) {
+                ProjectInfo projectInfo = Runtimes.getProjectInfo(project.name)
+                Map<String, String> map = new LinkedHashMap<>()
+                map.put("path", PublicationUtil.getImpMavenGAV(publication, !projectInfo.isDebug))
+                aarList.put(project.name, map)
+            }
+        }
+
+        if (!aarList.isEmpty()) {
+            root.allprojects.each { project ->
+                if (project == root) return
+                // 替换成aar文件
+                aarList.each { map ->
+                    //剔除所有配置中的不需要编译模块的依赖
+                    project.configurations.each { config ->
+                        config.dependencies.removeAll { dependency ->
+                            dependency instanceof DefaultProjectDependency && dependency.dependencyProject.name == map.key
+                        }
+                    }
+                    project.dependencies {
+                        api map.value.get("path")
+                    }
+                }
+            }
+            aarList.each { map ->
+                allConfigList.each { config ->
+                    config.dependencies.removeAll { dependency ->
+                        dependency instanceof DefaultProjectDependency && dependency.dependencyProject.name == map.key
+                    }
+                }
+            }
+            List<Map<String, Object>> needAndDependency = new ArrayList<>()
+            //分离所有dependency 进行预处理
+            allConfigList.each { config ->
+                config.dependencies.each { dependency ->
+                    if (dependency instanceof DefaultProjectDependency) {
+                        def dependencyClone = dependency.copy()
+                        dependencyClone.targetConfiguration = null
+                        Map<String, Object> map = new HashMap<>()
+                        map.put(config.name, dependencyClone)
+                        needAndDependency.add(map)
+                    } else {
+                        if (dependency instanceof DefaultSelfResolvingDependency && (dependency.files instanceof DefaultConfigurableFileCollection || dependency.files instanceof DefaultConfigurableFileTree)) {
+                            // 这里的依赖是以下两种： 无需添加在 编译project ，因为 jar 包直接进入 自身的 aar 中的libs 文件夹
+                            //    implementation rootProject.files("libs/*.jar")
+                            //    implementation fileTree(dir: "libs", include: ["*.jar"])
+
+                        } else {
+                            Map<String, Object> map = new HashMap<>()
+                            map.put(config.name, dependency)
+                            needAndDependency.add(map)
+                        }
+                    }
+
+                }
+            }
+            //遍历所有需要编译的project 将引用传递至需要编译的project中，module引用只需要传递api方式引用的
+            needCompileProjectConfigMap.each { entry ->
+                if (entry.key == root) return
+                needAndDependency.each { map ->
+                    Map.Entry<String, Object> config = map.entrySet().first()
+                    Dependency dependency = config.value
+                    if (config.key == "api") {
+                        if (dependency instanceof DefaultProjectDependency && dependency.dependencyProject.name == entry.key.name) {
+                            return
+                        }
+                        entry.key.dependencies.add(config.key, config.value)
+                    } else {
+                        //不传递implement project
+                        if (dependency instanceof DefaultProjectDependency) {
+                            return
+                        }
+                        entry.key.dependencies.add(config.key, config.value)
+                    }
+                }
+            }
+        }
+        Logger.buildBlockLog("处理Publish场景", mutLineLog)
     }
 
     private static void handleImpAar(Project project, PublicationOption publication) {
@@ -209,10 +337,10 @@ class SdkPlugin extends BasePlugin {
     }
 
     private void handleCompileModuleDependency(ProjectInfo compileProject, Project root, HashSet<String> hasResolve, MutLineLog mutLineLog) {
-        StringBuilder stringBuilder = new StringBuilder()
+
         //收集所有模块的引用配置
         ArrayList<Configuration> allConfigList = new ArrayList<>()
-        compileProject.project.rootProject.allprojects.each { project ->
+        root.allprojects.each { project ->
             if (project == root) return
             if (!Runtimes.shouldApplyComponentPlugin(project)) return
             project.configurations.each { config ->
@@ -227,7 +355,7 @@ class SdkPlugin extends BasePlugin {
         }
         //收集project之间的引用依赖关系 收集被依赖的project，需要参与编译
         HashMap<Project, ArrayList<Configuration>> needCompileProjectConfigMap = new HashMap<>()
-        compileProject.project.rootProject.allprojects.each { project ->
+        root.allprojects.each { project ->
             if (project == root) return
             allConfigList.each { config ->
                 for (Dependency dependency : config.dependencies) {
@@ -246,7 +374,7 @@ class SdkPlugin extends BasePlugin {
         }
         //剔除被收集的编译工程的引用
         allConfigList.clear()
-        compileProject.project.rootProject.allprojects.each { project ->
+        root.allprojects.each { project ->
             if (project == root) return
             if (!Runtimes.shouldApplyComponentPlugin(project)) return
             project.configurations.each { config ->
@@ -261,6 +389,7 @@ class SdkPlugin extends BasePlugin {
             }
         }
         HashMap<String, Map<String, String>> aarList = new HashMap<>()
+        StringBuilder stringBuilder = new StringBuilder()
         for (String realDependency : hasResolve) {
             PublicationOption publication = Runtimes.getImplPublication(realDependency)
             Logger.buildOutput("resolve publication ${publication}")
@@ -296,8 +425,9 @@ class SdkPlugin extends BasePlugin {
                 needCompileProjectConfigMap.put(Runtimes.getProjectInfo(realDependency).project, new ArrayList<Configuration>())
             }
         }
+        mutLineLog.build4("application[" + compileProject.name + "] component 合并依赖 = " + stringBuilder.toString())
         if (compileProject.isDebug && !aarList.isEmpty()) {
-            compileProject.project.rootProject.allprojects.each { project ->
+            root.allprojects.each { project ->
                 if (project == root) return
                 Logger.buildOutput("replace aar：project: $project.name")
                 // 替换成aar文件
@@ -372,6 +502,6 @@ class SdkPlugin extends BasePlugin {
                 }
             }
         }
-        mutLineLog.build4("application[" + compileProject.name + "] component 合并依赖 = " + stringBuilder.toString())
+
     }
 }

@@ -506,12 +506,13 @@ class PublicationUtil {
     }
 
     static void handleImplPublish(Project project, PublicationOption publication, boolean isDebug, Task dependTask) {
-        Logger.buildOutput("Handle ${publication.name} ImplPublish,isDebug:${isDebug}")
         boolean isAarExists = AarUtil.isArrExits(project, publication, !isDebug)
         if (isAarExists) {
             publication.impNeedPublish = false
+            Logger.buildOutput("Handle ${publication.name} ImplPublish,isDebug:${isDebug} impNeedPublish:${publication.impNeedPublish}")
             return
         }
+        Logger.buildOutput("Handle ${publication.name} ImplPublish,isDebug:${isDebug} impNeedPublish:${publication.impNeedPublish}")
         project.plugins.apply(Constants.PLUGIN_MAVEN_PUBLISH)
         if (isDebug) {
             //注册打包arr task

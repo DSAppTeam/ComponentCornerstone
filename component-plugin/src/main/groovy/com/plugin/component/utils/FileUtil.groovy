@@ -2,6 +2,7 @@ package com.plugin.component.utils
 
 import com.plugin.component.ComponentPlugin
 import com.plugin.component.Constants
+import com.plugin.component.log.Logger
 import org.gradle.api.Project
 
 class FileUtil {
@@ -82,12 +83,18 @@ class FileUtil {
     }
 
     static String shell(String cmd) {
-        def out = new ByteArrayOutputStream()
-        ComponentPlugin.rootProject.exec {
-            executable 'bash'
-            args '-c', cmd
-            standardOutput = out
+        try {
+            def out = new ByteArrayOutputStream()
+            ComponentPlugin.rootProject.exec {
+                executable 'bash'
+                args '-c', cmd
+                standardOutput = out
+            }
+            return out.toString().trim()
+        } catch (Exception e) {
+            Logger.buildOutput("bash error: ${e.getMessage()}")
+            return cmd.execute()
         }
-        return out.toString().trim()
+
     }
 }

@@ -1,0 +1,20 @@
+#!/bin/sh
+
+remote="$1"
+url="$2"
+branch=$(git symbolic-ref --short -q HEAD)
+
+strB="BUILD SUCCESSFUL"
+echo "current branch:$branch"
+tempLog=/tmp/$(date +%s).log && touch $tempLog
+if [[ "$branch" =~ (^develop$)|(^release/*) ]]; then
+   ./gradlew ComponentPublishDebug | tee $tempLog
+   result=$(cat $tempLog)
+   checkStr=$(echo "$result" | grep "${strB}")
+   if [[ "$checkStr" != ""  ]]; then
+     exit 0;
+   else
+     exit 1;
+   fi
+fi
+exit 0;
