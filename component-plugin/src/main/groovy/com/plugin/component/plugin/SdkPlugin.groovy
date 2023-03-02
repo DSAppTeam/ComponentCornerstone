@@ -151,11 +151,15 @@ class SdkPlugin extends BasePlugin {
                 }
             }
             PublicationOption publication = Runtimes.getImplPublication(project.name)
-            if (publication != null && !publication.impNeedPublish) {
-                ProjectInfo projectInfo = Runtimes.getProjectInfo(project.name)
-                Map<String, String> map = new LinkedHashMap<>()
-                map.put("path", PublicationUtil.getImpMavenGAV(publication, !projectInfo.isDebug))
-                aarList.put(project.name, map)
+            if (publication != null) {
+                if (!publication.impNeedPublish) {
+                    ProjectInfo projectInfo = Runtimes.getProjectInfo(project.name)
+                    Map<String, String> map = new LinkedHashMap<>()
+                    map.put("path", PublicationUtil.getImpMavenGAV(publication, !projectInfo.isDebug))
+                    aarList.put(project.name, map)
+                } else {
+                    needCompileProjectConfigMap.put(project, new ArrayList<>())
+                }
             }
         }
 
