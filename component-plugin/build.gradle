@@ -35,7 +35,7 @@ dependencies {
     implementation 'org.ow2.asm:asm:7.1'
     implementation 'org.ow2.asm:asm-commons:7.1'
     implementation 'org.ow2.asm:asm-util:7.1'
-    implementation 'com.quinn.hunter:hunter-transform:0.9.3'
+    implementation 'cn.quinnchen.hunter:hunter-transform:1.0.0'
 }
 
 sourceSets {
@@ -48,10 +48,10 @@ sourceSets {
 
 
 repositories {
-    jcenter()
-    google()
     mavenCentral()
+    google()
     maven { url 'https://jitpack.io' }
+    jcenter()
 }
 
 

@@ -30,8 +30,4 @@ class InjectCodeTransform extends BaseTransform {
         return super.getRunVariant()
     }
 
-    @Override
-    protected boolean inDuplcatedClassSafeMode() {
-        return super.inDuplcatedClassSafeMode()
-    }
 }
