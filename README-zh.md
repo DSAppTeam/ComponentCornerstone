@@ -32,6 +32,8 @@ README: [English](https://github.com/YummyLau/ComponentPlugin/blob/master/README
     - 暂时取消pin工程支持能力
 * 2023/03/01
     * 发布功能优化
+* 2024/10/18
+    * 修复发布SDK Task失败问题     
 
 ### 为什么要使用
 

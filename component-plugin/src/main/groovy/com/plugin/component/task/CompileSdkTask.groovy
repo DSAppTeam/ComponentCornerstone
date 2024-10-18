@@ -7,6 +7,7 @@ import com.plugin.component.extension.option.sdk.PublicationOption
 import com.plugin.component.utils.JarUtil
 import com.plugin.component.utils.PublicationUtil
 import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 
 /**
@@ -14,7 +15,7 @@ import org.gradle.api.tasks.TaskAction
  * created by yummylau 2019/08/09
  */
 class CompileSdkTask extends DefaultTask {
-
+    @Internal
     PublicationOption publication
 
     @TaskAction
